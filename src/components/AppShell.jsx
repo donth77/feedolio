@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
+import { selectAuth } from '../features/auth/authSlice.js';
 import { selectBookmarkCount } from '../features/bookmarks/bookmarksSlice.js';
 import {
   inLastDay,
@@ -25,6 +26,12 @@ import Icon from './Icon.jsx';
 import { FeedDot } from './Monogram.jsx';
 import NavPanel, { Wordmark } from './NavPanel.jsx';
 
+const GuestImportPrompt = lazy(() =>
+  import('../features/auth/AccountPanel.jsx').then((module) => ({
+    default: module.GuestImportPrompt,
+  })),
+);
+
 /**
  * The frame around every view, by width:
  * - 1024 px and up: a sidebar with sections and feeds. It collapses to a 64 px
@@ -47,6 +54,7 @@ export default function AppShell() {
   const allLoaded = states.every((state) => state.status !== 'loading');
   const todayCount = allLoaded ? inLastDay(mergeStories(states), now).length : null;
   const savedCount = useSelector(selectBookmarkCount);
+  const offeringGuestImport = useSelector(selectAuth).guestBookmarks > 0;
 
   const dispatch = useDispatch();
   const sidebar = useSelector(selectSidebar);
@@ -131,6 +139,11 @@ export default function AppShell() {
           </nav>
 
           <main id="main" className={styles.main} tabIndex={-1}>
+            {offeringGuestImport && (
+              <Suspense fallback={null}>
+                <GuestImportPrompt />
+              </Suspense>
+            )}
             <Outlet />
           </main>
 

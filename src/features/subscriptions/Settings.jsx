@@ -7,6 +7,7 @@ import PageHeader from '../../components/PageHeader.jsx';
 import Segmented from '../../components/Segmented.jsx';
 import { displayUrl, monogramFor, tintFor } from '../../lib/feeds.js';
 import { useFocusAfterRemoval } from '../../lib/useFocusAfterRemoval.js';
+import AccountPanel from '../auth/AccountPanel.jsx';
 import { lookOf } from '../feeds/useFeeds.js';
 import {
   densityChanged,
@@ -126,6 +127,13 @@ export default function Settings() {
             value={reading.font}
             onChange={(font) => dispatch(readingChanged({ font }))}
           />
+        </section>
+
+        <section aria-labelledby="settings-account" className={styles.section}>
+          <h2 id="settings-account" className={styles.sectionTitle}>
+            Account
+          </h2>
+          <AccountPanel variant="settings" />
         </section>
       </div>
     </>

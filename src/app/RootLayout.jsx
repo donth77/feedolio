@@ -1,10 +1,12 @@
-import { useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useState } from 'react';
 import { Outlet, ScrollRestoration } from 'react-router';
 import Toast from '../components/Toast.jsx';
+import { useFinishSignIn } from '../features/auth/useFinishSignIn.js';
 import { useApplyTheme } from '../features/preferences/useApplyTheme.js';
 import { ShortcutsContext } from '../features/shortcuts/shortcutsContext.js';
-import ShortcutsDialog from '../features/shortcuts/ShortcutsDialog.jsx';
 import { useShortcuts } from '../features/shortcuts/useShortcuts.js';
+
+const ShortcutsDialog = lazy(() => import('../features/shortcuts/ShortcutsDialog.jsx'));
 
 /**
  * Wraps every page: the list views inside the app shell, and the story page.
@@ -13,6 +15,7 @@ import { useShortcuts } from '../features/shortcuts/useShortcuts.js';
  */
 export default function RootLayout() {
   useApplyTheme();
+  useFinishSignIn();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const showShortcuts = useCallback(() => setShortcutsOpen(true), []);
   useShortcuts({ onShowHelp: showShortcuts });
@@ -21,7 +24,11 @@ export default function RootLayout() {
     <ShortcutsContext.Provider value={showShortcuts}>
       <Outlet />
       <Toast />
-      <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      {shortcutsOpen && (
+        <Suspense fallback={null}>
+          <ShortcutsDialog open onClose={() => setShortcutsOpen(false)} />
+        </Suspense>
+      )}
       <ScrollRestoration />
     </ShortcutsContext.Provider>
   );

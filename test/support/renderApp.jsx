@@ -46,6 +46,20 @@ function mount() {
       router.dispose();
       return mount();
     },
+    /**
+     * Leaves the page and opens another address, as when a sign-in sends the
+     * reader to GitHub and back.
+     *
+     * @param {string} url
+     */
+    visit(url) {
+      window.dispatchEvent(new Event('pagehide'));
+      view.unmount();
+      store.stopSaving();
+      router.dispose();
+      window.history.pushState(null, '', url);
+      return mount();
+    },
   };
 }
 

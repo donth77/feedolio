@@ -1,4 +1,6 @@
+import { lazy, Suspense } from 'react';
 import { Link, NavLink } from 'react-router';
+import { authConfig } from '../features/auth/authConfig.js';
 import Icon from './Icon.jsx';
 import { FeedDot } from './Monogram.jsx';
 import styles from './NavPanel.module.css';
@@ -119,6 +121,7 @@ function Panel({
           <Icon name="settings" />
           <span className={styles.label}>Settings</span>
         </NavLink>
+        <Account variant="sidebar" />
       </div>
     </nav>
   );
@@ -215,6 +218,7 @@ function Rail({ id, label, feeds, todayCount, savedCount, onAddFeed, onToggle, c
         <NavLink to="/settings" className={styles.railItem} aria-label="Settings" title="Settings">
           <Icon name="settings" />
         </NavLink>
+        <Account variant="rail" />
       </div>
     </nav>
   );
@@ -241,6 +245,23 @@ function SidebarToggle({ id, expanded, onToggle }) {
     >
       <Icon name="sidebar" />
     </button>
+  );
+}
+
+// Loaded only where sign-in is set up, so guests never download it.
+const AccountPanel = lazy(() => import('../features/auth/AccountPanel.jsx'));
+
+/**
+ * Sign in, or who is signed in, when this copy of Feedolio has sign-in.
+ *
+ * @param {{ variant: 'sidebar'|'rail' }} props
+ */
+function Account({ variant }) {
+  if (!authConfig()) return null;
+  return (
+    <Suspense fallback={null}>
+      <AccountPanel variant={variant} />
+    </Suspense>
   );
 }
 
