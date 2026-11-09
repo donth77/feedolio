@@ -1,0 +1,55 @@
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.heading {
+  font: 600 13px/1.2 var(--font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* The secondary button from the canvas. */
+.button,
+.headerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font: var(--type-control);
+  text-decoration: none;
+}
+
+.button:hover,
+.headerButton:hover {
+  border-color: var(--color-line-hover);
+  color: var(--color-ink);
+}
+
+/* Phones: an icon button in the story's top bar. */
+@media (max-width: 639px) {
+  .headerButton {
+    min-width: var(--tap-target);
+    padding: 0;
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .headerLabel {
+    display: none;
+  }
+}

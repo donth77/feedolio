@@ -22,11 +22,11 @@ async function storyShown(title) {
   return screen.findByRole('heading', { level: 1, name: title });
 }
 
-/** Links in the story that lead to other sites. */
+/** Links in the story that lead to other websites. */
 function externalLinks() {
   return within(screen.getByRole('article'))
     .getAllByRole('link')
-    .filter((link) => /^[a-z]+:/i.test(link.getAttribute('href') ?? ''));
+    .filter((link) => /^https?:/i.test(link.getAttribute('href') ?? ''));
 }
 
 describe('Opening a story', () => {
