@@ -10,6 +10,7 @@ import { fullTime, storyDate } from '../../lib/time.js';
 import { useNow } from '../../lib/useNow.js';
 import BookmarkButton from '../bookmarks/BookmarkButton.jsx';
 import { feedErrorMessage } from '../feeds/feedApi.js';
+import ShareBar, { ShareButton } from '../share/ShareBar.jsx';
 import { selectReading } from '../preferences/preferencesSlice.js';
 import { cleanStoryHtml, wordCount } from './cleanStoryHtml.js';
 import ReadingSettings from './ReadingSettings.jsx';
@@ -71,6 +72,7 @@ export default function StoryPage() {
           <div className={styles.actions}>
             <ReadingSettings />
             <BookmarkButton story={story} feedTitle={lookup.feedTitle ?? ''} variant="page" />
+            {siteOf(story.link) && <ShareButton title={story.title} url={story.link} />}
           </div>
         )}
       </header>
@@ -224,6 +226,8 @@ function Article({ story, lookup, feedId, back }) {
           {site && <OriginalLink site={site}>Continue reading on {site.host}</OriginalLink>}
         </div>
       )}
+
+      {site && <ShareBar title={story.title} url={site.href} />}
 
       <Pager lookup={lookup} feedId={feedId} back={back} />
     </article>

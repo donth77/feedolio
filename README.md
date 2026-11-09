@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestone M6. Readers start with five feeds and can add any website or feed by pasting its link, then hide, remove or restore feeds in Settings. Lists show date headers and, on a return visit, a "New since your last visit" divider. Each story opens on its own page, cleaned of anything that could run code, with reading settings that are remembered. Saved stories stay readable after they leave their feed. Lists come as rows or cards, comfortable or compact; the desktop sidebar collapses to an icon rail; everything works from the keyboard, with shortcuts. Sharing arrives in M7.
+> **Status:** milestone M7. Readers start with five feeds and can add any website or feed by pasting its link, then hide, remove or restore feeds in Settings. Lists show date headers and, on a return visit, a "New since your last visit" divider. Each story opens on its own page, cleaned of anything that could run code, with reading settings that are remembered. Saved stories stay readable after they leave their feed. Lists come as rows or cards, comfortable or compact; the desktop sidebar collapses to an icon rail; everything works from the keyboard, with shortcuts. Stories can be shared to X, Facebook, LinkedIn or email, copied, or sent through the phone's share sheet.
 
 ## Requirements
 
@@ -116,6 +116,18 @@ Everything works with the keyboard. A skip link leads past the navigation, and c
 | Esc              | Close a dialog or menu                                   |
 
 "Selected" is simply the story whose headline has focus, so J and K move focus, and Tab works too. Shortcuts pause while typing in a field or while a dialog is open.
+
+## Sharing
+
+Every story page ends with "Share this story":
+
+- **Networks:** Post on X, Facebook, LinkedIn. Each is a plain link to that network's share page, opening in a new tab. No network's buttons, scripts or trackers are loaded.
+- **Email:** a `mailto:` link with the title as the subject.
+- **Copy link:** copies the link and confirms with "Copied".
+
+Shares always use the publisher's original link, so anyone can read it without Feedolio.
+
+The **Share** button at the top opens the device's share sheet where there is one (most phones). Elsewhere it copies the link and says so.
 
 ## Saving stories
 
