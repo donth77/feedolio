@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** the feed endpoint works (milestone M1). The app's views are still empty; headlines arrive in M2.
+> **Status:** milestone M2. Headlines from the five starter feeds show in All stories, Today and each feed's page, under date headers, on phone, tablet and desktop. Story pages arrive in M3.
 
 ## Requirements
 
@@ -40,7 +40,7 @@ Use `pnpm run deploy`, not `pnpm deploy`: the short form is a different, built-i
 
 ## How it's built
 
-- **App:** React 19, React Router (data router), Redux Toolkit. Styles are CSS Modules plus design tokens in `src/styles/tokens.css`, with light and dark values copied from the design canvas.
+- **App:** React 19, React Router (data router), Redux Toolkit with RTK Query for feed data (retried twice on network or server errors, kept for ten minutes). Styles are CSS Modules plus design tokens in `src/styles/tokens.css`, with light and dark values copied from the design canvas.
 - **Worker:** `worker/index.js` routes `/api/*`; everything else is static assets in single-page-app mode, so page navigations never run the Worker. Workers Caching is on in `wrangler.jsonc`.
 - **Tests:** three Vitest projects, all against saved copies of real feeds and pages (`test/fixtures`, with their sources in its README).
   - **Journeys** (the main tool) render the real app in jsdom and fake only the network (MSW) and, when needed, the clock. Calls to `/api/feed` run the real Worker code in-process.

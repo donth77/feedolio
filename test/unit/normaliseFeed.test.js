@@ -398,6 +398,22 @@ describe('Atom variations', () => {
   });
 });
 
+describe('nearly empty documents', () => {
+  it.each([
+    ['an empty <rss>', '<rss version="2.0"></rss>'],
+    ['an <rss> holding only text', '<rss version="2.0">nothing here</rss>'],
+    ['an empty Atom <feed>', '<feed xmlns="http://www.w3.org/2005/Atom"/>'],
+    [
+      'an RDF feed with an empty item',
+      '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><item/></rdf:RDF>',
+    ],
+  ])('reads %s as a feed with no stories', (_, xml) => {
+    const { feed, stories } = readXml(xml);
+    expect(stories).toEqual([]);
+    expect(feed.title).toBe('site.test');
+  });
+});
+
 describe('documents that are not feeds', () => {
   it.each([
     ['an HTML page', '<html><head><title>Hi</title></head><body></body></html>'],

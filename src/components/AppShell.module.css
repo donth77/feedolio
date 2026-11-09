@@ -1,78 +1,174 @@
 .shell {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-height: 100vh;
   min-height: 100dvh;
 }
 
+.column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Sidebar, 1024 px and up. The panel inside only fills it. */
+.sidebar {
+  display: none;
+}
+
+.sidebarPanel {
+  min-height: 100%;
+}
+
+/* Top bar, under 1024 px. */
 .topBar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-6);
-  padding: var(--space-2) var(--space-6);
-  border-bottom: 1px solid var(--color-line);
-  background: var(--color-bg);
-}
-
-.wordmark {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--tap-target);
-  font: 600 23px/1 var(--font-read);
-  letter-spacing: -0.01em;
-  color: var(--color-ink);
-  text-decoration: none;
-}
-
-.navList {
-  display: flex;
-  flex-wrap: wrap;
   gap: var(--space-1);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  padding: var(--space-3) var(--space-5) var(--space-1);
 }
 
-.navLink {
-  display: inline-flex;
+.menuButton {
+  display: none;
   align-items: center;
-  min-height: var(--tap-target);
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-control);
-  font: 500 14px/1.2 var(--font-ui);
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  margin-left: calc(-1 * var(--space-3));
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
   color: var(--color-ink);
-  text-decoration: none;
 }
 
-.navLink:hover {
+.menuButton:hover {
   background: var(--color-hover);
 }
 
-.navLink[aria-current='page'] {
+/* Chips, under 640 px: Today, All and each feed, scrolling sideways. */
+.chips {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chipList {
+  display: flex;
+  gap: var(--space-2);
+  width: max-content;
+  margin: 0;
+  padding: var(--space-2) var(--space-5) 10px;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font: 500 14px/1 var(--font-ui);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.chip[aria-current='page'] {
+  border-color: var(--color-accent);
   background: var(--color-accent-soft);
   color: var(--color-accent);
   font-weight: 600;
+}
+
+.chipDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  font-size: 9px;
 }
 
 .main {
   flex: 1;
   width: 100%;
   max-width: calc(var(--list-width) + 2 * var(--space-6));
-  margin: 0 auto;
-  padding: var(--space-8) var(--space-6) var(--space-12);
+  padding: var(--space-2) var(--space-5) var(--space-8);
 }
 
-@media (max-width: 639px) {
+/* Tabs, under 640 px. */
+.tabs {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  padding: var(--space-1) var(--space-2) max(var(--space-2), env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-line);
+  background: var(--color-bg);
+}
+
+.tab {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 56px;
+  color: var(--color-ink-muted);
+  font: 500 12px/1 var(--font-ui);
+  text-decoration: none;
+}
+
+.tab[aria-current='page'] {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+@media (min-width: 640px) {
+  .chips,
+  .tabs {
+    display: none;
+  }
+
+  .menuButton {
+    display: inline-flex;
+  }
+
   .topBar {
-    padding: var(--space-2) var(--space-5);
+    padding: var(--space-3) var(--space-6);
+    border-bottom: 1px solid var(--color-line);
   }
 
   .main {
-    padding: var(--space-6) var(--space-5) var(--space-8);
+    padding: var(--space-8) var(--space-6) 72px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shell {
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    display: block;
+    height: 100dvh;
+    overflow-y: auto;
+    border-right: 1px solid var(--color-line);
+    background: var(--color-surface);
+  }
+
+  .topBar {
+    display: none;
+  }
+
+  .main {
+    padding: 36px clamp(20px, 4vw, 56px) 72px;
   }
 }

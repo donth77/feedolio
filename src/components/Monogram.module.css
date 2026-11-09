@@ -1,0 +1,50 @@
+/* A feed's initials on its tint: the fallback for stories without an image. */
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-read);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+/* A small rounded square with the initials, beside feed names. */
+.dot {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-dot);
+  font: 600 11px/1 var(--font-read);
+  letter-spacing: -0.02em;
+}
+
+.bc {
+  background: var(--tint-bc-bg);
+  color: var(--tint-bc-ink);
+}
+
+.ec {
+  background: var(--tint-ec-bg);
+  color: var(--tint-ec-ink);
+}
+
+.tc {
+  background: var(--tint-tc-bg);
+  color: var(--tint-tc-ink);
+}
+
+.bbc {
+  background: var(--tint-bbc-bg);
+  color: var(--tint-bbc-ink);
+}
+
+.vg {
+  background: var(--tint-vg-bg);
+  color: var(--tint-vg-ink);
+}

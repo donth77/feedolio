@@ -53,23 +53,23 @@ const parser = new XMLParser({
  * @returns {FeedDocument}
  */
 export function readFeedDocument(xml) {
+  /** @type {Record<string, unknown>} */
   let doc;
   try {
     doc = parser.parse(xml);
   } catch {
     throw notAFeed();
   }
-  if (!doc || typeof doc !== 'object') throw notAFeed();
 
-  if ('rss' in doc) {
+  if (Object.hasOwn(doc, 'rss')) {
     const channel = asObject(firstOf(asObject(doc.rss).channel));
     return { format: 'rss', channel, items: arrayOf(channel.item) };
   }
-  if ('feed' in doc) {
+  if (Object.hasOwn(doc, 'feed')) {
     const feed = asObject(doc.feed);
     return { format: 'atom', channel: feed, items: arrayOf(feed.entry) };
   }
-  if ('rdf:RDF' in doc) {
+  if (Object.hasOwn(doc, 'rdf:RDF')) {
     const rdf = asObject(doc['rdf:RDF']);
     return { format: 'rdf', channel: asObject(firstOf(rdf.channel)), items: arrayOf(rdf.item) };
   }
@@ -90,8 +90,12 @@ function asObject(value) {
   return value && typeof value === 'object' ? /** @type {Record<string, any>} */ (value) : {};
 }
 
-/** @param {unknown} value */
+/**
+ * Items and entries always parse as arrays (see ARRAY_TAGS); empty elements
+ * parse as "" and are dropped.
+ *
+ * @param {unknown} value
+ */
 function arrayOf(value) {
-  const list = Array.isArray(value) ? value : value === undefined ? [] : [value];
-  return list.filter((item) => item && typeof item === 'object');
+  return (Array.isArray(value) ? value : []).filter((item) => item && typeof item === 'object');
 }
