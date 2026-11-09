@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { selectCutoff } from '../../app/visitsSlice.js';
 import { Link, useParams } from 'react-router';
 import PageHeader from '../../components/PageHeader.jsx';
 import StoryList, { EmptyState, FeedErrors, ListNote } from '../../components/StoryList.jsx';
@@ -8,7 +9,8 @@ import { shortDate } from '../../lib/time.js';
 import { useNow } from '../../lib/useNow.js';
 import { selectSubscriptionById } from '../subscriptions/subscriptionsSlice.js';
 import { useGetFeedQuery } from './feedApi.js';
-import { mergeStories, useFeedStates, useRetryFeed } from './useFeeds.js';
+import ListHeader from './ListHeader.jsx';
+import { dividerPlace, mergeStories, useFeedStates, useRetryFeed } from './useFeeds.js';
 
 /** A feed counts as quiet when its newest story is this old. */
 const QUIET_AFTER_DAYS = 90;
@@ -41,13 +43,22 @@ function FeedStories({ subscription }) {
   const [state] = useFeedStates(subscriptions);
   const retry = useRetryFeed();
   const now = useNow();
+  const cutoff = useSelector(selectCutoff);
   const stories = mergeStories([state]);
+  const loading = state.status === 'loading';
+  const { newCount, firstOldId } = dividerPlace(stories, cutoff);
   const newest = stories[0]?.story.publishedAt;
   const quiet = newest && now - Date.parse(newest) > QUIET_AFTER_DAYS * 86_400_000;
 
   return (
     <>
-      <PageHeader title={subscription.title} description={displayUrl(subscription.url)} />
+      <ListHeader
+        title={subscription.title}
+        summary={displayUrl(subscription.url)}
+        states={[state]}
+        newCount={loading ? 0 : newCount}
+        showJump={!loading && firstOldId !== null}
+      />
       {quiet && (
         <ListNote>No new stories since {shortDate(newest)}. Older stories stay readable.</ListNote>
       )}
@@ -59,8 +70,9 @@ function FeedStories({ subscription }) {
           <StoryList
             stories={stories}
             now={now}
-            loading={state.status === 'loading'}
+            loading={loading}
             label={subscription.title}
+            cutoff={loading ? null : cutoff}
           />
         )
       )}

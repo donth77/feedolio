@@ -66,6 +66,8 @@ export function makeStore() {
   return Object.assign(store, {
     /** Saves pending changes now, e.g. when the page is closing. */
     flushSaves: () => saver?.flush(),
+    /** Stops saving, for a store that's being replaced (tests start a new app per test). */
+    stopSaving: () => saver?.cancel(),
     /** Takes in what another tab saved. */
     reloadSaved: () => store.dispatch(persistedStateHydrated(loadSaved())),
   });

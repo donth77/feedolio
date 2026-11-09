@@ -108,13 +108,22 @@ export function mergeStories(states) {
       merged.push({ story, feed });
     }
   }
-  return merged.sort(newestFirst);
+  return merged.sort((a, b) => newestFirst(a.story, b.story));
 }
 
-/** @param {ListedStory} a @param {ListedStory} b */
+/**
+ * Stories newest first; undated stories go last.
+ *
+ * @param {Story[]} stories
+ */
+export function sortNewestFirst(stories) {
+  return [...stories].sort(newestFirst);
+}
+
+/** @param {Story} a @param {Story} b */
 function newestFirst(a, b) {
-  const timeA = a.story.publishedAt ? Date.parse(a.story.publishedAt) : null;
-  const timeB = b.story.publishedAt ? Date.parse(b.story.publishedAt) : null;
+  const timeA = a.publishedAt ? Date.parse(a.publishedAt) : null;
+  const timeB = b.publishedAt ? Date.parse(b.publishedAt) : null;
   if (timeA === timeB) return 0;
   if (timeA === null) return 1;
   if (timeB === null) return -1;
@@ -125,4 +134,25 @@ function newestFirst(a, b) {
 export function inLastDay(stories, now) {
   const since = now - 86_400_000;
   return stories.filter(({ story }) => story.publishedAt && Date.parse(story.publishedAt) > since);
+}
+
+/** The divider's id, for "Jump to where you left off". */
+export const DIVIDER_ID = 'left-off';
+
+/**
+ * Where the "New since your last visit" divider goes: before the first story
+ * published at or before the cut-off, if newer stories sit above it.
+ *
+ * @param {ListedStory[]} stories  Newest first
+ * @param {string|null} cutoff
+ * @returns {{ newCount: number, firstOldId: string|null }}
+ */
+export function dividerPlace(stories, cutoff) {
+  if (!cutoff) return { newCount: 0, firstOldId: null };
+  const since = Date.parse(cutoff);
+  const isNew = (/** @type {ListedStory} */ { story }) =>
+    story.publishedAt !== null && Date.parse(story.publishedAt) > since;
+  const newCount = stories.filter(isNew).length;
+  const firstOld = stories.findIndex((item) => !isNew(item));
+  return { newCount, firstOldId: firstOld > 0 ? stories[firstOld].story.id : null };
 }

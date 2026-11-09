@@ -35,9 +35,14 @@ describe('All stories', () => {
     await storiesLoaded();
 
     expect(screen.getByText('71 stories from 5 feeds')).toBeVisible();
+    // Date headers label the sections they head.
     const headers = screen
       .getAllByRole('heading', { level: 2 })
-      .filter((heading) => heading.closest('main'));
+      .filter(
+        (heading) =>
+          heading.closest('main') &&
+          heading.closest('section:not([aria-labelledby="welcome-heading"])'),
+      );
     expect(headers.map((heading) => heading.parentElement?.textContent)).toEqual([
       'TodayFriday, Nov 6 · 16 stories',
       'YesterdayThursday, Nov 5 · 6 stories',

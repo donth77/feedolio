@@ -144,6 +144,35 @@ export function storyDate(publishedAt, now) {
 }
 
 /**
+ * When the reader was last here, for the "New since your last visit" divider:
+ * "Today 9:12 am", "Yesterday 5:52 pm", "Thu 3:00 pm", then "Oct 27".
+ *
+ * @param {string} visitedAt
+ * @param {number} now
+ */
+export function visitLabel(visitedAt, now) {
+  const time = Date.parse(visitedAt);
+  const group = dateGroupOf(visitedAt, now);
+  if (group === 'today') return `Today ${lowerMeridiem(clock.format(time))}`;
+  if (group === 'yesterday') return `Yesterday ${lowerMeridiem(clock.format(time))}`;
+  if (now - time < 7 * 86_400_000) return lowerMeridiem(weekdayClock.format(time));
+  return new Date(time).getFullYear() === new Date(now).getFullYear()
+    ? monthDay.format(time)
+    : monthDayYear.format(time);
+}
+
+/**
+ * How fresh a list is, after "Updated": "just now", "4 min ago", "2h ago".
+ *
+ * @param {string} fetchedAt
+ * @param {number} now
+ */
+export function updatedLabel(fetchedAt, now) {
+  const label = storyTime(fetchedAt, now);
+  return label === 'Just now' ? 'just now' : label;
+}
+
+/**
  * When a story was saved, after "Saved": "today", "yesterday", "3 days ago",
  * then the date, "Oct 21".
  *

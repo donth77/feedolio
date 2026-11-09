@@ -2,11 +2,13 @@ import { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { RouterProvider } from 'react-router';
 import { STORAGE_KEY } from './persistence.js';
+import { visitEnded } from './visitsSlice.js';
 
 /**
- * The whole app: the Redux store around the router. Pending saves are written
- * as soon as the page is hidden or closed, and changes saved in other tabs
- * show up here at once.
+ * The whole app: the Redux store around the router. When the page is hidden
+ * or closed, the visit is recorded (for the next "New since your last visit"
+ * divider) and pending saves are written. Changes saved in other tabs show up
+ * here at once.
  *
  * main.jsx and the journey tests each build their own store and router, so a
  * test "reload" is just rendering a fresh App.
@@ -18,7 +20,10 @@ import { STORAGE_KEY } from './persistence.js';
  */
 export default function App({ store, router }) {
   useEffect(() => {
-    const flush = () => store.flushSaves();
+    const flush = () => {
+      store.dispatch(visitEnded());
+      store.flushSaves();
+    };
     const flushWhenHidden = () => {
       if (document.visibilityState === 'hidden') flush();
     };

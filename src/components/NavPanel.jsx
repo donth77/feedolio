@@ -28,6 +28,7 @@ export function Wordmark({ onNavigate, className = '' }) {
  *   feeds: import('../features/feeds/useFeeds.js').FeedLook[],
  *   todayCount: number|null,
  *   savedCount: number,
+ *   onAddFeed: () => void,
  *   onNavigate?: () => void,
  *   className?: string,
  * }} props
@@ -38,12 +39,18 @@ export default function NavPanel({
   feeds,
   todayCount,
   savedCount,
+  onAddFeed,
   onNavigate,
   className = '',
 }) {
   return (
     <nav id={id} aria-label={label} className={`${styles.panel} ${className}`}>
       <Wordmark onNavigate={onNavigate} className={styles.panelWordmark} />
+
+      <button type="button" className={styles.addFeed} onClick={onAddFeed}>
+        <Icon name="add" />
+        Add feed
+      </button>
 
       <ul className={styles.items}>
         <li>

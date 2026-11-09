@@ -1,22 +1,23 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Icon from '../../components/Icon.jsx';
+import Segmented from '../../components/Segmented.jsx';
 import { readingChanged, selectReading } from '../preferences/preferencesSlice.js';
 import styles from './ReadingSettings.module.css';
 
 const SIZES = [
-  ['s', 'S', 'Small'],
-  ['m', 'M', 'Medium'],
-  ['l', 'L', 'Large'],
-  ['xl', 'XL', 'Extra large'],
+  { value: 's', label: 'S', spoken: 'Small' },
+  { value: 'm', label: 'M', spoken: 'Medium' },
+  { value: 'l', label: 'L', spoken: 'Large' },
+  { value: 'xl', label: 'XL', spoken: 'Extra large' },
 ];
 const FONTS = [
-  ['serif', 'Serif', 'Serif'],
-  ['sans', 'Sans', 'Sans serif'],
+  { value: 'serif', label: 'Serif' },
+  { value: 'sans', label: 'Sans', spoken: 'Sans serif' },
 ];
 const WIDTHS = [
-  ['narrow', 'Narrow', 'Narrow'],
-  ['wide', 'Wide', 'Wide'],
+  { value: 'narrow', label: 'Narrow' },
+  { value: 'wide', label: 'Wide' },
 ];
 
 /**
@@ -87,19 +88,22 @@ export default function ReadingSettings() {
               <Icon name="close" size={18} />
             </button>
           </div>
-          <Choice
+          <Segmented
+            fill
             legend="Text size"
             options={SIZES}
             value={reading.size}
             onChange={(size) => dispatch(readingChanged({ size }))}
           />
-          <Choice
+          <Segmented
+            fill
             legend="Font"
             options={FONTS}
             value={reading.font}
             onChange={(font) => dispatch(readingChanged({ font }))}
           />
-          <Choice
+          <Segmented
+            fill
             legend="Line width"
             options={WIDTHS}
             value={reading.width}
@@ -109,39 +113,5 @@ export default function ReadingSettings() {
         </div>
       )}
     </div>
-  );
-}
-
-/**
- * A row of mutually exclusive options, as radio buttons.
- *
- * @param {{
- *   legend: string,
- *   options: string[][],
- *   value: string,
- *   onChange: (value: any) => void,
- * }} props
- */
-function Choice({ legend, options, value, onChange }) {
-  const name = useId();
-  return (
-    <fieldset className={styles.fieldset}>
-      <legend className={styles.legend}>{legend}</legend>
-      <div className={styles.segments}>
-        {options.map(([id, shown, spoken]) => (
-          <label key={id} className={styles.segment}>
-            <input
-              type="radio"
-              name={name}
-              value={id}
-              checked={value === id}
-              onChange={() => onChange(id)}
-            />
-            <span aria-hidden="true">{shown}</span>
-            <span className="visually-hidden">{spoken}</span>
-          </label>
-        ))}
-      </div>
-    </fieldset>
   );
 }

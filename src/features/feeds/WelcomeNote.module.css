@@ -1,0 +1,116 @@
+.welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: var(--space-6);
+  padding: 28px;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 640px;
+}
+
+.title {
+  font: 600 30px/1.15 var(--font-read);
+  letter-spacing: -0.01em;
+}
+
+.lead {
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.starter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0 var(--space-3) 0 6px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  font: 500 13px/1 var(--font-ui);
+}
+
+.hint {
+  font-size: 14px;
+  color: var(--color-ink-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-control);
+  font: var(--type-control);
+  text-decoration: none;
+}
+
+.primary {
+  composes: button;
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.primary:hover {
+  border-color: var(--color-accent-hover);
+  background: var(--color-accent-hover);
+}
+
+.secondary {
+  composes: button;
+  border: 1px solid var(--color-line);
+  background: var(--color-raised);
+  color: var(--color-ink);
+}
+
+.secondary:hover {
+  border-color: var(--color-line-hover);
+}
+
+.quiet {
+  composes: button;
+  border: 1px solid transparent;
+  color: var(--color-ink-muted);
+}
+
+.quiet:hover {
+  background: var(--color-hover);
+  color: var(--color-ink);
+}
+
+@media (max-width: 639px) {
+  .welcome {
+    padding: var(--space-5);
+  }
+
+  .title {
+    font-size: 24px;
+  }
+}

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { selectBookmarkById } from '../bookmarks/bookmarksSlice.js';
 import { useGetFeedQuery } from '../feeds/feedApi.js';
-import { lookOf, mergeStories } from '../feeds/useFeeds.js';
+import { sortNewestFirst } from '../feeds/useFeeds.js';
 import { selectSubscriptionById } from '../subscriptions/subscriptionsSlice.js';
 
 /** @typedef {import('../../lib/types.js').Story} Story */
@@ -46,7 +46,7 @@ export function useStory(feedId, storyId) {
   const feed = useGetFeedQuery(subscription?.url ?? skipToken);
 
   const ordered = useMemo(
-    () => (subscription && feed.data ? feedOrder(subscription, feed.data) : []),
+    () => (subscription && feed.data ? sortNewestFirst(dedupe(feed.data.stories)) : []),
     [subscription, feed.data],
   );
   const index = ordered.findIndex((story) => story.id === storyId);
@@ -76,18 +76,15 @@ export function useStory(feedId, storyId) {
 }
 
 /**
- * The feed's stories in list order: newest first, undated last.
+ * A feed's stories without repeats, as lists show them.
  *
- * @param {Subscription} subscription
- * @param {import('../../lib/types.js').FeedResponse} data
+ * @param {Story[]} stories
  */
-function feedOrder(subscription, data) {
-  const state = /** @type {import('../feeds/useFeeds.js').FeedState} */ ({
-    feed: lookOf(subscription),
-    status: 'ready',
-    data,
-    error: undefined,
-    isFetching: false,
+function dedupe(stories) {
+  const seen = new Set();
+  return stories.filter((story) => {
+    if (seen.has(story.id)) return false;
+    seen.add(story.id);
+    return true;
   });
-  return mergeStories([state]).map(({ story }) => story);
 }

@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestone M4. Headlines from the five starter feeds show in All stories, Today and each feed's page, under date headers. Each story opens on its own page with everything its feed provides, cleaned of anything that could run code, and with reading settings that are remembered on the device. Stories can be saved from any list or story page and stay readable after they leave their feed. Adding feeds and Settings arrive in M5.
+> **Status:** milestone M5. Readers start with five feeds and can add any website or feed by pasting its link, then hide, remove or restore feeds in Settings. Lists show date headers and, on a return visit, a "New since your last visit" divider. Each story opens on its own page, cleaned of anything that could run code, with reading settings that are remembered. Saved stories stay readable after they leave their feed. Dark mode before first paint, shortcuts and layouts arrive in M6.
 
 ## Requirements
 
@@ -67,6 +67,31 @@ Feed HTML is untrusted. It's kept raw and cleaned only when shown, by `src/featu
 Summary-only feeds (TechCrunch and BBC share a summary, not the full story) get a note and a "Continue reading on {site}" button. Full stories show a reading time at 230 words a minute. Newer and older links step through the same feed without adding to the history, so Back returns to the list.
 
 The **Aa** button sets text size (S to XL), serif or sans, and a narrow or wide column for every story. The choice is saved on the device.
+
+## Adding feeds
+
+"Add feed" (in the sidebar, the top bar on phones, the first-visit welcome note and Settings) takes any link:
+
+1. The app checks the link itself. A missing `https://` is added, so `theverge.com` works.
+2. It asks `/api/feed` about the link and shows a preview: the feed's name, how often it posts, and its latest headlines.
+   - If the page links to several feeds, the reader picks one, and that feed is previewed.
+3. **Add feed** follows it and opens its page, already loaded from the preview.
+
+Feeds the reader already follows are caught before and after the lookup. Addresses are compared normalised: case, a trailing slash and a fragment don't make a feed new. Failures say what went wrong and what to try.
+
+In **Settings**:
+
+- A switch hides a feed from All stories and Today; it stays in the sidebar.
+- **Remove** offers Undo, and keeps stories saved from the feed.
+- **Suggested feeds** lists starter feeds the reader removed.
+- **Restore starter feeds** brings them all back.
+- **Theme** switches between System, Light and Dark.
+
+## What's new
+
+- **The divider:** when the reader leaves the page, the time is recorded. On the next visit, a "New since your last visit" divider sits between newer and older stories, and the header counts the new ones with a "Jump to where you left off" link.
+- **The welcome note:** a first visit has no divider. A welcome note explains the starter feeds and offers "Add a feed" instead.
+- **Freshness:** each list says how fresh it is ("Updated 4 min ago"), and **Refresh** fetches every feed again.
 
 ## Saving stories
 
