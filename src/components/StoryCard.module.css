@@ -1,0 +1,106 @@
+/* The Cards layout: a grid of image-first cards. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));
+  gap: var(--space-5);
+  margin: 0;
+  padding: var(--space-5) 0 var(--space-1);
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-raised);
+}
+
+/* Selected with the keyboard (J/K or Tab). */
+.card:has(.link:focus-visible) {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.link:focus-visible {
+  outline: none;
+}
+
+.media {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-placeholder);
+  font-size: 56px;
+}
+
+.fill {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 14px var(--space-4) 6px;
+}
+
+.meta {
+  font: var(--type-meta);
+  color: var(--color-ink-muted);
+}
+
+.source {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  font: 600 19px/1.25 var(--font-read);
+}
+
+.link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 6px 6px;
+}
+
+[data-density='compact'] .media {
+  aspect-ratio: 21 / 9;
+  font-size: 40px;
+}
+
+[data-density='compact'] .excerpt {
+  display: none;
+}

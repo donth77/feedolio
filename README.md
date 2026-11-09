@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestone M5. Readers start with five feeds and can add any website or feed by pasting its link, then hide, remove or restore feeds in Settings. Lists show date headers and, on a return visit, a "New since your last visit" divider. Each story opens on its own page, cleaned of anything that could run code, with reading settings that are remembered. Saved stories stay readable after they leave their feed. Dark mode before first paint, shortcuts and layouts arrive in M6.
+> **Status:** milestone M6. Readers start with five feeds and can add any website or feed by pasting its link, then hide, remove or restore feeds in Settings. Lists show date headers and, on a return visit, a "New since your last visit" divider. Each story opens on its own page, cleaned of anything that could run code, with reading settings that are remembered. Saved stories stay readable after they leave their feed. Lists come as rows or cards, comfortable or compact; the desktop sidebar collapses to an icon rail; everything works from the keyboard, with shortcuts. Sharing arrives in M7.
 
 ## Requirements
 
@@ -92,6 +92,30 @@ In **Settings**:
 - **The divider:** when the reader leaves the page, the time is recorded. On the next visit, a "New since your last visit" divider sits between newer and older stories, and the header counts the new ones with a "Jump to where you left off" link.
 - **The welcome note:** a first visit has no divider. A welcome note explains the starter feeds and offers "Add a feed" instead.
 - **Freshness:** each list says how fresh it is ("Updated 4 min ago"), and **Refresh** fetches every feed again.
+
+## Reading your way
+
+- **Layout:** List or Cards, and Comfortable or Compact density, from the list header or Settings. Both are remembered.
+- **Sidebar:** from 1024 px, the sidebar collapses to a 64 px icon rail with the button at its top or the `[` key. Without a choice from the reader, it's expanded from 1280 px and a rail below that; once they choose, their choice is remembered. Rail icons keep accessible names and tooltips, with count badges.
+- **Theme:** System, Light or Dark. A few lines in `index.html` apply a chosen theme before the first paint, so a dark page never flashes white.
+
+### Keyboard
+
+Everything works with the keyboard. A skip link leads past the navigation, and coming back from a story puts focus on it again.
+
+| Key              | Does                                                     |
+| ---------------- | -------------------------------------------------------- |
+| J / K            | Next or previous story (on a story page: older or newer) |
+| Enter or O       | Open the selected story                                  |
+| V                | Open the original on the publisher's site                |
+| S                | Save or unsave                                           |
+| R                | Refresh feeds                                            |
+| `[`              | Collapse or expand the sidebar                           |
+| G then T, A or S | Go to Today, All stories or Saved                        |
+| ?                | Show every shortcut                                      |
+| Esc              | Close a dialog or menu                                   |
+
+"Selected" is simply the story whose headline has focus, so J and K move focus, and Tab works too. Shortcuts pause while typing in a field or while a dialog is open.
 
 ## Saving stories
 

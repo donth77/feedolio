@@ -5,6 +5,29 @@
   min-height: 100dvh;
 }
 
+/* Hidden until focused: the first stop for keyboard users. */
+.skip {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 60;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font: var(--type-control);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+.main:focus {
+  outline: none;
+}
+
 .column {
   display: flex;
   flex-direction: column;
@@ -171,6 +194,10 @@
 @media (min-width: 1024px) {
   .shell {
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  }
+
+  .shell[data-rail='true'] {
+    grid-template-columns: var(--rail-width) minmax(0, 1fr);
   }
 
   .sidebar {

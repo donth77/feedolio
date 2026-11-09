@@ -15,12 +15,13 @@ import styles from './BookmarkButton.module.css';
  * and "Saved" label say it on screen.
  *
  * - row: in a headline list; icon only until saved. Named after the story.
+ * - card: on a story card; always labelled. Named after the story.
  * - page: on the story page; always labelled.
  *
  * @param {{
  *   story: import('../../lib/types.js').Story,
  *   feedTitle: string,
- *   variant?: 'row'|'page',
+ *   variant?: 'row'|'card'|'page',
  *   className?: string,
  * }} props
  */
@@ -44,10 +45,12 @@ export default function BookmarkButton({ story, feedTitle, variant = 'row', clas
       className={`${styles.save} ${styles[variant]} ${className}`}
       aria-pressed={saved}
       aria-label={variant === 'page' ? 'Save story' : `Save ${story.title}`}
+      aria-keyshortcuts="S"
+      data-shortcut="save"
       onClick={toggle}
     >
       <Icon name={saved ? 'savedFilled' : 'saved'} size={variant === 'page' ? 18 : 20} />
-      {(variant === 'page' || saved) && (
+      {(variant !== 'row' || saved) && (
         <span className={styles.label} aria-hidden="true">
           {saved ? 'Saved' : 'Save'}
         </span>
@@ -73,6 +76,7 @@ export function RemoveBookmarkButton({ bookmark, onRemove, className = '' }) {
       className={`${styles.save} ${styles.row} ${className}`}
       aria-label={`Remove from saved: ${bookmark.story.title}`}
       data-saved=""
+      data-shortcut="save"
       onClick={() => {
         onRemove?.();
         dispatch(bookmarkRemoved(bookmark.id));

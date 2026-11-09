@@ -5,6 +5,7 @@ import Icon from '../../components/Icon.jsx';
 import { FeedDot } from '../../components/Monogram.jsx';
 import { monogramFor, tintFor, tintForId } from '../../lib/feeds.js';
 import { sizedImageUrl } from '../../lib/images.js';
+import { skipToMain } from '../../lib/skipToMain.js';
 import { fullTime, storyDate } from '../../lib/time.js';
 import { useNow } from '../../lib/useNow.js';
 import BookmarkButton from '../bookmarks/BookmarkButton.jsx';
@@ -60,7 +61,10 @@ export default function StoryPage() {
   }, [title]);
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-story-page="">
+      <a href="#main" className={styles.skip} onClick={skipToMain}>
+        Skip to story
+      </a>
       <header className={styles.bar}>
         <BackLink back={back} />
         {story && (
@@ -70,7 +74,7 @@ export default function StoryPage() {
           </div>
         )}
       </header>
-      <main className={styles.main}>
+      <main id="main" className={styles.main} tabIndex={-1}>
         {status === 'ready' && story ? (
           <Article story={story} lookup={lookup} feedId={feedId} back={back} />
         ) : status === 'loading' ? (
@@ -298,7 +302,14 @@ function Hero({ url }) {
  */
 function OriginalLink({ site, children }) {
   return (
-    <a className={styles.primary} href={site.href} target="_blank" rel="noopener noreferrer">
+    <a
+      className={styles.primary}
+      href={site.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-keyshortcuts="V"
+      data-shortcut="original"
+    >
       {children} <span className="visually-hidden">(opens in a new tab)</span>
       <Icon name="external" size={18} />
     </a>
@@ -319,7 +330,14 @@ function Pager({ lookup, feedId, back }) {
   return (
     <nav className={styles.pager} aria-label={`More from ${feedTitle}`}>
       {newer && (
-        <Link to={linkTo(newer)} replace state={state} className={styles.pagerLink}>
+        <Link
+          to={linkTo(newer)}
+          replace
+          state={state}
+          className={styles.pagerLink}
+          aria-keyshortcuts="K"
+          data-shortcut="newer"
+        >
           <span className={styles.pagerLabel}>Newer in {feedTitle}</span>{' '}
           <span className={styles.pagerTitle}>{newer.title}</span>
         </Link>
@@ -330,6 +348,8 @@ function Pager({ lookup, feedId, back }) {
           replace
           state={state}
           className={`${styles.pagerLink} ${styles.older}`}
+          aria-keyshortcuts="J"
+          data-shortcut="older"
         >
           <span className={styles.pagerLabel}>Older in {feedTitle}</span>{' '}
           <span className={styles.pagerTitle}>{older.title}</span>

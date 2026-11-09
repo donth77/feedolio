@@ -19,6 +19,23 @@ const PATHS = {
   saved: <path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1z" />,
   savedFilled: <path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1z" fill="currentColor" />,
   check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  sidebar: (
+    <>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+      <path d="M9.5 4.5v15" />
+    </>
+  ),
+  layoutList: <path d="M4 6h16M4 12h16M4 18h16" />,
+  layoutCards: (
+    <>
+      <rect x="4" y="4" width="7" height="7" rx="1.5" />
+      <rect x="13" y="4" width="7" height="7" rx="1.5" />
+      <rect x="4" y="13" width="7" height="7" rx="1.5" />
+      <rect x="13" y="13" width="7" height="7" rx="1.5" />
+    </>
+  ),
+  density: <path d="M4 7h16M4 12h16M4 17h10" />,
+  chevronDown: <path d="M6 9l6 6 6-6" />,
   search: (
     <>
       <circle cx="11" cy="11" r="6" />
