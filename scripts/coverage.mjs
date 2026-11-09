@@ -10,6 +10,9 @@
 import { startVitest } from 'vitest/node';
 
 const UNIT_FILES = [
+  'src/app/persistence.js',
+  'src/features/story/cleanStoryHtml.js',
+  'src/lib/beacons.js',
   'src/lib/hash.js',
   'src/lib/url.js',
   'worker/lib/discoverFeed.js',

@@ -1,4 +1,5 @@
-import { useId } from 'react';
+import { useId, useMemo } from 'react';
+import { useLocation } from 'react-router';
 import { feedErrorMessage } from '../features/feeds/feedApi.js';
 import { GROUP_LABELS, groupByDate, groupDates } from '../lib/time.js';
 import Icon from './Icon.jsx';
@@ -16,11 +17,15 @@ import StoryRow, { SkeletonRow } from './StoryRow.jsx';
  *   stories: ListedStory[],
  *   now: number,
  *   loading: boolean,
+ *   label: string,
  *   showCounts?: boolean,
  * }} props
+ *   label: the list's name, for the story page's back link ("All stories")
  */
-export default function StoryList({ stories, now, loading, showCounts = false }) {
+export default function StoryList({ stories, now, loading, label, showCounts = false }) {
   const idPrefix = useId();
+  const { pathname } = useLocation();
+  const from = useMemo(() => ({ pathname, label }), [pathname, label]);
 
   if (stories.length === 0 && loading) {
     return (
@@ -50,7 +55,7 @@ export default function StoryList({ stories, now, loading, showCounts = false })
             </div>
             <ul className={styles.list}>
               {items.map((item) => (
-                <StoryRow key={item.story.id} item={item} now={now} />
+                <StoryRow key={item.story.id} item={item} now={now} from={from} />
               ))}
             </ul>
           </section>

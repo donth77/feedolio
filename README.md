@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestone M2. Headlines from the five starter feeds show in All stories, Today and each feed's page, under date headers, on phone, tablet and desktop. Story pages arrive in M3.
+> **Status:** milestone M3. Headlines from the five starter feeds show in All stories, Today and each feed's page, under date headers. Each story opens on its own page with everything its feed provides, cleaned of anything that could run code, and with reading settings that are remembered on the device. Bookmarks arrive in M4.
 
 ## Requirements
 
@@ -42,10 +42,27 @@ Use `pnpm run deploy`, not `pnpm deploy`: the short form is a different, built-i
 
 - **App:** React 19, React Router (data router), Redux Toolkit with RTK Query for feed data (retried twice on network or server errors, kept for ten minutes). Styles are CSS Modules plus design tokens in `src/styles/tokens.css`, with light and dark values copied from the design canvas.
 - **Worker:** `worker/index.js` routes `/api/*`; everything else is static assets in single-page-app mode, so page navigations never run the Worker. Workers Caching is on in `wrangler.jsonc`.
+- **Saved data:** the reader's own data (feeds, bookmarks, preferences, visit times) lives in `localStorage` under one versioned key, `feedolio:v1`. It's checked on load (anything malformed falls back to defaults), saved at most every 500 ms, and saved at once when the page is hidden or closed. Feed data is never stored.
 - **Tests:** three Vitest projects, all against saved copies of real feeds and pages (`test/fixtures`, with their sources in its README).
-  - **Journeys** (the main tool) render the real app in jsdom and fake only the network (MSW) and, when needed, the clock. Calls to `/api/feed` run the real Worker code in-process.
-  - **Unit** tests cover dense logic only: parsing, normalising, main images, feed discovery and the address guard.
+  - **Journeys** (the main tool) render the real app in jsdom and fake only the network (MSW) and, when needed, the clock. Calls to `/api/feed` run the real Worker code in-process. A test "reload" saves as a browser would, then starts a fresh app from storage.
+  - **Unit** tests cover dense logic only: parsing, normalising, main images, feed discovery, the address guard, the story sanitiser and saved data.
   - **Worker contract** tests run inside Cloudflare's runtime through `@cloudflare/vitest-plugin`.
+
+## Reading a story
+
+A story's page is `/feeds/:feedId/stories/:storyId`, so it survives a reload and can be shared. The page finds its story in the feed data already loaded, then by fetching the feed, then in the reader's bookmarks; otherwise it explains that the story has left its feed.
+
+Feed HTML is untrusted. It's kept raw and cleaned only when shown, by `src/features/story/cleanStoryHtml.js`, so improvements to the rules also protect older bookmarks:
+
+- DOMPurify removes scripts, event handlers, styles, forms, SVG and anything that isn't plain content; links and images keep only http(s) addresses (and `mailto:` for links).
+- Links open in a new tab with `rel="noopener noreferrer"`. Images load lazily without a referrer, and tracking pixels are dropped.
+- Embedded media (iframes, video, audio, plug-ins) becomes an "Embedded media" card linking to the original story.
+- A main image from the feed's media tags shows above the story only if the body doesn't start with the same picture. Headings are renumbered to follow the title without skipping levels.
+- The cleaned nodes are inserted directly, never as an HTML string. DOMPurify loads with the story page, not with the lists.
+
+Summary-only feeds (TechCrunch and BBC share a summary, not the full story) get a note and a "Continue reading on {site}" button. Full stories show a reading time at 230 words a minute. Newer and older links step through the same feed without adding to the history, so Back returns to the list.
+
+The **Aa** button sets text size (S to XL), serif or sans, and a narrow or wide column for every story. The choice is saved on the device.
 
 ## The feed endpoint
 
@@ -68,12 +85,15 @@ Use `pnpm run deploy`, not `pnpm deploy`: the short form is a different, built-i
 
 Errors look like `{ "error": { "code": "NO_FEED_FOUND", "message": "…" } }`.
 
+## Project layout
+
 ```text
 src/
-  app/          store, router, route-level states
+  app/          store, router, saved data (persistence.js), visits, route-level states
   features/     feeds · story · bookmarks · subscriptions · preferences · auth
-  components/   AppShell, PageHeader (*.module.css)
-  lib/          shared with the Worker: JSDoc types, ids, URL normalising
+  components/   AppShell, NavPanel, Drawer, StoryList, StoryRow, StoryImage, Monogram, Icon
+  lib/          dates, images, feed tiles; shared with the Worker: JSDoc types, ids,
+                URL normalising, tracking-pixel rules
   styles/       tokens.css, base.css
 worker/
   index.js      routes /api/*

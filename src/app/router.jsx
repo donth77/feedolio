@@ -5,6 +5,7 @@ import AllStories from '../features/feeds/AllStories.jsx';
 import FeedView from '../features/feeds/FeedView.jsx';
 import TodayView from '../features/feeds/TodayView.jsx';
 import NotFound from './NotFound.jsx';
+import RootLayout from './RootLayout.jsx';
 import RouteError from './RouteError.jsx';
 import ViewLoading from './ViewLoading.jsx';
 
@@ -18,28 +19,36 @@ const lazyView = (load) => async () => ({ Component: (await load()).default });
 /** @type {import('react-router').RouteObject[]} */
 export const routes = [
   {
-    path: '/',
-    Component: AppShell,
+    Component: RootLayout,
     ErrorBoundary: RouteError,
+    HydrateFallback: ViewLoading,
     children: [
       {
-        // Errors and first-load waits show inside the shell, so its links keep working.
+        // A story is its own page, without the sidebar: a quiet place to read.
+        path: '/feeds/:feedId/stories/:storyId',
         ErrorBoundary: RouteError,
-        HydrateFallback: ViewLoading,
+        lazy: lazyView(() => import('../features/story/StoryPage.jsx')),
+      },
+      {
+        path: '/',
+        Component: AppShell,
         children: [
-          { index: true, Component: AllStories },
-          { path: 'today', Component: TodayView },
-          { path: 'feeds/:feedId', Component: FeedView },
           {
-            path: 'feeds/:feedId/stories/:storyId',
-            lazy: lazyView(() => import('../features/story/StoryPage.jsx')),
+            // Errors and first-load waits show inside the shell, so its links keep working.
+            ErrorBoundary: RouteError,
+            HydrateFallback: ViewLoading,
+            children: [
+              { index: true, Component: AllStories },
+              { path: 'today', Component: TodayView },
+              { path: 'feeds/:feedId', Component: FeedView },
+              { path: 'bookmarks', Component: SavedView },
+              {
+                path: 'settings',
+                lazy: lazyView(() => import('../features/subscriptions/Settings.jsx')),
+              },
+              { path: '*', Component: NotFound },
+            ],
           },
-          { path: 'bookmarks', Component: SavedView },
-          {
-            path: 'settings',
-            lazy: lazyView(() => import('../features/subscriptions/Settings.jsx')),
-          },
-          { path: '*', Component: NotFound },
         ],
       },
     ],

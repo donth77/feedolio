@@ -56,7 +56,12 @@ function FeedStories({ subscription }) {
         <EmptyState title="No stories yet">This feed hasn’t published anything.</EmptyState>
       ) : (
         state.status !== 'error' && (
-          <StoryList stories={stories} now={now} loading={state.status === 'loading'} />
+          <StoryList
+            stories={stories}
+            now={now}
+            loading={state.status === 'loading'}
+            label={subscription.title}
+          />
         )
       )}
     </>
