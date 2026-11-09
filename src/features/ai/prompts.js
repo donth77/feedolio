@@ -36,6 +36,39 @@ export function fenceStory({ id, title, text, feedTitle }) {
   return `<untrusted_story id="${defuse(id).replace(/"/g, '')}"${source}>\nTitle: ${defuse(title)}${body}\n</untrusted_story>`;
 }
 
+/** Plain text only: Feedolio shows answers as text, never as HTML. */
+const PLAIN = 'Write plain text. Use "- " for list items. No HTML, no links, no headings.';
+
+/**
+ * Instructions for the story page's actions (US-100 to US-102).
+ *
+ * @param {'summarize'|'translate'|'explain'} action
+ * @param {{ language?: string, summaryOnly?: boolean }} [options]
+ *   language: the name of the language to translate into
+ *   summaryOnly: the feed gave only a summary, not the whole story
+ */
+export function actionSystem(action, { language = 'English', summaryOnly = false } = {}) {
+  const partial = summaryOnly
+    ? ' You have only the summary the feed gives, not the whole story, so work from that and don’t guess at the rest.'
+    : '';
+  if (action === 'summarize') {
+    return `You summarise news stories for a busy reader. ${UNTRUSTED_NOTE}${partial} Give the gist in three to five short bullet points, one sentence each: what happened and why it matters. No introduction. ${PLAIN}`;
+  }
+  if (action === 'translate') {
+    return `You translate news stories. ${UNTRUSTED_NOTE}${partial} Translate the story’s title and text into ${language}, keeping its paragraphs and lists. Put the translated title on the first line, then a blank line, then the text. Reply with the translation only. ${PLAIN}`;
+  }
+  return `You explain news stories to a curious reader who is new to the subject. ${UNTRUSTED_NOTE}${partial} In plain words, give the background needed to follow the story, and explain the names, terms and acronyms it uses. Don’t retell the story. Keep it short: a few paragraphs or a short list. ${PLAIN}`;
+}
+
+/**
+ * The story itself, fenced, as the request's text.
+ *
+ * @param {PromptStory} story
+ */
+export function actionPrompt(story) {
+  return fenceStory(story);
+}
+
 export const JUDGE_SYSTEM = `You check news stories against a reader's filter rule. ${UNTRUSTED_NOTE} For each story, say whether the rule matches it and how sure you are, from 0 (a guess) to 1 (certain).`;
 
 /** The general model's answer when it judges stories. */

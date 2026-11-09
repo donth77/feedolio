@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom/vitest';
+import { IDBFactory } from 'fake-indexeddb';
+import 'fake-indexeddb/auto';
 import { cleanup, configure } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, expect } from 'vitest';
+import { closeCache } from '../../src/features/ai/cache.js';
 import { removeAllKeys } from '../../src/features/ai/keys.js';
 import { resetUsage } from '../../src/features/ai/usage.js';
 import { takeOpenedStory } from '../../src/lib/returnFocus.js';
@@ -98,6 +101,12 @@ afterEach(() => {
   removeAllKeys();
   resetUsage();
   window.history.replaceState(null, '', '/');
+});
+
+// jsdom has no IndexedDB; each test gets a fresh, empty one for the AI cache.
+afterEach(async () => {
+  await closeCache();
+  globalThis.indexedDB = new IDBFactory();
 });
 
 afterAll(() => server.close());

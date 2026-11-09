@@ -31,6 +31,15 @@ describe('Model output as text', () => {
     ]);
   });
 
+  it('keeps bullets spaced out with blank lines in one list', () => {
+    expect(textBlocks('Intro:\n\n- a\n\n- b\n\n  indented after a gap\n\nEnd.')).toEqual([
+      { type: 'paragraph', lines: ['Intro:'] },
+      { type: 'bullets', items: ['a', 'b'] },
+      { type: 'paragraph', lines: ['indented after a gap'] },
+      { type: 'paragraph', lines: ['End.'] },
+    ]);
+  });
+
   it('switches between list kinds', () => {
     expect(textBlocks('- a\n1. b\n- c')).toEqual([
       { type: 'bullets', items: ['a'] },

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import Icon from '../../components/Icon.jsx';
@@ -8,6 +8,7 @@ import { sizedImageUrl } from '../../lib/images.js';
 import { skipToMain } from '../../lib/skipToMain.js';
 import { fullTime, storyDate } from '../../lib/time.js';
 import { useNow } from '../../lib/useNow.js';
+import { selectAiSettings } from '../ai/aiSettingsSlice.js';
 import BookmarkButton from '../bookmarks/BookmarkButton.jsx';
 import { feedErrorMessage } from '../feeds/feedApi.js';
 import ShareBar, { ShareButton } from '../share/ShareBar.jsx';
@@ -19,6 +20,9 @@ import styles from './StoryPage.module.css';
 import { useStory } from './useStory.js';
 
 /** @typedef {import('../../lib/types.js').Story} Story */
+
+// Loaded only for readers who set up AI.
+const AiActions = lazy(() => import('../ai/actions/AiActions.jsx'));
 /** @typedef {import('./useStory.js').StoryLookup} StoryLookup */
 
 /**
@@ -193,6 +197,8 @@ function Article({ story, lookup, feedId, back }) {
         <Byline story={story} now={now} minutes={minutes} />
       </div>
 
+      <StoryAi story={story} body={body} feedTitle={feedTitle} site={site} />
+
       {heroUrl && <Hero url={heroUrl} />}
 
       {body ? (
@@ -231,6 +237,34 @@ function Article({ story, lookup, feedId, back }) {
 
       <Pager lookup={lookup} feedId={feedId} back={back} />
     </article>
+  );
+}
+
+/**
+ * Summarize, Translate and Explain, for readers who set up AI and kept
+ * article actions on (US-114).
+ *
+ * @param {{
+ *   story: Story,
+ *   body: DocumentFragment|null,
+ *   feedTitle: string,
+ *   site: { host: string } | null,
+ * }} props
+ */
+function StoryAi({ story, body, feedTitle, site }) {
+  const ai = useSelector(selectAiSettings);
+  if (!ai.general || !ai.features.actions) return null;
+  return (
+    <Suspense fallback={null}>
+      <AiActions
+        key={story.id}
+        story={story}
+        body={body}
+        feedTitle={feedTitle}
+        summaryOnly={!story.hasFullContent}
+        site={site}
+      />
+    </Suspense>
   );
 }
 

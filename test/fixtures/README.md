@@ -43,6 +43,9 @@ Served by `ai.js`, which also holds the fake test keys. Each provider accepts on
 | --------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | `anthropic-models.json`     | Recorded 2026-11-09: `GET https://api.anthropic.com/v1/models`                      | 14 models, with what each can do (effort, structured output, output limit)  |
 | `anthropic-summary.sse`     | Recorded 2026-11-09: a streamed `claude-opus-5-5` summary, low effort, fallbacks on | The raw event stream, byte for byte                                         |
+| `anthropic-summarize-pandemic.sse` | Recorded 2026-11-09: Summarize on "Measuring the true toll of the pandemic" (The Economist fixture), with Feedolio's own prompt | Five bullet points |
+| `anthropic-translate-stocks-es.sse` | Recorded 2026-11-09: Translate into Spanish on the BBC "AI stocks climb…" summary | Summary-only story |
+| `anthropic-explain-stocks.sse` | Recorded 2026-11-09: Explain on the same BBC summary | Four bullet points |
 | `anthropic-judgments.json`  | Recorded 2026-11-09: structured output judging two stories against a rule           | `{ judgments: [{ id, match, confidence }] }`                                |
 | `jev-models.json`           | Recorded 2026-11-09: `GET https://api.typesafe.ai/v1/models`                        |                                                                             |
 | `jev-systemone.json`        | Recorded 2026-11-09: `POST https://api.typesafe.ai/v1/systemone`, three yes/no questions | The conference story came back at 0.53: a "Maybe"                     |
