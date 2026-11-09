@@ -7,6 +7,7 @@ import {
   MAX_AGE_MS,
   readAllCached,
   readCached,
+  writeAllCached,
   writeCached,
 } from '../../src/features/ai/cache.js';
 
@@ -91,6 +92,14 @@ describe('The AI cache', () => {
     expect(await readCached('judgments', 'guest|s1|r1')).toEqual({ verdict: 'match' });
   });
 
+  it('saves a batch in one go', async () => {
+    await writeAllCached('judgments', [
+      { key: 'guest|s1|r1', value: 'one', keep: true },
+      { key: 'guest|s2|r1', value: 'two' },
+    ]);
+    expect(await readAllCached('judgments', 'guest|')).toEqual(['one', 'two']);
+  });
+
   it('keeps results in memory where IndexedDB is missing or fails', async () => {
     globalThis.indexedDB = /** @type {any} */ ({
       open() {
@@ -102,7 +111,8 @@ describe('The AI cache', () => {
     expect(await readCached('answers', 'b')).toBeNull();
     await writeCached('judgments', 'guest|s1|r1', 'Kept', { keep: true });
     await writeCached('judgments', 'github|42|s1|r1', 'Theirs');
-    expect(await readAllCached('judgments', 'guest|')).toEqual(['Kept']);
+    await writeAllCached('judgments', [{ key: 'guest|s2|r1', value: 'Batch' }]);
+    expect(await readAllCached('judgments', 'guest|')).toEqual(['Kept', 'Batch']);
   });
 
   it('copes with a database that won’t open', async () => {

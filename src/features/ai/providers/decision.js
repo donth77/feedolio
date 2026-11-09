@@ -72,13 +72,55 @@ export function createDecisionAdapter({ provider, apiKey }) {
       return {
         judgments,
         model: typeof body.model === 'string' ? body.model : info.model,
-        usage: body.usage
-          ? {
-              tokensSent: Number(body.usage.input_tokens) || 0,
-              tokensReceived: Number(body.usage.output_tokens) || 0,
-            }
-          : null,
+        usage: usageOf(body),
+      };
+    },
+
+    async score({ question, items, levels, signal }) {
+      // Each item gets a "score" question on the same scale; Jev answers with
+      // the probability-weighted level, which becomes 0 to 100.
+      const request = {
+        model: info.model,
+        state: { items: Object.fromEntries(items.map((item) => [item.id, item.text])) },
+        questions: Object.fromEntries(
+          items.map((item) => [
+            item.id,
+            { type: 'score', instructions: `${question} (item ${item.id})`, criteria: levels },
+          ]),
+        ),
+      };
+      const body = await readJson(
+        await call(`${info.baseUrl}/systemone`, {
+          method: 'POST',
+          key: apiKey,
+          signal,
+          body: JSON.stringify(request),
+        }),
+      );
+      const answers = body?.answers;
+      if (!answers || typeof answers !== 'object') throw new AiError('bad-response');
+      const top = Math.max(1, levels.length - 1);
+      const scores = items.flatMap((item) => {
+        const value = answers[item.id]?.score;
+        return typeof value === 'number' && Number.isFinite(value)
+          ? [{ id: item.id, importance: Math.round(Math.min(1, Math.max(0, value / top)) * 100) }]
+          : [];
+      });
+      return {
+        scores,
+        model: typeof body.model === 'string' ? body.model : info.model,
+        usage: usageOf(body),
       };
     },
   };
+}
+
+/** @param {any} body */
+function usageOf(body) {
+  return body?.usage
+    ? {
+        tokensSent: Number(body.usage.input_tokens) || 0,
+        tokensReceived: Number(body.usage.output_tokens) || 0,
+      }
+    : null;
 }

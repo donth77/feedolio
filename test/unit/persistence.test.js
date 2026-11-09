@@ -290,6 +290,12 @@ describe('createSaver', () => {
     saver.cancel();
     vi.runAllTimers();
     expect(localStorage.setItem).not.toHaveBeenCalled();
+
+    // A store that's gone never saves again.
+    state = { ...state, preferences: { theme: 'dark' } };
+    saver.changed();
+    vi.runAllTimers();
+    expect(localStorage.setItem).not.toHaveBeenCalled();
   });
 
   it('doesn’t write back data that was just loaded from another tab', () => {

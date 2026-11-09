@@ -53,9 +53,21 @@
  * @property {string} model
  * @property {TokenCount|null} usage
  *
+ * @typedef {Object} ScoreRequest   One score on the same scale for each item
+ * @property {string} question
+ * @property {{ id: string, text: string }[]} items
+ * @property {string[]} levels      The scale, least to most
+ * @property {AbortSignal} [signal]
+ *
+ * @typedef {Object} ScoreResult
+ * @property {{ id: string, importance: number }[]} scores   0 to 100
+ * @property {string} model
+ * @property {TokenCount|null} usage
+ *
  * @typedef {Object} DecisionAdapter
  * @property {() => Promise<void>} check   Proves the key works
  * @property {(request: JudgeRequest) => Promise<JudgeResult>} judge
+ * @property {(request: ScoreRequest) => Promise<ScoreResult>} score
  */
 
 export {};

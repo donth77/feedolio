@@ -1,5 +1,5 @@
 import { feedApi } from '../../feeds/feedApi.js';
-import { readAllCached, writeCached } from '../cache.js';
+import { readAllCached, writeAllCached } from '../cache.js';
 import { describeAiError } from '../errors.js';
 import { DECISION_PROVIDERS, GENERAL_PROVIDERS, hostOf, isLocal } from '../providerInfo.js';
 import { isReady, judge, roleFor } from '../router.js';
@@ -184,12 +184,13 @@ export function promptStory(story) {
  */
 export function saveJudgments(state, judgments) {
   const scope = scopeOf(state);
-  return Promise.all(
-    judgments.map((judgment) =>
-      writeCached('judgments', storageKey(scope, judgment), judgment, {
-        keep: judgment.verdict !== 'no' || judgment.readerSaid !== null,
-      }),
-    ),
+  return writeAllCached(
+    'judgments',
+    judgments.map((judgment) => ({
+      key: storageKey(scope, judgment),
+      value: judgment,
+      keep: judgment.verdict !== 'no' || judgment.readerSaid !== null,
+    })),
   );
 }
 

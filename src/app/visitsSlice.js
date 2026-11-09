@@ -3,7 +3,8 @@ import { persistedStateHydrated } from './actions.js';
 
 /**
  * When the reader was last here. Drives the "New since your last visit"
- * divider, the first-visit welcome note and, later, the "Catch me up" window.
+ * divider, the first-visit welcome note and the "Catch me up" window, which
+ * leaves out stories the reader has opened.
  *
  * @typedef {Object} Visits
  * @property {string|null} lastVisitAt       ISO; moves forward whenever the reader leaves the page
@@ -40,6 +41,26 @@ const visitsSlice = createSlice({
     welcomeDismissed(state) {
       state.welcomeDismissed = true;
     },
+    /**
+     * The reader opened a story: it's read, so Catch me up leaves it out.
+     *
+     * @param {{ payload: string }} action
+     */
+    storyOpened(state, { payload }) {
+      if (state.openedIds.at(-1) === payload) return;
+      state.openedIds = [...state.openedIds.filter((id) => id !== payload), payload].slice(-2000);
+    },
+    /** "Mark all caught up": the next digest starts from now. */
+    caughtUp: {
+      reducer(state, /** @type {{ payload: string }} */ { payload }) {
+        state.lastCatchUpAt = payload;
+      },
+      prepare: () => ({ payload: new Date().toISOString() }),
+    },
+    /** Undo for "Mark all caught up". @param {{ payload: string|null }} action */
+    catchUpRestored(state, { payload }) {
+      state.lastCatchUpAt = payload;
+    },
   },
   extraReducers: (builder) => {
     // Another tab's record replaces ours, but this session keeps its own cut-off.
@@ -51,7 +72,8 @@ const visitsSlice = createSlice({
   },
 });
 
-export const { visitEnded, welcomeDismissed } = visitsSlice.actions;
+export const { visitEnded, welcomeDismissed, storyOpened, caughtUp, catchUpRestored } =
+  visitsSlice.actions;
 export default visitsSlice.reducer;
 
 /**
@@ -80,6 +102,12 @@ export function restoreVisits(saved = {}) {
 
 /** Where this session's "New since your last visit" divider goes. @param {WithVisits} state */
 export const selectCutoff = (state) => state.visits.cutoff;
+
+/** Where the next Catch me up starts. @param {WithVisits} state */
+export const selectLastCatchUpAt = (state) => state.visits.lastCatchUpAt;
+
+/** Stories the reader has opened. @param {WithVisits} state */
+export const selectOpenedIds = (state) => state.visits.openedIds;
 
 /** A first visit that hasn't dismissed the welcome note. @param {WithVisits} state */
 export const selectShowWelcome = (state) =>

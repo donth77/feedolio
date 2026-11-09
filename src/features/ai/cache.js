@@ -141,6 +141,44 @@ export async function writeCached(store, key, value, { keep = false } = {}) {
 }
 
 /**
+ * Saves several results in one transaction, e.g. a batch of judgments.
+ *
+ * @param {CacheStore} store
+ * @param {{ key: string, value: unknown, keep?: boolean }[]} entries
+ */
+export async function writeAllCached(store, entries) {
+  const savedAt = Date.now();
+  /** @type {CacheRecord[]} */
+  const records = entries.map(({ key, value, keep }) => ({
+    key,
+    value,
+    savedAt,
+    ...(keep && { keep }),
+  }));
+  const db = await open();
+  if (db) {
+    try {
+      await new Promise((resolve, reject) => {
+        const transaction = db.transaction(store, 'readwrite');
+        for (const record of records) transaction.objectStore(store).put(record);
+        transaction.oncomplete = () => resolve(undefined);
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
+      });
+      return;
+    } catch {
+      // Kept in memory below.
+    }
+  }
+  for (const record of records)
+    memory.set(
+      `${store}
+${record.key}`,
+      record,
+    );
+}
+
+/**
  * Every saved result whose key starts with `prefix`, e.g. one account's
  * judgments.
  *

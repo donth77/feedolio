@@ -106,3 +106,101 @@ export function judgePrompt(rule, stories) {
     'Judge every story above, by its id.',
   ].join('\n\n');
 }
+
+// Catch me up (US-109 to US-112)
+
+export const MAX_GROUPS = 8;
+
+export const GROUP_SYSTEM = `You build a news digest for a reader catching up after time away. ${UNTRUSTED_NOTE} Group the stories into the main news stories: stories about the same event or topic go together. Give each group a short, neutral headline of at most 10 words, in plain text. Cite stories only by the ids given. Leave out stories that don't belong with any main story. Make at most ${MAX_GROUPS} groups.`;
+
+/** The general model's grouping. */
+export const GROUPS_SCHEMA = {
+  type: 'object',
+  properties: {
+    groups: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          headline: { type: 'string' },
+          storyIds: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['headline', 'storyIds'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['groups'],
+  additionalProperties: false,
+};
+
+/**
+ * Asks for the main stories among these.
+ *
+ * @param {PromptStory[]} stories
+ */
+export function groupPrompt(stories) {
+  return [
+    ...stories.map(fenceStory),
+    'Group the stories above into main stories, citing their ids.',
+  ].join('\n\n');
+}
+
+/** A main story as the ranking and summary prompts show it. @typedef {{ id: string, headline: string, stories: PromptStory[] }} PromptGroup */
+
+/**
+ * One main story, fenced: its headline (model-written, so also untrusted) and
+ * its reports' titles.
+ *
+ * @param {PromptGroup} group
+ */
+export function fenceGroup({ id, headline, stories }) {
+  return fenceStory({
+    id,
+    title: headline,
+    text: stories.map((story) => `- ${story.title}`).join('\n'),
+  });
+}
+
+export const RANK_SYSTEM = `You rank the main news stories in a digest by how much they matter to a general reader of technology news. ${UNTRUSTED_NOTE} Give each story an importance from 0 (trivial) to 100 (major news nearly everyone should hear about).`;
+
+/** The general model's ranking. */
+export const RANKS_SCHEMA = {
+  type: 'object',
+  properties: {
+    ranks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { id: { type: 'string' }, importance: { type: 'number' } },
+        required: ['id', 'importance'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['ranks'],
+  additionalProperties: false,
+};
+
+/** @param {PromptGroup[]} groups */
+export function rankPrompt(groups) {
+  return [...groups.map(fenceGroup), 'Rank every main story above, by its id.'].join('\n\n');
+}
+
+/** Jev's scale for ranking, from least to most important. */
+export const IMPORTANCE_LEVELS = [
+  'Minor: few readers would notice it',
+  'Worth knowing',
+  'Major news most readers should hear about',
+];
+
+export const DIGEST_SUMMARY_SYSTEM = `You summarise one main news story from several reports, for a reader catching up. ${UNTRUSTED_NOTE} In two or three plain sentences, say what happened and why it matters, using only the reports given. No links, headings or lists.`;
+
+/**
+ * Asks for one main story's summary.
+ *
+ * @param {PromptGroup} group
+ */
+export function digestSummaryPrompt({ headline, stories }) {
+  return [`Main story: ${JSON.stringify(headline)}`, ...stories.map(fenceStory)].join('\n\n');
+}

@@ -182,6 +182,8 @@ export function createSaver(getState, onFailure = () => {}, keyOf = () => STORAG
   /** @type {ReturnType<typeof setTimeout>|null} */
   let timer = null;
   let last = pick(getState());
+  /** Set once this store is going away: it never saves again. */
+  let stopped = false;
 
   const flush = () => {
     if (timer) clearTimeout(timer);
@@ -195,6 +197,7 @@ export function createSaver(getState, onFailure = () => {}, keyOf = () => STORAG
   return {
     /** Call after every action. */
     changed() {
+      if (stopped) return;
       const next = pick(getState());
       if (SAVED_SLICES.every((slice) => next[slice] === last[slice])) return;
       timer ??= setTimeout(flush, SAVE_INTERVAL_MS);
@@ -203,8 +206,12 @@ export function createSaver(getState, onFailure = () => {}, keyOf = () => STORAG
     flush() {
       if (timer) flush();
     },
-    /** Drops a pending save without writing it, when this store is going away. */
+    /**
+     * Drops a pending save without writing it, when this store is going away.
+     * Nothing it does afterwards is saved, so it can't overwrite its successor.
+     */
     cancel() {
+      stopped = true;
       if (timer) clearTimeout(timer);
       timer = null;
     },

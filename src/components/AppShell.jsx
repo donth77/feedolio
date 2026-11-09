@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
-import { tagPath, useRulesNav, useWithoutHidden } from '../features/ai/rules/useRules.js';
+import { tagPath, useAiNav, useWithoutHidden } from '../features/ai/rules/useRules.js';
 import { selectAuth } from '../features/auth/authSlice.js';
 import { selectBookmarkCount } from '../features/bookmarks/bookmarksSlice.js';
 import {
@@ -55,7 +55,7 @@ export default function AppShell() {
   const allLoaded = states.every((state) => state.status !== 'loading');
   const { stories: visible } = useWithoutHidden(mergeStories(states));
   const todayCount = allLoaded ? inLastDay(visible, now).length : null;
-  const rulesNav = useRulesNav();
+  const aiNav = useAiNav();
   const savedCount = useSelector(selectBookmarkCount);
   const offeringGuestImport = useSelector(selectAuth).guestBookmarks > 0;
 
@@ -92,7 +92,7 @@ export default function AppShell() {
             collapsed={railed}
             onToggle={toggleSidebar}
             className={styles.sidebarPanel}
-            rules={rulesNav}
+            ai={aiNav}
           />
         </div>
 
@@ -131,21 +131,29 @@ export default function AppShell() {
                   All
                 </NavLink>
               </li>
-              {rulesNav.show && (
+              {aiNav.catchUp && (
+                <li>
+                  <NavLink to="/catch-up" className={styles.chip}>
+                    <Icon name="sparkle" size={14} />
+                    Catch me up
+                  </NavLink>
+                </li>
+              )}
+              {aiNav.ruleViews && (
                 <>
                   <li>
                     <NavLink to="/maybe" className={styles.chip}>
-                      Maybe {rulesNav.maybe > 0 && rulesNav.maybe}
+                      Maybe {aiNav.maybe > 0 && aiNav.maybe}
                     </NavLink>
                   </li>
                   <li>
                     <NavLink to="/hidden" className={styles.chip}>
-                      Hidden {rulesNav.hidden > 0 && rulesNav.hidden}
+                      Hidden {aiNav.hidden > 0 && aiNav.hidden}
                     </NavLink>
                   </li>
                 </>
               )}
-              {rulesNav.tags.map(({ tag }) => (
+              {aiNav.tags.map(({ tag }) => (
                 <li key={tag}>
                   <NavLink to={tagPath(tag)} className={styles.chip}>
                     <Icon name="tag" size={14} />
@@ -197,7 +205,7 @@ export default function AppShell() {
             savedCount={savedCount}
             onAddFeed={openAddFeed}
             onNavigate={() => setDrawerOpen(false)}
-            rules={rulesNav}
+            ai={aiNav}
           />
         </Drawer>
 
