@@ -37,7 +37,7 @@ describe('Opening a story', () => {
 
     expect(await storyShown(PANDEMIC)).toBeVisible();
     expect(window.location.pathname).toBe(PANDEMIC_PAGE);
-    expect(document.title).toBe(`${PANDEMIC} · Feedolio`);
+    await waitFor(() => expect(document.title).toBe(`${PANDEMIC} · Feedolio`));
 
     // The source line links to the feed. (The story itself also links to The Economist.)
     expect(screen.getAllByRole('link', { name: 'The Economist' })[0]).toHaveAttribute(
@@ -363,7 +363,7 @@ describe('Stories that can’t be shown', () => {
       'target',
       '_blank',
     );
-    expect(document.title).toBe('Story not available · Feedolio');
+    await waitFor(() => expect(document.title).toBe('Story not available · Feedolio'));
     await expectNoAxeViolations();
   });
 
@@ -405,7 +405,8 @@ describe('Stories that can’t be shown', () => {
   it('shows a loading state while the feed loads', async () => {
     renderApp(PANDEMIC_PAGE);
 
-    expect(await screen.findByText('Loading story…')).toBeInTheDocument();
+    // It can be brief, so only its appearance is checked.
+    await screen.findByText('Loading story…');
     await storyShown(PANDEMIC);
     await waitFor(() => expect(screen.queryByText('Loading story…')).toBeNull());
   });
