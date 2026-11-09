@@ -17,6 +17,8 @@ const PATHS = {
     </>
   ),
   saved: <path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1z" />,
+  savedFilled: <path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1z" fill="currentColor" />,
+  check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   settings: (
     <>
       <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />

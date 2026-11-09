@@ -16,7 +16,7 @@ describe('Getting around', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Today' })).toBeVisible();
     expect(window.location.pathname).toBe('/today');
 
-    await user.click(within(sidebar).getByRole('link', { name: 'Saved' }));
+    await user.click(within(sidebar).getByRole('link', { name: 'Saved, 0 saved' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Saved' })).toBeVisible();
     expect(window.location.pathname).toBe('/bookmarks');
 

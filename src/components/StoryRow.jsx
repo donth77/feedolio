@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
+import BookmarkButton from '../features/bookmarks/BookmarkButton.jsx';
 import { sizedImageUrl } from '../lib/images.js';
-import { fullTime, storyTime } from '../lib/time.js';
+import { fullTime, savedWhen, storyTime } from '../lib/time.js';
 import StoryImage from './StoryImage.jsx';
 import styles from './StoryRow.module.css';
 
@@ -22,18 +23,25 @@ function shortAuthors(author) {
 
 /**
  * One headline in a list: image or monogram tile, source, time, author,
- * headline and excerpt. The headline links to the story page, telling it
- * which list to go back to.
+ * headline, excerpt and a Save button. The headline links to the story page,
+ * telling it which list to go back to.
  *
  * @param {{
- *   item: import('../features/feeds/useFeeds.js').ListedStory,
+ *   item: { story: import('../lib/types.js').Story, feed: import('./Monogram.jsx').FeedMark & { title: string } },
  *   now: number,
  *   from?: { pathname: string, label: string },
+ *   headingLevel?: 2|3,
+ *   savedAt?: string,
+ *   action?: import('react').ReactNode,
  * }} props
+ *   headingLevel: 3 under date headers, 2 in a plain list
+ *   savedAt: shows when the story was saved instead of when it was published
+ *   action: replaces the Save button
  */
-export default function StoryRow({ item, now, from }) {
+export default function StoryRow({ item, now, from, headingLevel = 3, savedAt, action }) {
   const { story, feed } = item;
   const author = shortAuthors(story.author);
+  const Headline = headingLevel === 2 ? 'h2' : 'h3';
 
   return (
     <li className={styles.row}>
@@ -47,13 +55,22 @@ export default function StoryRow({ item, now, from }) {
       <div className={styles.text}>
         <p className={styles.meta}>
           <span className={styles.source}>{feed.title}</span>
-          {story.publishedAt && (
+          {savedAt ? (
             <>
               <span aria-hidden="true"> · </span>
-              <time dateTime={story.publishedAt} title={fullTime(story.publishedAt)}>
-                {storyTime(story.publishedAt, now)}
+              <time dateTime={savedAt} title={fullTime(savedAt)}>
+                Saved {savedWhen(savedAt, now)}
               </time>
             </>
+          ) : (
+            story.publishedAt && (
+              <>
+                <span aria-hidden="true"> · </span>
+                <time dateTime={story.publishedAt} title={fullTime(story.publishedAt)}>
+                  {storyTime(story.publishedAt, now)}
+                </time>
+              </>
+            )
           )}
           {author && (
             <span className={styles.author}>
@@ -62,7 +79,7 @@ export default function StoryRow({ item, now, from }) {
             </span>
           )}
         </p>
-        <h3 className={styles.headline}>
+        <Headline className={styles.headline}>
           <Link
             className={styles.link}
             to={`/feeds/${story.feedId}/stories/${story.id}`}
@@ -70,8 +87,11 @@ export default function StoryRow({ item, now, from }) {
           >
             {story.title}
           </Link>
-        </h3>
+        </Headline>
         {story.excerpt && <p className={styles.excerpt}>{story.excerpt}</p>}
+      </div>
+      <div className={styles.action}>
+        {action ?? <BookmarkButton story={story} feedTitle={feed.title} />}
       </div>
     </li>
   );

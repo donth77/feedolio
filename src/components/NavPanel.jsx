@@ -27,11 +27,20 @@ export function Wordmark({ onNavigate, className = '' }) {
  *   label: string,
  *   feeds: import('../features/feeds/useFeeds.js').FeedLook[],
  *   todayCount: number|null,
+ *   savedCount: number,
  *   onNavigate?: () => void,
  *   className?: string,
  * }} props
  */
-export default function NavPanel({ id, label, feeds, todayCount, onNavigate, className = '' }) {
+export default function NavPanel({
+  id,
+  label,
+  feeds,
+  todayCount,
+  savedCount,
+  onNavigate,
+  className = '',
+}) {
   return (
     <nav id={id} aria-label={label} className={`${styles.panel} ${className}`}>
       <Wordmark onNavigate={onNavigate} className={styles.panelWordmark} />
@@ -63,6 +72,10 @@ export default function NavPanel({ id, label, feeds, todayCount, onNavigate, cla
           <NavLink to="/bookmarks" className={styles.item} onClick={onNavigate}>
             <Icon name="saved" />
             <span className={styles.label}>Saved</span>
+            <span className={styles.count} aria-hidden="true">
+              {savedCount}
+            </span>
+            <span className="visually-hidden">, {savedCount} saved</span>
           </NavLink>
         </li>
       </ul>

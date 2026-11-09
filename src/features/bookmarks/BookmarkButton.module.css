@@ -1,0 +1,43 @@
+/* The Save pill from the canvas: quiet until saved, then accent. */
+.save {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: var(--tap-target);
+  height: var(--tap-target);
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-ink-muted);
+  font: 600 13px/1 var(--font-ui);
+}
+
+.save:hover {
+  background: var(--color-hover);
+  color: var(--color-ink);
+}
+
+.save[aria-pressed='true'],
+.save[data-saved] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.page {
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+@media (max-width: 639px) {
+  /* Phones show the icon alone in lists, as in the design. */
+  .row {
+    padding: 0;
+  }
+
+  .row .label {
+    display: none;
+  }
+}

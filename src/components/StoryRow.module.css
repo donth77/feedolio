@@ -1,11 +1,21 @@
-/* List rows: thumbnail on the left from 640 px, on the right on phones. */
+/*
+ * List rows: thumbnail, text, then the Save button from 640 px. On phones the
+ * thumbnail goes on the right, with the Save button under it.
+ */
 .row {
   display: grid;
-  grid-template-columns: minmax(72px, 128px) minmax(0, 1fr);
+  grid-template-columns: minmax(72px, 128px) minmax(0, 1fr) auto;
   gap: var(--space-5);
   align-items: start;
   padding: 22px 0;
   border-bottom: 1px solid var(--color-line);
+}
+
+.action {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  margin-top: -6px;
 }
 
 .thumb {
@@ -75,7 +85,7 @@
 @media (max-width: 639px) {
   .row {
     grid-template-columns: minmax(0, 1fr) 72px;
-    gap: 14px;
+    gap: 6px 14px;
     padding: 14px 0;
   }
 
@@ -90,7 +100,14 @@
 
   .text {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .action {
+    grid-column: 2;
+    grid-row: 2;
+    justify-content: center;
+    margin-top: 0;
   }
 
   .meta {

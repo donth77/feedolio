@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { persistedStateHydrated } from './actions.js';
 
 /**
  * When the reader was last here. Drives the "New since your last visit"
@@ -23,6 +24,13 @@ const visitsSlice = createSlice({
   name: 'visits',
   initialState,
   reducers: {},
+  extraReducers: (builder) => {
+    // Another tab's record replaces ours, but this session keeps its own cut-off.
+    builder.addCase(persistedStateHydrated, (state, { payload }) => ({
+      ...restoreVisits(payload.visits),
+      cutoff: state.cutoff,
+    }));
+  },
 });
 
 export default visitsSlice.reducer;

@@ -407,7 +407,7 @@ describe('Stories that can’t be shown', () => {
 
     expect(await screen.findByText('Loading story…')).toBeInTheDocument();
     await storyShown(PANDEMIC);
-    await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
+    await waitFor(() => expect(screen.queryByText('Loading story…')).toBeNull());
   });
 });
 

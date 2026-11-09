@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestone M3. Headlines from the five starter feeds show in All stories, Today and each feed's page, under date headers. Each story opens on its own page with everything its feed provides, cleaned of anything that could run code, and with reading settings that are remembered on the device. Bookmarks arrive in M4.
+> **Status:** milestone M4. Headlines from the five starter feeds show in All stories, Today and each feed's page, under date headers. Each story opens on its own page with everything its feed provides, cleaned of anything that could run code, and with reading settings that are remembered on the device. Stories can be saved from any list or story page and stay readable after they leave their feed. Adding feeds and Settings arrive in M5.
 
 ## Requirements
 
@@ -42,7 +42,11 @@ Use `pnpm run deploy`, not `pnpm deploy`: the short form is a different, built-i
 
 - **App:** React 19, React Router (data router), Redux Toolkit with RTK Query for feed data (retried twice on network or server errors, kept for ten minutes). Styles are CSS Modules plus design tokens in `src/styles/tokens.css`, with light and dark values copied from the design canvas.
 - **Worker:** `worker/index.js` routes `/api/*`; everything else is static assets in single-page-app mode, so page navigations never run the Worker. Workers Caching is on in `wrangler.jsonc`.
-- **Saved data:** the reader's own data (feeds, bookmarks, preferences, visit times) lives in `localStorage` under one versioned key, `feedolio:v1`. It's checked on load (anything malformed falls back to defaults), saved at most every 500 ms, and saved at once when the page is hidden or closed. Feed data is never stored.
+- **Saved data:** the reader's own data (feeds, bookmarks, preferences, visit times) lives in `localStorage` under one versioned key, `feedolio:v1`.
+  - It's checked on load: anything malformed falls back to defaults.
+  - It's saved at most every 500 ms, and at once when the page is hidden or closed. Feed data is never stored.
+  - Other open tabs pick up changes through the `storage` event, without a reload.
+  - If the browser's storage is full, the change stays in memory and a message asks the reader to remove some saved stories. If the browser blocks storage altogether, a message says so once.
 - **Tests:** three Vitest projects, all against saved copies of real feeds and pages (`test/fixtures`, with their sources in its README).
   - **Journeys** (the main tool) render the real app in jsdom and fake only the network (MSW) and, when needed, the clock. Calls to `/api/feed` run the real Worker code in-process. A test "reload" saves as a browser would, then starts a fresh app from storage.
   - **Unit** tests cover dense logic only: parsing, normalising, main images, feed discovery, the address guard, the story sanitiser and saved data.
@@ -63,6 +67,14 @@ Feed HTML is untrusted. It's kept raw and cleaned only when shown, by `src/featu
 Summary-only feeds (TechCrunch and BBC share a summary, not the full story) get a note and a "Continue reading on {site}" button. Full stories show a reading time at 230 words a minute. Newer and older links step through the same feed without adding to the history, so Back returns to the list.
 
 The **Aa** button sets text size (S to XL), serif or sans, and a narrow or wide column for every story. The choice is saved on the device.
+
+## Saving stories
+
+The bookmark button on every headline and story page saves the story. It's a toggle (`aria-pressed`), so the same button un-saves it, with an Undo message.
+
+A bookmark keeps a full copy of the story. Feeds keep only their latest stories, so this is what lets a saved story open after it drops out of its feed, or after its feed is removed.
+
+The Saved page lists bookmarks most recently saved first, and the sidebar shows how many there are. A long-form story copy is about 15 KB, so roughly 300 fit in the browser's usual 5 MB.
 
 ## The feed endpoint
 

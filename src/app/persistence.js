@@ -74,10 +74,19 @@ export function loadSaved() {
 }
 
 /**
- * Writes the reader's data. Returns false when storage is full or blocked; the
- * app keeps working from memory either way.
+ * How a save went. The app keeps working from memory either way.
+ * - saved
+ * - full: the browser's storage quota is used up
+ * - unavailable: storage is blocked, as in some private-browsing modes
+ *
+ * @typedef {'saved'|'full'|'unavailable'} SaveResult
+ */
+
+/**
+ * Writes the reader's data.
  *
  * @param {RootState} state
+ * @returns {SaveResult}
  */
 export function save(state) {
   const data = {
@@ -91,12 +100,25 @@ export function save(state) {
       openedIds: state.visits.openedIds,
     },
   };
+  const target = storage();
+  if (!target) return 'unavailable';
   try {
-    storage()?.setItem(STORAGE_KEY, JSON.stringify(data));
-    return true;
-  } catch {
-    return false;
+    target.setItem(STORAGE_KEY, JSON.stringify(data));
+    return 'saved';
+  } catch (error) {
+    return isQuotaError(error) ? 'full' : 'unavailable';
   }
+}
+
+/** @param {unknown} error */
+function isQuotaError(error) {
+  if (!(error instanceof DOMException)) return false;
+  return (
+    error.name === 'QuotaExceededError' ||
+    error.name === 'NS_ERROR_DOM_QUOTA_REACHED' || // Older Firefox
+    error.code === 22 ||
+    error.code === 1014
+  );
 }
 
 /** The slices that are saved; a change to any of them schedules a save. */
@@ -107,8 +129,9 @@ const SAVED_SLICES = /** @type {const} */ (['subscriptions', 'bookmarks', 'prefe
  * once on flush() (when the page is hidden or closed).
  *
  * @param {() => RootState} getState
+ * @param {(result: Exclude<SaveResult, 'saved'>) => void} [onFailure]  Told when a save fails
  */
-export function createSaver(getState) {
+export function createSaver(getState, onFailure = () => {}) {
   /** @type {ReturnType<typeof setTimeout>|null} */
   let timer = null;
   let last = pick(getState());
@@ -118,7 +141,8 @@ export function createSaver(getState) {
     timer = null;
     const state = getState();
     last = pick(state);
-    save(state);
+    const result = save(state);
+    if (result !== 'saved') onFailure(result);
   };
 
   return {
@@ -128,8 +152,18 @@ export function createSaver(getState) {
       if (SAVED_SLICES.every((slice) => next[slice] === last[slice])) return;
       timer ??= setTimeout(flush, SAVE_INTERVAL_MS);
     },
+    /** Saves a pending change now. */
     flush() {
       if (timer) flush();
+    },
+    /**
+     * The state now matches storage (it was just loaded from it), so there's
+     * nothing to save. Writing it back would only echo it to other tabs.
+     */
+    synced() {
+      if (timer) clearTimeout(timer);
+      timer = null;
+      last = pick(getState());
     },
   };
 }

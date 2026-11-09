@@ -143,6 +143,24 @@ export function storyDate(publishedAt, now) {
   return monthDayYear.format(time);
 }
 
+/**
+ * When a story was saved, after "Saved": "today", "yesterday", "3 days ago",
+ * then the date, "Oct 21".
+ *
+ * @param {string} savedAt
+ * @param {number} now
+ */
+export function savedWhen(savedAt, now) {
+  const time = Date.parse(savedAt);
+  const days = Math.round((startOfDay(now).getTime() - startOfDay(time).getTime()) / 86_400_000);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days} days ago`;
+  return new Date(time).getFullYear() === new Date(now).getFullYear()
+    ? monthDay.format(time)
+    : monthDayYear.format(time);
+}
+
 /** The exact time, for tooltips: "Friday, November 6, 2026 at 8:02 PM". @param {string} publishedAt */
 export function fullTime(publishedAt) {
   return fullDate.format(Date.parse(publishedAt));

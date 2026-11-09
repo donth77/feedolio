@@ -1,5 +1,5 @@
 import { useId, useMemo } from 'react';
-import { useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { feedErrorMessage } from '../features/feeds/feedApi.js';
 import { GROUP_LABELS, groupByDate, groupDates } from '../lib/time.js';
 import Icon from './Icon.jsx';
@@ -93,13 +93,26 @@ export function FeedErrors({ failed, onRetry }) {
 /**
  * A calm box for when a list has nothing to show.
  *
- * @param {{ title: string, children?: import('react').ReactNode }} props
+ * @param {{
+ *   title: string,
+ *   children?: import('react').ReactNode,
+ *   icon?: import('react').ComponentProps<typeof Icon>['name'],
+ *   action?: { to: string, label: string },
+ *   actionRef?: import('react').Ref<HTMLAnchorElement>,
+ * }} props
+ *   action: a link onward, such as "Browse all stories"
  */
-export function EmptyState({ title, children }) {
+export function EmptyState({ title, children, icon, action, actionRef }) {
   return (
     <div className={styles.empty}>
+      {icon && <Icon name={icon} size={32} className={styles.emptyIcon} />}
       <h2 className={styles.emptyTitle}>{title}</h2>
       {children && <div className={styles.emptyText}>{children}</div>}
+      {action && (
+        <Link ref={actionRef} to={action.to} className={styles.emptyAction}>
+          {action.label}
+        </Link>
+      )}
     </div>
   );
 }

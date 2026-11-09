@@ -110,7 +110,7 @@ describe('loadSaved', () => {
 
 describe('save', () => {
   it('writes the reader’s data under one versioned key', () => {
-    expect(save(/** @type {any} */ (appState()))).toBe(true);
+    expect(save(/** @type {any} */ (appState()))).toBe('saved');
 
     expect(JSON.parse(/** @type {string} */ (localStorage.getItem(STORAGE_KEY)))).toEqual({
       version: 1,
@@ -127,7 +127,19 @@ describe('save', () => {
 
   it('reports when storage is full', () => {
     vi.stubGlobal('localStorage', fakeStorage({ full: true }));
-    expect(save(/** @type {any} */ (appState()))).toBe(false);
+    expect(save(/** @type {any} */ (appState()))).toBe('full');
+  });
+
+  it('reports when the browser won’t store anything', () => {
+    vi.stubGlobal('localStorage', {
+      setItem() {
+        throw new DOMException('Access denied', 'SecurityError');
+      },
+    });
+    expect(save(/** @type {any} */ (appState()))).toBe('unavailable');
+
+    vi.stubGlobal('localStorage', undefined);
+    expect(save(/** @type {any} */ (appState()))).toBe('unavailable');
   });
 });
 
@@ -176,5 +188,32 @@ describe('createSaver', () => {
     expect(localStorage.setItem).toHaveBeenCalledTimes(1);
     vi.runAllTimers();
     expect(localStorage.setItem).toHaveBeenCalledTimes(1);
+  });
+
+  it('tells the app when a save fails', () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('localStorage', fakeStorage({ full: true }));
+    let state = appState();
+    const onFailure = vi.fn();
+    const saver = createSaver(() => /** @type {any} */ (state), onFailure);
+
+    state = { ...state, preferences: { theme: 'light' } };
+    saver.changed();
+    vi.runAllTimers();
+    expect(onFailure).toHaveBeenCalledWith('full');
+  });
+
+  it('doesn’t write back data that was just loaded from another tab', () => {
+    vi.useFakeTimers();
+    let state = appState();
+    const saver = createSaver(() => /** @type {any} */ (state));
+
+    state = { ...state, bookmarks: { ids: [], entities: {} } };
+    saver.changed();
+    saver.synced();
+    vi.runAllTimers();
+    saver.changed();
+    vi.runAllTimers();
+    expect(localStorage.setItem).not.toHaveBeenCalled();
   });
 });

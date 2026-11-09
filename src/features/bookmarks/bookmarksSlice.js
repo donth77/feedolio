@@ -1,4 +1,5 @@
 import { createEntityAdapter, createSlice } from '@reduxjs/toolkit';
+import { persistedStateHydrated } from '../../app/actions.js';
 
 /**
  * A saved story. It keeps a full copy of the story, so it still opens after
@@ -21,9 +22,44 @@ const bookmarksAdapter = createEntityAdapter({
 const bookmarksSlice = createSlice({
   name: 'bookmarks',
   initialState: bookmarksAdapter.getInitialState(),
-  reducers: {},
+  reducers: {
+    /** Saves the story, or un-saves it if it's already saved. */
+    bookmarkToggled: {
+      reducer(state, /** @type {{ payload: Bookmark }} */ { payload }) {
+        if (state.entities[payload.id]) bookmarksAdapter.removeOne(state, payload.id);
+        else bookmarksAdapter.addOne(state, payload);
+      },
+      /**
+       * @param {import('../../lib/types.js').Story} story
+       * @param {string} feedTitle
+       */
+      prepare: (story, feedTitle) => ({
+        payload: {
+          id: story.id,
+          feedId: story.feedId,
+          feedTitle,
+          savedAt: new Date().toISOString(),
+          story,
+        },
+      }),
+    },
+    /** @param {{ payload: string }} action  The story id */
+    bookmarkRemoved(state, { payload }) {
+      bookmarksAdapter.removeOne(state, payload);
+    },
+    /** Puts back a removed bookmark, with its original saved time (Undo). */
+    bookmarkRestored(state, /** @type {{ payload: Bookmark }} */ { payload }) {
+      bookmarksAdapter.upsertOne(state, payload);
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(persistedStateHydrated, (_state, { payload }) =>
+      restoreBookmarks(payload.bookmarks),
+    );
+  },
 });
 
+export const { bookmarkToggled, bookmarkRemoved, bookmarkRestored } = bookmarksSlice.actions;
 export default bookmarksSlice.reducer;
 
 /**
@@ -37,6 +73,14 @@ export function restoreBookmarks(saved) {
 
 /** @typedef {{ bookmarks: ReturnType<typeof bookmarksSlice.reducer> }} WithBookmarks */
 
-export const { selectById: selectBookmarkById } = bookmarksAdapter.getSelectors(
-  (/** @type {WithBookmarks} */ state) => state.bookmarks,
-);
+export const {
+  selectAll: selectAllBookmarks,
+  selectById: selectBookmarkById,
+  selectTotal: selectBookmarkCount,
+} = bookmarksAdapter.getSelectors((/** @type {WithBookmarks} */ state) => state.bookmarks);
+
+/**
+ * @param {WithBookmarks} state
+ * @param {string} storyId
+ */
+export const selectIsBookmarked = (state, storyId) => Boolean(state.bookmarks.entities[storyId]);
