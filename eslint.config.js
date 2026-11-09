@@ -6,7 +6,15 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 
 export default defineConfig([
-  globalIgnores(['dist', 'coverage', '.wrangler', 'docs', 'plans']),
+  globalIgnores([
+    'dist',
+    'coverage',
+    '.wrangler',
+    'docs',
+    'plans',
+    'test-results',
+    'playwright-report',
+  ]),
   {
     files: ['**/*.{js,jsx}'],
     extends: [js.configs.recommended],
@@ -36,6 +44,11 @@ export default defineConfig([
   {
     files: ['*.config.js', 'scripts/**/*.mjs'],
     languageOptions: { globals: globals.node },
+  },
+  {
+    // Smoke tests drive a real browser; page.evaluate callbacks run there.
+    files: ['e2e/**/*.js'],
+    languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
   // Last, so formatting is left to Prettier.
   prettier,

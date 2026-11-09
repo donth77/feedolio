@@ -4,7 +4,9 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestone M7. Readers start with five feeds and can add any website or feed by pasting its link, then hide, remove or restore feeds in Settings. Lists show date headers and, on a return visit, a "New since your last visit" divider. Each story opens on its own page, cleaned of anything that could run code, with reading settings that are remembered. Saved stories stay readable after they leave their feed. Lists come as rows or cards, comfortable or compact; the desktop sidebar collapses to an icon rail; everything works from the keyboard, with shortcuts. Stories can be shared to X, Facebook, LinkedIn or email, copied, or sent through the phone's share sheet.
+> **Status:** milestones M0 to M8 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. GitHub sign-in (M9) and the optional AI features (M10 to M13) come next.
+>
+> **Live:** set this line after the first production deploy (see [Deploying](#deploying)).
 
 ## Requirements
 
@@ -30,6 +32,7 @@ pnpm runs dependency install scripts only when they're approved. `pnpm-workspace
 | `pnpm test`          | All tests: journeys, unit tests and Worker contract tests   |
 | `pnpm test:watch`    | Tests in watch mode                                         |
 | `pnpm test:coverage` | Tests with a coverage report                                |
+| `pnpm test:smoke`    | Playwright smoke tests against `SMOKE_URL` (see Testing)    |
 | `pnpm lint`          | ESLint                                                      |
 | `pnpm format`        | Prettier, rewriting files (`pnpm format:check` only checks) |
 | `pnpm build`         | Production build of the app and the Worker into `dist/`     |
@@ -47,10 +50,6 @@ Use `pnpm run deploy`, not `pnpm deploy`: the short form is a different, built-i
   - It's saved at most every 500 ms, and at once when the page is hidden or closed. Feed data is never stored.
   - Other open tabs pick up changes through the `storage` event, without a reload.
   - If the browser's storage is full, the change stays in memory and a message asks the reader to remove some saved stories. If the browser blocks storage altogether, a message says so once.
-- **Tests:** three Vitest projects, all against saved copies of real feeds and pages (`test/fixtures`, with their sources in its README).
-  - **Journeys** (the main tool) render the real app in jsdom and fake only the network (MSW) and, when needed, the clock. Calls to `/api/feed` run the real Worker code in-process. A test "reload" saves as a browser would, then starts a fresh app from storage.
-  - **Unit** tests cover dense logic only: parsing, normalising, main images, feed discovery, the address guard, the story sanitiser and saved data.
-  - **Worker contract** tests run inside Cloudflare's runtime through `@cloudflare/vitest-plugin`.
 
 ## Reading a story
 
@@ -137,6 +136,54 @@ A bookmark keeps a full copy of the story. Feeds keep only their latest stories,
 
 The Saved page lists bookmarks most recently saved first, and the sidebar shows how many there are. A long-form story copy is about 15 KB, so roughly 300 fit in the browser's usual 5 MB.
 
+## Security
+
+- **Feed content is untrusted.** Story HTML is cleaned by DOMPurify plus Feedolio's own rules when it's shown (see [Reading a story](#reading-a-story)). Titles and excerpts are always text.
+- **The feed endpoint is not an open proxy.** It only fetches http(s) on standard ports and refuses local, private and reserved addresses on every redirect, with time and size limits.
+- **Headers:** `public/_headers` gives every page a strict Content Security Policy:
+  - Scripts come only from Feedolio's own files, plus the inline theme script by its hash. A unit test checks the hash still matches `index.html`.
+  - No inline styles, plug-ins, frames, or `<base>`; fonts are self-hosted.
+  - Trusted Types are required, so no HTML string can reach the page except through DOMPurify's policy.
+  - Pages also get `nosniff`, `X-Frame-Options: DENY`, a strict referrer policy and a locked-down permissions policy.
+- **No third-party scripts:** no analytics, no social widgets, no fonts from other sites.
+
+## Testing
+
+Journey tests are the main tool: they check what a reader sees and does, not how the code is arranged. Three Vitest projects run against saved copies of real feeds and pages (`test/fixtures`, with their sources in its README):
+
+- **Journeys** (`test/journeys`) render the real app in jsdom and fake only the network (MSW) and, when needed, the clock. Calls to `/api/feed` run the real Worker code in-process. A test "reload" saves as a browser would, then starts a fresh app from storage. Each view is also checked with axe.
+- **Unit** tests (`test/unit`) cover dense logic only: parsing, normalising, main images, feed discovery, the address guard, the story sanitiser, saved data, adding feeds, share links and the security headers.
+- **Worker contract** tests (`test/worker`) run inside Cloudflare's runtime through `@cloudflare/vitest-plugin`.
+
+Coverage targets are 90% of lines and branches for the Worker and dense logic, and 80% of lines for the app. `scripts/coverage.mjs` measures each project separately.
+
+**Smoke tests** (`e2e/`, Playwright) use real browsers and real feeds against a deployed copy, at desktop and phone sizes:
+
+```bash
+SMOKE_URL=https://<version>-feedolio.<account>.workers.dev pnpm test:smoke
+```
+
+They need a browser: run `pnpm exec playwright install chromium` once, or set `PW_CHANNEL=msedge` or `PW_CHANNEL=chrome` to use one already installed. On GitHub, run the **Smoke test** workflow from the Actions tab with the address to test. Locally, `pnpm preview` serves the production build (on port 4173) to point them at.
+
+## Decisions and trade-offs
+
+| Decision                                                 | Why                                                                                                                  | Trade-off                                                                        |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| A small Cloudflare Worker fetches feeds                  | Publishers don't allow browsers to read their feeds directly (CORS), and parsing XML on a server keeps the app light | One server-side piece to run; its URL checks keep it from becoming an open proxy |
+| Cloudflare's edge caches feed answers for 10 minutes     | Keeps the Worker within the free plan and makes repeat loads instant                                                 | A story can appear up to 10 minutes late; the list says how fresh it is          |
+| Feed HTML is cleaned in the browser, when shown          | One place to audit, and better rules protect old bookmarks too                                                       | About 17 KB more on the story page, loaded only there                            |
+| Saved data lives in `localStorage`                       | Synchronous, tiny and easy to test; nothing to sign up for                                                           | Per device and about 5 MB; a warning appears if it fills up                      |
+| Bookmarks keep a full copy of the story                  | Feeds keep only their latest items, so saved stories would otherwise disappear                                       | Uses more storage than a link would                                              |
+| Redux Toolkit with RTK Query                             | Feed data gets caching, retries and loading states without hand-written code; reader data stays in plain slices      | More moving parts than React state alone                                         |
+| JavaScript with JSDoc, CSS Modules and design tokens     | As the brief asks: no TypeScript, no CSS libraries                                                                   | Types are documented, not compiled                                               |
+| A "new since your last visit" divider, not unread counts | Shows where the reader left off without tracking every story                                                         | Doesn't remember individual stories read                                         |
+
+## What's next
+
+- **GitHub sign-in (M9):** keeps each reader's data separate on a shared browser.
+- **AI features (M10 to M13), optional:** summaries and translation, plain-English filter rules, and a "Catch me up" digest, on the reader's own keys.
+- **Later:** sync across devices, search, OPML import, offline reading, and rate limiting on the feed endpoint.
+
 ## The feed endpoint
 
 `GET /api/feed?url=<feed or website address>`
@@ -163,8 +210,10 @@ Errors look like `{ "error": { "code": "NO_FEED_FOUND", "message": "…" } }`.
 ```text
 src/
   app/          store, router, saved data (persistence.js), visits, route-level states
-  features/     feeds · story · bookmarks · subscriptions · preferences · auth
-  components/   AppShell, NavPanel, Drawer, StoryList, StoryRow, StoryImage, Monogram, Icon
+  features/     feeds · story · bookmarks · subscriptions · preferences · share ·
+                shortcuts · auth
+  components/   AppShell, NavPanel, Drawer, StoryList, StoryRow, StoryCard, StoryImage,
+                Monogram, Toast, Segmented, Icon
   lib/          dates, images, feed tiles; shared with the Worker: JSDoc types, ids,
                 URL normalising, tracking-pixel rules
   styles/       tokens.css, base.css
@@ -173,13 +222,19 @@ worker/
   lib/          handleFeedRequest, safeFetch, urlGuard, parser, normaliseFeed,
                 pickMainImage, discoverFeed, text
 test/           journeys/, unit/, worker/, fixtures/, msw/, support/, setup/
+e2e/            Playwright smoke tests against a deployed copy
+public/_headers security headers for the app's pages
 ```
 
 ## Deploying
 
 Deploys use Cloudflare Workers Builds, connected to the GitHub repository:
 
-1. `pnpm exec wrangler login` once, then `pnpm run deploy` for a first manual deploy.
-2. In the Cloudflare dashboard, connect the repository to the `feedolio` Worker (Workers Builds). Use build command `pnpm build`, deploy command `pnpm exec wrangler deploy`, and non-production branch command `pnpm exec wrangler versions upload`, which gives each branch a preview URL.
+1. `pnpm exec wrangler login` once, then `pnpm run deploy` for a first manual deploy. Wrangler prints the `workers.dev` address.
+2. In the Cloudflare dashboard, connect the repository to the `feedolio` Worker (Workers Builds):
+   - build command: `pnpm build`
+   - deploy command: `pnpm exec wrangler deploy`
+   - non-production branch command: `pnpm exec wrangler versions upload`, which gives each branch a preview URL.
+3. Run the smoke tests against the preview or live address (see [Testing](#testing)).
 
-CI (`.github/workflows/ci.yml`) runs lint, the format check, tests with coverage and the build on every push.
+No secrets are needed for M0 to M8. CI (`.github/workflows/ci.yml`) runs lint, the format check, tests with coverage and the build on every push.
