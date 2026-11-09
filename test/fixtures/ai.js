@@ -1,7 +1,10 @@
 import { http, HttpResponse } from 'msw';
 import anthropicJudgments from './ai/anthropic-judgments.json';
 import anthropicModels from './ai/anthropic-models.json';
+import anthropicExplainStocks from './ai/anthropic-explain-stocks.sse?raw';
+import anthropicSummarizePandemic from './ai/anthropic-summarize-pandemic.sse?raw';
 import anthropicSummary from './ai/anthropic-summary.sse?raw';
+import anthropicTranslateStocksEs from './ai/anthropic-translate-stocks-es.sse?raw';
 import customModels from './ai/custom-models.json';
 import jevModels from './ai/jev-models.json';
 import jevSystemOne from './ai/jev-systemone.json';
@@ -29,7 +32,10 @@ const RECORDED = {
   'openrouter-models.json': openrouterModels,
 };
 const STREAMS = {
+  'anthropic-explain-stocks.sse': anthropicExplainStocks,
+  'anthropic-summarize-pandemic.sse': anthropicSummarizePandemic,
   'anthropic-summary.sse': anthropicSummary,
+  'anthropic-translate-stocks-es.sse': anthropicTranslateStocksEs,
   'openai-summary.sse': openaiSummary,
 };
 
@@ -92,6 +98,29 @@ const unauthorizedOpenAi = () =>
     { status: 401 },
   );
 
+/**
+ * A streamed answer, as a response.
+ *
+ * @param {keyof typeof STREAMS | ReadableStream<Uint8Array>} stream  a recording, or a stream a test feeds
+ */
+export const eventStream = (stream) =>
+  new HttpResponse(typeof stream === 'string' ? STREAMS[stream] : stream, {
+    headers: { 'Content-Type': 'text/event-stream' },
+  });
+
+/**
+ * Anthropic's answer to a story-page action, picked by what the request asks
+ * for. Each was recorded with Feedolio's own prompts.
+ *
+ * @param {any} body
+ */
+function anthropicAnswer(body) {
+  const system = String(body?.system ?? '');
+  if (system.startsWith('You translate')) return eventStream('anthropic-translate-stocks-es.sse');
+  if (system.startsWith('You explain')) return eventStream('anthropic-explain-stocks.sse');
+  return eventStream('anthropic-summarize-pandemic.sse');
+}
+
 /** Answers like the real providers, as recorded or as their docs show. */
 export const aiHandlers = [
   // Anthropic (recorded 2026-11-09)
@@ -99,6 +128,18 @@ export const aiHandlers = [
   http.get('https://api.anthropic.com/v1/models', ({ request }) =>
     hasBearer(request, TEST_KEYS.anthropic) || request.headers.get('x-api-key') === TEST_KEYS.anthropic
       ? HttpResponse.json(recorded('anthropic-models.json'))
+      : HttpResponse.json(
+          {
+            type: 'error',
+            error: { type: 'authentication_error', message: 'invalid x-api-key' },
+          },
+          { status: 401 },
+        ),
+  ),
+
+  http.post('https://api.anthropic.com/v1/messages', async ({ request }) =>
+    hasBearer(request, TEST_KEYS.anthropic)
+      ? anthropicAnswer(await request.json())
       : HttpResponse.json(
           {
             type: 'error',

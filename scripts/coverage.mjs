@@ -22,6 +22,7 @@ const UNIT_FILES = [
   'src/features/ai/providers/http.js',
   'src/features/ai/providers/openaiCompatible.js',
   'src/features/ai/router.js',
+  'src/features/ai/storyText.js',
   'src/features/ai/usage.js',
   'src/features/story/cleanStoryHtml.js',
   'src/features/subscriptions/addFeed.js',

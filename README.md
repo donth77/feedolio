@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestones M0 to M10 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser, and can connect their own AI provider in Settings › AI. The AI features that use it (M11 to M13) come next.
+> **Status:** milestones M0 to M11 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser, and can connect their own AI provider to summarize, translate or explain any story. AI filter rules and a "Catch me up" digest (M12, M13) come next.
 >
 > **Live:** set this line after the first production deploy (see [Deploying](#deploying)).
 
@@ -172,7 +172,19 @@ AI is optional and stays off until a reader sets it up in **Settings › AI** (`
 - **Usage:** Settings › AI counts this session's requests and approximate tokens sent. Only stories the reader uses AI on, or that rules check, are sent.
 - **Anthropic details:** the official SDK runs in browser mode (`dangerouslyAllowBrowser`, safe because the key is the reader's own), pinned to `api.anthropic.com`. Answers stream at low effort; JSON uses structured output; a refusal is retried on Anthropic's recommended model (`fallbacks: "default"`).
 - **Code loading:** none of this is on the first page. Settings › AI is about 8 KB, and the Anthropic SDK (about 78 KB) loads only when an Anthropic model is used.
-- **Caching:** results will be kept in IndexedDB (`feedolio-ai`) for 30 days, so the same question is never paid for twice.
+- **Caching:** answers are kept in IndexedDB (`feedolio-ai`) for 30 days, per account, story, action, language and model, so the same question is never paid for twice.
+
+### On a story
+
+With AI set up, a story page shows **Summarize**, **Translate** (with a language menu; Settings › AI picks the first choice) and **Explain** under the byline (US-100 to US-103).
+
+- **Streaming:** the answer appears in a panel as it's written, labelled with the model that wrote it and whose key paid ("claude-opus-5-5 · your Anthropic key"), with the note "AI can make mistakes. Check the original." Stop ends it part-way.
+- **Copy, Regenerate, Close:** Copy takes the answer as plain text; Regenerate asks again even when an answer is kept; Close returns focus to the button.
+- **Summary-only feeds:** the actions work on the feed's summary and say so, and the prompt tells the model not to guess at the rest.
+- **Text only:** answers are drawn as paragraphs and simple lists by Feedolio's own formatter. HTML in an answer shows as characters and never runs, and answers carry no links.
+- **What's sent:** the story's title and text (or summary), fenced and labelled as untrusted, at low effort. Nothing is sent until the reader presses a button.
+- **Off switch:** Settings › AI can turn article actions off. If a key kept for one tab is gone, the buttons point back to Settings.
+- **Code loading:** the actions (about 5 KB) load only for readers who set up AI.
 
 ## Security
 
@@ -221,7 +233,7 @@ They need a browser: run `pnpm exec playwright install chromium` once, or set `P
 
 ## What's next
 
-- **AI features (M11 to M13), optional:** Summarize, Translate and Explain on stories, plain-English filter rules, and a "Catch me up" digest, on the connection set up in Settings › AI.
+- **AI features (M12, M13), optional:** plain-English filter rules with Maybe and Hidden views, and a "Catch me up" digest, on the connection set up in Settings › AI.
 - **Later:** sync across devices, search, OPML import, offline reading, and rate limiting on the feed endpoint.
 
 ## The feed endpoint

@@ -41,11 +41,14 @@ export function textBlocks(text) {
     list = null;
   };
 
+  // A blank line ends a paragraph. A list goes on across blank lines, as
+  // models often space out their bullets; any other line ends it.
+  let gap = false;
   for (const raw of text.replace(/\r\n?/g, '\n').split('\n')) {
     const line = raw.trim();
     if (!line) {
       endParagraph();
-      endList();
+      gap = true;
       continue;
     }
     const bullet = BULLET.exec(line);
@@ -69,13 +72,14 @@ export function textBlocks(text) {
       endParagraph();
       endList();
       blocks.push({ type: 'heading', text: heading[1] });
-    } else if (list && /^\s{2,}/.test(raw)) {
+    } else if (list && !gap && /^\s{2,}/.test(raw)) {
       // An indented line carries on the list item above it.
       list.items[list.items.length - 1] += ` ${line}`;
     } else {
       endList();
       lines.push(line);
     }
+    gap = false;
   }
   endParagraph();
   endList();
