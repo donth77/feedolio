@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { expectNoAxeViolations } from '../support/axe.js';
 import { renderApp } from '../support/renderApp.jsx';
@@ -8,7 +8,7 @@ describe('Getting around', () => {
     const { user } = renderApp('/');
 
     expect(await screen.findByRole('heading', { level: 1, name: 'All stories' })).toBeVisible();
-    expect(document.title).toBe('All stories · Feedolio');
+    await waitFor(() => expect(document.title).toBe('All stories · Feedolio'));
 
     const sidebar = screen.getByRole('navigation', { name: 'Sections and feeds' });
 
