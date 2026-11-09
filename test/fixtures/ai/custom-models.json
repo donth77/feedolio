@@ -1,0 +1,4 @@
+{
+  "object": "list",
+  "data": [{ "id": "mistral-small-3.2", "object": "model", "created": 1762473600, "owned_by": "vllm" }]
+}

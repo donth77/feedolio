@@ -1,0 +1,12 @@
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1762646400,"model":"gpt-5-mini","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1762646400,"model":"gpt-5-mini","choices":[{"index":0,"delta":{"content":"The council approved"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1762646400,"model":"gpt-5-mini","choices":[{"index":0,"delta":{"content":" 40 km of protected bike lanes."},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1762646400,"model":"gpt-5-mini","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1762646400,"model":"gpt-5-mini","choices":[],"usage":{"prompt_tokens":88,"completion_tokens":12,"total_tokens":100}}
+
+data: [DONE]
+

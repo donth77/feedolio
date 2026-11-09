@@ -21,6 +21,7 @@ import {
 } from '../preferences/preferencesSlice.js';
 import AddFeedForm from './AddFeedForm.jsx';
 import styles from './Settings.module.css';
+import SettingsTabs from './SettingsTabs.jsx';
 import {
   defaultsRestored,
   selectAllSubscriptions,
@@ -56,7 +57,7 @@ const FONTS = [
   { value: 'sans', label: 'Sans' },
 ];
 
-/** Feeds and appearance, at /settings. Everything saves as it changes. */
+/** Feeds, appearance and account, at /settings. Everything saves as it changes. */
 export default function Settings() {
   const dispatch = useDispatch();
   const theme = useSelector(selectTheme);
@@ -67,10 +68,11 @@ export default function Settings() {
   return (
     <>
       <PageHeader title="Settings" description="Changes save automatically on this device." />
+      <SettingsTabs />
       <div className={styles.sections}>
         <section aria-labelledby="settings-feeds" className={styles.section}>
           <div className={styles.sectionHead}>
-            <h2 id="settings-feeds" className={styles.sectionTitle}>
+            <h2 id="settings-feeds" tabIndex={-1} className={styles.sectionTitle}>
               Feeds
             </h2>
             <p className={styles.help}>
@@ -89,7 +91,7 @@ export default function Settings() {
 
         <section aria-labelledby="settings-appearance" className={styles.section}>
           <div className={styles.sectionHead}>
-            <h2 id="settings-appearance" className={styles.sectionTitle}>
+            <h2 id="settings-appearance" tabIndex={-1} className={styles.sectionTitle}>
               Appearance
             </h2>
             <p className={styles.help}>
@@ -130,7 +132,7 @@ export default function Settings() {
         </section>
 
         <section aria-labelledby="settings-account" className={styles.section}>
-          <h2 id="settings-account" className={styles.sectionTitle}>
+          <h2 id="settings-account" tabIndex={-1} className={styles.sectionTitle}>
             Account
           </h2>
           <AccountPanel variant="settings" />

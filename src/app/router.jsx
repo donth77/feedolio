@@ -48,6 +48,10 @@ export const routes = [
                 path: 'settings',
                 lazy: lazyView(() => import('../features/subscriptions/Settings.jsx')),
               },
+              {
+                path: 'settings/ai',
+                lazy: lazyView(() => import('../features/ai/AiSettings.jsx')),
+              },
               { path: '*', Component: NotFound },
             ],
           },

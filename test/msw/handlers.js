@@ -1,5 +1,6 @@
 import { http } from 'msw';
 import worker from '../../worker/index.js';
+import { aiHandlers } from '../fixtures/ai.js';
 import { savedAnswer, WEB } from '../fixtures/web.js';
 
 /**
@@ -7,10 +8,12 @@ import { savedAnswer, WEB } from '../fixtures/web.js';
  *
  * Requests to our own /api/* run the real Worker code in-process, so a journey
  * covers the UI, the data layer and the endpoint together. The Worker's own
- * requests to publishers get the saved answers in test/fixtures/web.js. Any
- * other request fails the test.
+ * requests to publishers get the saved answers in test/fixtures/web.js, and AI
+ * providers answer as recorded in test/fixtures/ai.js. Any other request fails
+ * the test.
  */
 export const handlers = [
   http.all('/api/*', ({ request }) => worker.fetch(request)),
   ...Object.keys(WEB).map((url) => http.get(url, () => savedAnswer(url))),
+  ...aiHandlers,
 ];
