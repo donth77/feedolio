@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Relative Notes</title>
+  <subtitle type="html">Notes &lt;em&gt;without&lt;/em&gt; ids</subtitle>
+  <link href="/" />
+  <link rel="self" href="/feed.atom" />
+  <author><name>Ada Lovelace</name></author>
+  <updated>2026-11-06T10:00:00Z</updated>
+  <entry>
+    <title type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">Engines <em>and</em> looms</div></title>
+    <link href="/notes/engines" />
+    <updated>2026-11-06T10:00:00Z</updated>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>Inline <strong>XHTML</strong> content &amp; an image:</p><img src="/images/loom.jpg" alt="A loom" /></div></content>
+  </entry>
+  <entry>
+    <title>Plain &amp; simple</title>
+    <link rel="alternate" type="text/html" href="notes/plain" />
+    <published>2026-11-05T08:00:00Z</published>
+    <summary>Text with &lt;angle brackets&gt; that must stay text.
+
+A second paragraph.</summary>
+  </entry>
+</feed>

@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+	>
+
+<channel>
+	<title>Startups | TechCrunch</title>
+	<atom:link href="https://techcrunch.com/category/startups/feed/" rel="self" type="application/rss+xml" />
+	<link>https://techcrunch.com/category/startups/</link>
+	<description>Startup and Technology News</description>
+	<lastBuildDate>Fri, 06 Nov 2026 18:00:00 +0000</lastBuildDate>
+	<language>en-US</language>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=6.9.11</generator>
+
+<image>
+	<url>https://techcrunch.com/wp-content/uploads/2015/02/cropped-cropped-favicon-gradient.png?w=32</url>
+	<title>Startups | TechCrunch</title>
+	<link>https://techcrunch.com/category/startups/</link>
+	<width>32</width>
+	<height>32</height>
+</image> 
+	<item>
+		<title>How a Blue Wave midterm might reshape the AI industry</title>
+		<link>https://techcrunch.com/podcast/how-a-blue-wave-midterm-might-reshape-the-ai-industry/</link>
+		
+		<dc:creator><![CDATA[Theresa Loconsolo, Anthony Ha, Sean O'Kane, Kirsten Korosec]]></dc:creator>
+		<pubDate>Fri, 06 Nov 2026 18:00:00 +0000</pubDate>
+				<category><![CDATA[Startups]]></category>
+		<category><![CDATA[AI]]></category>
+		<category><![CDATA[marvell]]></category>
+		<category><![CDATA[CrowdStrike]]></category>
+		<category><![CDATA[OpenAI]]></category>
+		<category><![CDATA[Equity podcast]]></category>
+		<category><![CDATA[midterms]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?post_type=tc_podcast&#038;p=3185898</guid>
+
+					<description><![CDATA[Democrats’ historic victories in this week’s U.S. midterm elections could also transform the tech industry. The public voted on 41 data center-related ballot measures on Tuesday — in all but one, the majority voted to impose more restrictions on data center development. And even when data centers weren’t on the ballot directly, they were a [&#8230;]]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Harbinger raises $240M after expanding into defense</title>
+		<link>https://techcrunch.com/2026/11/05/harbinger-raises-240m-after-expanding-into-defense/</link>
+		
+		<dc:creator><![CDATA[Sean O'Kane]]></dc:creator>
+		<pubDate>Thu, 05 Nov 2026 17:52:44 +0000</pubDate>
+				<category><![CDATA[Fundraising]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Transportation]]></category>
+		<category><![CDATA[autonomous vehicles]]></category>
+		<category><![CDATA[electric trucks]]></category>
+		<category><![CDATA[Harbinger]]></category>
+		<category><![CDATA[In Brief]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3185516</guid>
+
+					<description><![CDATA[The Los Angeles-based startup has now raised more than $650 million, and is working on electric trucks, emergency vehicles, and a driverless platform for the military.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Food delivery startup Wonder files for IPO as it explores its next big bite</title>
+		<link>https://techcrunch.com/2026/11/05/food-delivery-startup-wonder-files-for-ipo-as-it-explores-its-next-big-bite/</link>
+		
+		<dc:creator><![CDATA[Lauren Forristal]]></dc:creator>
+		<pubDate>Thu, 05 Nov 2026 17:11:48 +0000</pubDate>
+				<category><![CDATA[Startups]]></category>
+		<category><![CDATA[food delivery]]></category>
+		<category><![CDATA[initial public offering]]></category>
+		<category><![CDATA[IPO]]></category>
+		<category><![CDATA[Marc Lore]]></category>
+		<category><![CDATA[wonder]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3185493</guid>
+
+					<description><![CDATA[Following years of fundraising, acquisitions, and expansion, food delivery startup Wonder is moving closer to becoming a publicly traded company.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Axiom Math wants to keep AI slop out of mathematics</title>
+		<link>https://techcrunch.com/2026/11/05/axiom-math-wants-to-keep-ai-slop-out-of-mathematics/</link>
+		
+		<dc:creator><![CDATA[Aditya Mehta]]></dc:creator>
+		<pubDate>Thu, 05 Nov 2026 16:16:45 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[agents]]></category>
+		<category><![CDATA[math]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3185344</guid>
+
+					<description><![CDATA[As AI floods math with unchecked proofs, Axiom Math is betting on verification. The startup’s AI agents just formally verified the Stacks Project, one of the field’s biggest libraries.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Zipline hits $21.5B valuation as Walmart expands bet on drone delivery</title>
+		<link>https://techcrunch.com/2026/11/05/zipline-hits-21-5b-valuation-as-walmart-expands-bet-on-drone-delivery/</link>
+		
+		<dc:creator><![CDATA[Kirsten Korosec]]></dc:creator>
+		<pubDate>Thu, 05 Nov 2026 15:40:34 +0000</pubDate>
+				<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Transportation]]></category>
+		<category><![CDATA[drone]]></category>
+		<category><![CDATA[drone delivery]]></category>
+		<category><![CDATA[e-commerce]]></category>
+		<category><![CDATA[Walmart]]></category>
+		<category><![CDATA[zipline]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3185425</guid>
+
+					<description><![CDATA[Zipline raised $1.5 billion and ramped up its partnership with Walmart. ]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Aina&#8217;s smart ring has a screen, a joystick, and a mic so you can talk to AI agents</title>
+		<link>https://techcrunch.com/2026/11/05/ainas-smart-ring-has-a-screen-a-joystick-and-a-mic-so-you-can-talk-to-ai-agents/</link>
+		
+		<dc:creator><![CDATA[Ivan Mehta]]></dc:creator>
+		<pubDate>Thu, 05 Nov 2026 14:42:00 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Gadgets]]></category>
+		<category><![CDATA[Hardware]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[AI agents]]></category>
+		<category><![CDATA[smart ring]]></category>
+		<category><![CDATA[wearables]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3185356</guid>
+
+					<description><![CDATA[Aina's ring can also take calls and help you dictate notes on your Mac.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>A YC startup is putting $1M behind 5 unsolved materials science problems for AI</title>
+		<link>https://techcrunch.com/2026/11/05/a-yc-startup-is-putting-1m-behind-five-unsolved-materials-science-problems-for-ai/</link>
+		
+		<dc:creator><![CDATA[Tim Fernholz]]></dc:creator>
+		<pubDate>Thu, 05 Nov 2026 13:00:00 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Exclusive]]></category>
+		<category><![CDATA[yc]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3185211</guid>
+
+					<description><![CDATA[While frontier AI models have solved a remarkable series of outstanding mathematics problems and made progress in the life sciences, they have yet to truly plumb the complex physics in advanced materials.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Nothing CEO says company&#8217;s mysterious AI-first device is dropping next month</title>
+		<link>https://techcrunch.com/2026/11/04/nothing-ceo-says-companys-mysterious-ai-first-device-is-dropping-next-month/</link>
+		
+		<dc:creator><![CDATA[Lucas Ropek]]></dc:creator>
+		<pubDate>Wed, 04 Nov 2026 22:13:16 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[AI hardware]]></category>
+		<category><![CDATA[hardware]]></category>
+		<category><![CDATA[In Brief]]></category>
+		<category><![CDATA[nothing phone]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3185172</guid>
+
+					<description><![CDATA[While it's not yet clear what kind of product the smartphone startup is cooking up, Nothing's CEO said the product is designed to leverage AI for productivity gains.  ]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Open source AI is booming. Hugging Face explains who profits.</title>
+		<link>https://techcrunch.com/video/open-source-ai-is-booming-hugging-face-explains-who-profits/</link>
+		
+		<dc:creator><![CDATA[Theresa Loconsolo]]></dc:creator>
+		<pubDate>Wed, 04 Nov 2026 19:30:04 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Hugging Face]]></category>
+		<category><![CDATA[Irene Solaiman]]></category>
+		<category><![CDATA[nvidia]]></category>
+		<category><![CDATA[open source]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?post_type=tc_video&#038;p=3185186</guid>
+
+					<description><![CDATA[Open source models are becoming more mainstream as enterprises, governments and startups alike rely on the promise of lower costs, more control, and more flexibility. But as increasingly capable models become more freely available, how do companies capture value? And with Chinese open models gaining ground, can American players keep up?&#160; On this episode of [&#8230;]]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Building on open source AI? Hugging Face’s policy chief on the costs, risks, and trade-offs</title>
+		<link>https://techcrunch.com/podcast/building-on-open-source-ai-hugging-faces-policy-chief-on-the-costs-risks-and-trade-offs/</link>
+		
+		<dc:creator><![CDATA[Theresa Loconsolo, Rebecca Bellan]]></dc:creator>
+		<pubDate>Wed, 04 Nov 2026 18:44:57 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Security]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Equity podcast]]></category>
+		<category><![CDATA[Hugging Face]]></category>
+		<category><![CDATA[open source]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?post_type=tc_podcast&#038;p=3185167</guid>
+
+					<description><![CDATA[Open source models are becoming more mainstream as enterprises, governments and startups alike rely on the promise of lower costs, more control, and more flexibility. But as increasingly capable models become more freely available, how do companies capture value? And with Chinese open models gaining ground, can American players keep up?&#160; On this episode of [&#8230;]]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>TechCrunch Founder Summit 2026: Doors open at 9 a.m. ET in Boston</title>
+		<link>https://techcrunch.com/2026/11/04/techcrunch-founder-summit-2026-todays-the-day/</link>
+		
+		<dc:creator><![CDATA[TechCrunch Events]]></dc:creator>
+		<pubDate>Wed, 04 Nov 2026 13:00:00 +0000</pubDate>
+				<category><![CDATA[TC]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Climate]]></category>
+		<category><![CDATA[Fintech]]></category>
+		<category><![CDATA[Biotech & Health]]></category>
+		<category><![CDATA[Venture]]></category>
+		<category><![CDATA[AI]]></category>
+		<category><![CDATA[Robotics]]></category>
+		<category><![CDATA[Fundraising]]></category>
+		<category><![CDATA[TechCrunch Founder Summit 2026]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3185013</guid>
+
+					<description><![CDATA[Today is the day to join TechCrunch Founder Summit 2026 in Boston's SoWa Power Station. Register now to join this founder-focused conference today.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>AI inference startup Fal doubles its valuation to $16B as demand surges</title>
+		<link>https://techcrunch.com/2026/11/03/ai-inference-startup-fal-doubles-its-valuation-to-16b-as-demand-surges/</link>
+		
+		<dc:creator><![CDATA[Marina Temkin]]></dc:creator>
+		<pubDate>Tue, 03 Nov 2026 19:34:43 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Bessemer Venture Partners]]></category>
+		<category><![CDATA[In Brief]]></category>
+		<category><![CDATA[inference]]></category>
+		<category><![CDATA[infrastructure]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3184774</guid>
+
+					<description><![CDATA[The five-year-old startup raised a $1.3  billion round led by Bessemer.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Rivian spinout Also was working on an e-moto project in Kenya &#8212; until it walked away</title>
+		<link>https://techcrunch.com/2026/11/03/rivian-spinout-also-owns-up-to-mistakes-in-delayed-e-bike-launch/</link>
+		
+		<dc:creator><![CDATA[Sean O'Kane]]></dc:creator>
+		<pubDate>Tue, 03 Nov 2026 16:49:09 +0000</pubDate>
+				<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Transportation]]></category>
+		<category><![CDATA[also]]></category>
+		<category><![CDATA[Exclusive]]></category>
+		<category><![CDATA[micromobility]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3183082</guid>
+
+					<description><![CDATA[Also co-founder and president Chris Yu told TechCrunch that he wanted to prioritize autonomous vehicles.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>The TechCrunch Founder Summit agenda is only half the reason to be in Boston on November 4</title>
+		<link>https://techcrunch.com/2026/11/03/the-techcrunch-founder-summit-agenda-is-only-half-the-reason-to-be-in-boston-on-nov-4/</link>
+		
+		<dc:creator><![CDATA[TechCrunch Events]]></dc:creator>
+		<pubDate>Tue, 03 Nov 2026 14:30:00 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Biotech & Health]]></category>
+		<category><![CDATA[Climate]]></category>
+		<category><![CDATA[Crypto]]></category>
+		<category><![CDATA[Fintech]]></category>
+		<category><![CDATA[Fundraising]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[TC]]></category>
+		<category><![CDATA[Venture]]></category>
+		<category><![CDATA[TechCrunch Founder Summit 2026]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3184579</guid>
+
+					<description><![CDATA[On November 4, TechCrunch Founder Summit 2026 brings founders and VCs to Boston's SoWa Power Station for practical insights and connections. Register before prices increase at the door.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Tomorrow: TechCrunch Founder Summit takes over Boston and when pass rates increase</title>
+		<link>https://techcrunch.com/2026/11/03/tomorrow-techcrunch-founder-summit-takes-over-boston-and-when-pass-rates-increase/</link>
+		
+		<dc:creator><![CDATA[TechCrunch Events]]></dc:creator>
+		<pubDate>Tue, 03 Nov 2026 14:00:00 +0000</pubDate>
+				<category><![CDATA[TC]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Climate]]></category>
+		<category><![CDATA[Fintech]]></category>
+		<category><![CDATA[Biotech & Health]]></category>
+		<category><![CDATA[Venture]]></category>
+		<category><![CDATA[AI]]></category>
+		<category><![CDATA[Fundraising]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3184568</guid>
+
+					<description><![CDATA[Secure your TechCrunch Founder Summit pass savings before prices increase tomorrow at 9 a.m. ET. Save up to $100 on your pass, and get a second for free.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Ukraine’s new pocket-sized gadget turns Russian drones’ cameras against them</title>
+		<link>https://techcrunch.com/2026/11/02/ukraines-new-pocket-sized-gadget-turns-russian-drones-cameras-against-them/</link>
+		
+		<dc:creator><![CDATA[Connie Loizos]]></dc:creator>
+		<pubDate>Tue, 03 Nov 2026 01:12:55 +0000</pubDate>
+				<category><![CDATA[Hardware]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[TC]]></category>
+		<category><![CDATA[Ukraine war]]></category>
+		<category><![CDATA[In Brief]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3184542</guid>
+
+					<description><![CDATA[A Kyiv startup’s pocket-sized, 10-ounce receiver lets Ukrainian troops watch the video feeds of Russian drones, though Russian moves toward digital video and AI-guided drones that emit no signals could make the victory short-lived.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Y Combinator&#8217;s Garry Tan uses AI agents so much, he spends up to $200K a year on tokens</title>
+		<link>https://techcrunch.com/2026/11/02/y-combinators-garry-tan-uses-ai-agents-so-much-he-spends-up-to-200k-a-year-on-tokens/</link>
+		
+		<dc:creator><![CDATA[Julie Bort]]></dc:creator>
+		<pubDate>Tue, 03 Nov 2026 00:35:52 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[garry tan]]></category>
+		<category><![CDATA[Y Combinator]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3184485</guid>
+
+					<description><![CDATA[Y Combinator Garry Tan has jokingly admitted that he's suffered from "cyber psychosis” and barely sleeps sometimes because he’s so excited to be working with his AI agents. On a new episode of Walter Isaacson’s podcast, The Builders, Tan put a price tag on his passion.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Trajectory raises $45M to make AI model training accessible to nontechnical experts</title>
+		<link>https://techcrunch.com/2026/11/02/trajectory-raises-45m-to-make-ai-model-training-accessible-to-nontechnical-experts/</link>
+		
+		<dc:creator><![CDATA[Marina Temkin]]></dc:creator>
+		<pubDate>Mon, 02 Nov 2026 23:13:53 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Fundraising]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Venture]]></category>
+		<category><![CDATA[fine-tuning]]></category>
+		<category><![CDATA[Sequoia]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3184455</guid>
+
+					<description><![CDATA[The one-year-old startup is now valued at $300 million.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Readwise takes on Amazon&#8217;s Kindle and Goodreads with its new app for book lovers</title>
+		<link>https://techcrunch.com/2026/11/02/readwise-takes-on-amazons-kindle-and-goodreads-with-its-new-app-for-book-lovers/</link>
+		
+		<dc:creator><![CDATA[Sarah Perez]]></dc:creator>
+		<pubDate>Mon, 02 Nov 2026 17:49:41 +0000</pubDate>
+				<category><![CDATA[Apps]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[Amazon]]></category>
+		<category><![CDATA[e-books]]></category>
+		<category><![CDATA[goodreads]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3184167</guid>
+
+					<description><![CDATA[Readwise Books combines an e-book store, reading tracker, detailed reading stats, and AI features in a bid to challenge Amazon's ecosystem.]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>42AI comes out of stealth with $62.5M and a world model that can &#8216;predict human behavior&#8217;</title>
+		<link>https://techcrunch.com/2026/11/02/42ai-comes-out-of-stealth-with-62-5m-and-a-world-model-that-can-predict-human-behavior/</link>
+		
+		<dc:creator><![CDATA[Ram Iyer]]></dc:creator>
+		<pubDate>Mon, 02 Nov 2026 16:30:00 +0000</pubDate>
+				<category><![CDATA[AI]]></category>
+		<category><![CDATA[Startups]]></category>
+		<category><![CDATA[behavioral analysis]]></category>
+		<category><![CDATA[Exclusive]]></category>
+		<category><![CDATA[predictive analytics]]></category>
+		<category><![CDATA[world models]]></category>
+		<guid isPermaLink="false">https://techcrunch.com/?p=3184087</guid>
+
+					<description><![CDATA[Here's a question straight out of sci-fi: What if AI could predict what you were going to do before you decided to, even in a completely new situation?]]></description>
+		
+		
+		
+			</item>
+	</channel>
+</rss>

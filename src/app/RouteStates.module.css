@@ -1,0 +1,22 @@
+.loading {
+  color: var(--color-ink-muted);
+}
+
+/* Secondary button from the canvas: 44 px tall, raised, hairline border */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font: var(--type-control);
+}
+
+.button:hover {
+  border-color: var(--color-line-hover);
+}

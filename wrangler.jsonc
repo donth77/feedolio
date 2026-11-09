@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "feedolio",
+  "main": "worker/index.js",
+  // The newest date the pinned local runtime (workerd 1.20261101) supports.
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    // No "directory": the Cloudflare Vite plugin points it at the client build.
+    // Page navigations get index.html straight from static assets, without
+    // running the Worker.
+    "not_found_handling": "single-page-application",
+    // /api/* always reaches the Worker, even when opened in the address bar.
+    "run_worker_first": ["/api/*"],
+  },
+  // Workers Caching: Cloudflare checks its cache before running the Worker and
+  // collapses identical requests. The Worker sets edge freshness with
+  // Cloudflare-CDN-Cache-Control, never s-maxage.
+  "cache": { "enabled": true },
+  // Workers Logs
+  "observability": { "enabled": true },
+  // A workers.dev address, plus preview URLs for Workers Builds branches.
+  "workers_dev": true,
+  "preview_urls": true,
+}

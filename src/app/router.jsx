@@ -1,0 +1,51 @@
+import { createBrowserRouter } from 'react-router';
+import AppShell from '../components/AppShell.jsx';
+import SavedView from '../features/bookmarks/SavedView.jsx';
+import AllStories from '../features/feeds/AllStories.jsx';
+import FeedView from '../features/feeds/FeedView.jsx';
+import TodayView from '../features/feeds/TodayView.jsx';
+import NotFound from './NotFound.jsx';
+import RouteError from './RouteError.jsx';
+import ViewLoading from './ViewLoading.jsx';
+
+/**
+ * Loads a view's code only when a reader first opens it.
+ *
+ * @param {() => Promise<{ default: import('react').ComponentType }>} load
+ */
+const lazyView = (load) => async () => ({ Component: (await load()).default });
+
+/** @type {import('react-router').RouteObject[]} */
+export const routes = [
+  {
+    path: '/',
+    Component: AppShell,
+    ErrorBoundary: RouteError,
+    children: [
+      {
+        // Errors and first-load waits show inside the shell, so its links keep working.
+        ErrorBoundary: RouteError,
+        HydrateFallback: ViewLoading,
+        children: [
+          { index: true, Component: AllStories },
+          { path: 'today', Component: TodayView },
+          { path: 'feeds/:feedId', Component: FeedView },
+          {
+            path: 'feeds/:feedId/stories/:storyId',
+            lazy: lazyView(() => import('../features/story/StoryPage.jsx')),
+          },
+          { path: 'bookmarks', Component: SavedView },
+          {
+            path: 'settings',
+            lazy: lazyView(() => import('../features/subscriptions/Settings.jsx')),
+          },
+          { path: '*', Component: NotFound },
+        ],
+      },
+    ],
+  },
+];
+
+export function createAppRouter() {
+  return createBrowserRouter(routes);
+}

@@ -1,0 +1,195 @@
+/*
+ * Feedolio design tokens, copied from the design canvas boards
+ * "Foundations · Tokens and components", "Reader components and shortcuts"
+ * and "AI components".
+ *
+ * Every token is a custom property on :root. The dark theme swaps the same
+ * names, under [data-theme='dark'] (the reader's choice) and under
+ * prefers-color-scheme when the reader hasn't chosen. The two dark blocks
+ * at the bottom must stay identical.
+ *
+ * The canvas writes a few colours as color-mix(); they're precomputed here
+ * because older Safari versions (iOS 16) can't read color-mix().
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Colour · light */
+  --color-bg: #ffffff;
+  --color-surface: #f5f6f8;
+  --color-raised: #ffffff;
+  --color-ink: #16181d;
+  --color-ink-muted: #5b6170; /* 6.2:1 on bg */
+  --color-line: #e3e5ea;
+  --color-line-strong: #c9cdd5;
+  --color-accent: #2552e0; /* 6.3:1 on bg; used only for state: selection, saved, focus */
+  --color-accent-ink: #ffffff;
+  --color-accent-soft: #e7ecfc; /* accent 11% on bg */
+  --color-accent-hover: #2047c1; /* accent 86% with black: primary button hover */
+  --color-highlight: #f2f5fd; /* accent 6% on bg: selected rows, AI highlights */
+  --color-hover: rgba(22, 24, 29, 0.06); /* ink 6%: hover wash on quiet controls */
+  --color-line-hover: rgba(22, 24, 29, 0.35); /* ink 35%: secondary button hover border */
+  --color-control-off: #8a90a0; /* 3.2:1: switches in the off state */
+  --color-danger: #b42318; /* 6.6:1 */
+  --color-danger-soft: #fdecea;
+  --color-success: #1b7344;
+  --color-success-soft: #e7f4ec;
+  --color-warn: #8a4b00;
+  --color-warn-soft: #fff1d6;
+  --color-maybe-bg: #fdf1dc;
+  --color-maybe-ink: #8a4b00;
+  --color-placeholder: #eceef2;
+  --color-placeholder-ink: #5b6170;
+  --color-skeleton: #e6e8ed;
+  --color-scrim: rgba(17, 19, 23, 0.55); /* behind dialogs */
+  --hatch: rgba(22, 24, 29, 0.05); /* diagonal stripes on image placeholders */
+
+  /* Feed tints for monogram tiles and feed dots (ink on tint ≥ 6:1) */
+  --tint-bc-bg: #e6ecfb; /* Backchannel */
+  --tint-bc-ink: #23408f;
+  --tint-tc-bg: #e2f2e8; /* TechCrunch Startups */
+  --tint-tc-ink: #17603a;
+  --tint-ec-bg: #fbe7e4; /* The Economist */
+  --tint-ec-ink: #8e2a1f;
+  --tint-bbc-bg: #eee7f8; /* BBC Technology */
+  --tint-bbc-ink: #5b2e91;
+  --tint-vg-bg: #fcefd9; /* The Verge */
+  --tint-vg-ink: #7a4a06;
+
+  /* Shadows */
+  --shadow-menu: 0 10px 30px rgba(22, 24, 29, 0.14);
+  --shadow-overlay: 0 18px 48px rgba(0, 0, 0, 0.16);
+  --shadow-dialog: 0 28px 72px rgba(0, 0, 0, 0.32);
+
+  /* Type families. The self-hosted variable fonts register as "… Variable". */
+  --font-ui: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-read: 'Newsreader Variable', 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-code: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Type scale: weight size/line-height family */
+  --type-story-title: 600 46px/1.1 var(--font-read);
+  --type-page-title: 600 38px/1.1 var(--font-read);
+  --type-headline: 600 22px/1.25 var(--font-read);
+  --type-reading: 400 20px/1.65 var(--font-read); /* story body, ~68 characters a line */
+  --type-body: 400 15px/1.5 var(--font-ui);
+  --type-control: 600 14px/1 var(--font-ui);
+  --type-meta: 500 13px/1.4 var(--font-ui);
+  --type-overline: 600 11px/1 var(--font-ui); /* uppercase */
+  --tracking-title: -0.015em;
+  --tracking-overline: 0.08em;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px; /* row gaps and phone gutters on the boards */
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Radii */
+  --radius-dot: 6px; /* feed dots, small tiles */
+  --radius-control: 8px; /* buttons, inputs, thumbnails */
+  --radius-card: 12px;
+  --radius-dialog: 16px;
+  --radius-pill: 999px;
+
+  /* Sizes */
+  --tap-target: 44px; /* minimum height of anything tappable */
+  --sidebar-width: 248px;
+  --rail-width: 64px; /* collapsed sidebar */
+  --list-width: 760px;
+  --reading-width: 680px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Colour · dark */
+  --color-bg: #111317;
+  --color-surface: #171a20;
+  --color-raised: #1c1f26;
+  --color-ink: #eceef2;
+  --color-ink-muted: #a3a9b6; /* 7.9:1 on bg */
+  --color-line: #2a2e37;
+  --color-line-strong: #3a3f4a;
+  --color-accent: #7894ec; /* 6.4:1 on bg */
+  --color-accent-ink: #0b1020;
+  --color-accent-soft: #22283a; /* accent 16% on bg */
+  --color-accent-hover: #677fcb;
+  --color-highlight: #1b202c; /* accent 10% on bg */
+  --color-hover: rgba(236, 238, 242, 0.06);
+  --color-line-hover: rgba(236, 238, 242, 0.35);
+  --color-control-off: #6b7180;
+  --color-danger: #ff8a7a;
+  --color-danger-soft: #3a1d1a;
+  --color-success: #6fd39b;
+  --color-success-soft: #173225;
+  --color-warn: #f2c16b;
+  --color-warn-soft: #3a2c12;
+  --color-maybe-bg: #3a2a10;
+  --color-maybe-ink: #f2c46d;
+  --color-placeholder: #22262e;
+  --color-placeholder-ink: #a3a9b6;
+  --color-skeleton: #22262e;
+  --hatch: rgba(255, 255, 255, 0.04);
+
+  --tint-bc-bg: #1d2a4d;
+  --tint-bc-ink: #b4c6ff;
+  --tint-tc-bg: #16352a;
+  --tint-tc-ink: #8fd9b0;
+  --tint-ec-bg: #3d1f1c;
+  --tint-ec-ink: #f3a79c;
+  --tint-bbc-bg: #2e2342;
+  --tint-bbc-ink: #cdb3f2;
+  --tint-vg-bg: #3a2c14;
+  --tint-vg-ink: #f0c477;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    /* Same values as :root[data-theme='dark'] above */
+    --color-bg: #111317;
+    --color-surface: #171a20;
+    --color-raised: #1c1f26;
+    --color-ink: #eceef2;
+    --color-ink-muted: #a3a9b6;
+    --color-line: #2a2e37;
+    --color-line-strong: #3a3f4a;
+    --color-accent: #7894ec;
+    --color-accent-ink: #0b1020;
+    --color-accent-soft: #22283a;
+    --color-accent-hover: #677fcb;
+    --color-highlight: #1b202c;
+    --color-hover: rgba(236, 238, 242, 0.06);
+    --color-line-hover: rgba(236, 238, 242, 0.35);
+    --color-control-off: #6b7180;
+    --color-danger: #ff8a7a;
+    --color-danger-soft: #3a1d1a;
+    --color-success: #6fd39b;
+    --color-success-soft: #173225;
+    --color-warn: #f2c16b;
+    --color-warn-soft: #3a2c12;
+    --color-maybe-bg: #3a2a10;
+    --color-maybe-ink: #f2c46d;
+    --color-placeholder: #22262e;
+    --color-placeholder-ink: #a3a9b6;
+    --color-skeleton: #22262e;
+    --hatch: rgba(255, 255, 255, 0.04);
+
+    --tint-bc-bg: #1d2a4d;
+    --tint-bc-ink: #b4c6ff;
+    --tint-tc-bg: #16352a;
+    --tint-tc-ink: #8fd9b0;
+    --tint-ec-bg: #3d1f1c;
+    --tint-ec-ink: #f3a79c;
+    --tint-bbc-bg: #2e2342;
+    --tint-bbc-ink: #cdb3f2;
+    --tint-vg-bg: #3a2c14;
+    --tint-vg-ink: #f0c477;
+  }
+}

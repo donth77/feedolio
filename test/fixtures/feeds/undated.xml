@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Undated Feed</title>
+    <link>https://undated.test/</link>
+    <description>Stories without usable dates.</description>
+    <item>
+      <title>No date at all</title>
+      <link>https://undated.test/one</link>
+      <description>The first story has no pubDate.</description>
+    </item>
+    <item>
+      <title>A date nobody can read</title>
+      <link>https://undated.test/two</link>
+      <pubDate>sometime last week</pubDate>
+      <description>The second story's date isn't a date.</description>
+    </item>
+    <item>
+      <title>The only dated story</title>
+      <link>https://undated.test/three</link>
+      <pubDate>Thu, 05 Nov 2026 09:30:00 +0000</pubDate>
+      <description>The third story has a real date.</description>
+    </item>
+  </channel>
+</rss>

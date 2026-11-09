@@ -1,0 +1,8 @@
+dist
+coverage
+.wrangler
+docs
+plans
+pnpm-lock.yaml
+# Saved copies of real feeds and pages stay byte-for-byte as captured.
+test/fixtures
