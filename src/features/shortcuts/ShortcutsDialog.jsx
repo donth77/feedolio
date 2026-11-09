@@ -9,6 +9,7 @@ const SHORTCUTS = [
   { label: 'Open the original on the publisher’s site', keys: ['V'] },
   { label: 'Save or unsave', keys: ['S'] },
   { label: 'Refresh feeds', keys: ['R'] },
+  { label: 'Search (within the feed you’re in)', keys: ['/'] },
   { label: 'Collapse or expand the sidebar', keys: ['['] },
   { label: 'Move the focused feed up or down', keys: ['Alt', '+', '↑', 'or', '↓'] },
   { label: 'Go to Today', keys: ['G', 'then', 'T'] },

@@ -274,3 +274,42 @@
   background: var(--color-raised);
   box-shadow: var(--shadow-menu);
 }
+
+/* Search, under Add feed: looks like a field and opens the search page. */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap-target);
+  padding: 0 10px 0 12px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+  color: var(--color-ink-muted);
+  font: 500 14px/1.2 var(--font-ui);
+  text-decoration: none;
+}
+
+.search:hover {
+  border-color: var(--color-line-hover);
+  color: var(--color-ink);
+}
+
+.search[aria-current='page'] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.searchLabel {
+  flex: 1 1 auto;
+}
+
+.key {
+  padding: 1px 6px;
+  border: 1px solid var(--color-line);
+  border-radius: 5px;
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font: 600 12px/1.4 var(--font-ui);
+}

@@ -132,6 +132,9 @@ export default function AppShell() {
               <Icon name="menu" size={22} />
             </button>
             <Wordmark />
+            <Link to="/search" className={styles.searchButton} aria-label="Search">
+              <Icon name="search" size={22} />
+            </Link>
             <button
               type="button"
               className={styles.addButton}

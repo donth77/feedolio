@@ -163,6 +163,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li class="toc-l3"><a href="#what-s-new-from-reader-research">What's new (from reader research)</a></li>
 <li class="toc-l3"><a href="#read-your-way-from-reader-research">Read your way (from reader research)</a></li>
 <li class="toc-l3"><a href="#adding-feeds-and-the-first-visit-from-reader-research">Adding feeds and the first visit (from reader research)</a></li>
+<li class="toc-l3"><a href="#search-added-2026-11-09">Search (added 2026-11-09)</a></li>
 <li class="toc-l3"><a href="#ai-setup-stretch">AI setup (stretch)</a></li>
 <li class="toc-l3"><a href="#ai-article-actions-stretch">AI article actions (stretch)</a></li>
 <li class="toc-l3"><a href="#ai-filter-rules-stretch">AI filter rules (stretch)</a></li>
@@ -183,6 +184,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li class="toc-l3"><a href="#11-app-shell-and-design-system">11. App shell and design system</a></li>
 <li class="toc-l3"><a href="#12-authentication">12. Authentication</a></li>
 <li class="toc-l3"><a href="#13-ai-features-stretch">13. AI features (stretch)</a></li>
+<li class="toc-l3"><a href="#14-search">14. Search</a></li>
 <li class="toc-l3"><a href="#vocabulary">Vocabulary</a></li>
 <li class="toc-l2"><a href="#testing-decisions">Testing Decisions</a></li>
 <li class="toc-l3"><a href="#what-makes-a-good-test-here">What makes a good test here</a></li>
@@ -223,6 +225,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li class="toc-l3"><a href="#what-s-new-from-reader-research">What's new (from reader research)</a></li>
 <li class="toc-l3"><a href="#read-your-way-from-reader-research">Read your way (from reader research)</a></li>
 <li class="toc-l3"><a href="#adding-feeds-and-the-first-visit-from-reader-research">Adding feeds and the first visit (from reader research)</a></li>
+<li class="toc-l3"><a href="#search-added-2026-11-09">Search (added 2026-11-09)</a></li>
 <li class="toc-l3"><a href="#ai-setup-stretch">AI setup (stretch)</a></li>
 <li class="toc-l3"><a href="#ai-article-actions-stretch">AI article actions (stretch)</a></li>
 <li class="toc-l3"><a href="#ai-filter-rules-stretch">AI filter rules (stretch)</a></li>
@@ -243,6 +246,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li class="toc-l3"><a href="#11-app-shell-and-design-system">11. App shell and design system</a></li>
 <li class="toc-l3"><a href="#12-authentication">12. Authentication</a></li>
 <li class="toc-l3"><a href="#13-ai-features-stretch">13. AI features (stretch)</a></li>
+<li class="toc-l3"><a href="#14-search">14. Search</a></li>
 <li class="toc-l3"><a href="#vocabulary">Vocabulary</a></li>
 <li class="toc-l2"><a href="#testing-decisions">Testing Decisions</a></li>
 <li class="toc-l3"><a href="#what-makes-a-good-test-here">What makes a good test here</a></li>
@@ -264,7 +268,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <ul>
 <li><strong>What:</strong> a responsive React (JavaScript) web app for reading RSS and Atom feeds, with bookmarks that persist and optional AI help on the reader&#39;s own keys.</li>
 <li><strong>Hosting:</strong> one Cloudflare Worker. It serves the app&#39;s static files and a small feed endpoint (<code>/api/feed</code>) that the browser needs because publishers block cross-site requests. AI requests never touch it: they go straight from the browser to the reader&#39;s chosen provider.</li>
-<li><strong>Scope:</strong> the app (US-01 to US-94, and US-115), plus AI stretch features (US-95 to US-114).</li>
+<li><strong>Scope:</strong> the app (US-01 to US-94, US-115, and search: US-116 to US-119), plus AI stretch features (US-95 to US-114).</li>
 <li><strong>Status:</strong> ready for implementation. Test seams confirmed 2026-11-09. Triage label <code>ready-for-agent</code>.</li>
 </ul>
 <p>Written with Matt Pocock&#39;s <a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/to-spec/SKILL.md" target="_blank" rel="noopener noreferrer"><code>to-spec</code></a> skill, which synthesises a spec from what&#39;s already known, without an interview. Sources: the &quot;Simple RSS Reader&quot; brief (<code>docs/</code> PDF), a live inspection of the sample feeds on 2026-11-06, and research into Feedly, Inoreader, NetNewsWire, Reeder, Feedbin and Readwise Reader on 2026-11-09.</p>
@@ -334,7 +338,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 </tr>
 </tbody></table></div>
 <h2 id="user-stories">User Stories<a class="anchor" href="#user-stories" aria-label="Link to this section">#</a></h2>
-<p>Stories are numbered <strong>US-01 to US-115</strong>. US-82 to US-94 come from research into popular readers, US-95 to US-114 are the AI stretch features, and US-115 (a collapsible sidebar) was added last. Implementation, test and slice notes below refer to these IDs.</p>
+<p>Stories are numbered <strong>US-01 to US-119</strong>. US-82 to US-94 come from research into popular readers, US-95 to US-114 are the AI stretch features, US-115 (a collapsible sidebar) came next, and US-116 to US-119 (search) were added last. Implementation, test and slice notes below refer to these IDs.</p>
 <h3 id="browsing-headlines">Browsing headlines<a class="anchor" href="#browsing-headlines" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
 <thead>
@@ -1037,6 +1041,41 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td>I can bring a feed back in one tap</td>
 </tr>
 </tbody></table></div>
+<h3 id="search-added-2026-11-09">Search (added 2026-11-09)<a class="anchor" href="#search-added-2026-11-09" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>As a…</th>
+<th>I want…</th>
+<th>So that…</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>US-116</td>
+<td>reader</td>
+<td>to search my feeds and saved stories by words in the title, summary, author or feed name, newest first, with the matching words highlighted</td>
+<td>I can find a story I half remember</td>
+</tr>
+<tr>
+<td>US-117</td>
+<td>reader</td>
+<td>to narrow a search to one feed or to Saved, to titles only, or to today or this week</td>
+<td>the results stay focused</td>
+</tr>
+<tr>
+<td>US-118</td>
+<td>keyboard user</td>
+<td>to press <code>/</code> to search from anywhere, starting within the feed I&#39;m reading, and Esc to clear the field</td>
+<td>I can search without reaching for the mouse</td>
+</tr>
+<tr>
+<td>US-119</td>
+<td>reader</td>
+<td>a clear message when nothing matches, saying what search covers, with a way to widen the search</td>
+<td>I know whether the story is there at all</td>
+</tr>
+</tbody></table></div>
 <h3 id="ai-setup-stretch">AI setup (stretch)<a class="anchor" href="#ai-setup-stretch" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
 <thead>
@@ -1728,6 +1767,16 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li>The digest is capped at 60 stories.</li>
 <li>Settings shows what is sent to the provider and this session&#39;s usage.</li>
 </ul>
+<h3 id="14-search">14. Search<a class="anchor" href="#14-search" aria-label="Link to this section">#</a></h3>
+<p><strong>Purpose:</strong> find stories by words, across feeds and Saved (US-116 to US-119).</p>
+<ul>
+<li><strong>What it searches:</strong> every followed feed&#39;s current stories (already in RTK Query&#39;s cache) plus saved stories, de-duplicated by story id. There&#39;s no index on a server, so a story that has left its feed is found only if it was saved. Stories hidden by rules stay hidden.</li>
+<li><strong>Matching</strong> (a small pure function, <code>matchStories</code>): the query splits into words and &quot;quoted phrases&quot;, and every one must appear. Text is lower-cased with accents removed. Fields are the title, excerpt, author and feed title, or only the title with Titles only.</li>
+<li><strong>Filters:</strong> Search in (All feeds, Saved or one feed), Titles only, and Published (Any time, Today, This week). Results are newest first.</li>
+<li><strong>Route:</strong> <code>/search?q=…&amp;in=…&amp;match=title&amp;when=today|week</code>, loaded on demand. The URL updates as the reader types (replacing the history entry), so Back returns to the results.</li>
+<li><strong>Showing matches:</strong> in the usual story rows, with the matching words wrapped in <code>&lt;mark&gt;</code> as React text, never as HTML.</li>
+<li><strong>Entry points:</strong> a Search item at the top of the sidebar, a magnifier on the rail, a button in the top bar on smaller screens, and <code>/</code> from anywhere (scoped to the feed on a feed&#39;s page). Esc in the field clears it, then leaves it.</li>
+</ul>
 <h3 id="vocabulary">Vocabulary<a class="anchor" href="#vocabulary" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
 <thead>
@@ -1783,6 +1832,10 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <tr>
 <td><strong>Digest</strong></td>
 <td>The &quot;Catch me up&quot; summary of unread stories, grouped into a few stories</td>
+</tr>
+<tr>
+<td><strong>Search</strong></td>
+<td>Finding stories by words. It covers your feeds&#39; current stories and everything saved.</td>
 </tr>
 <tr>
 <td><strong>General model</strong></td>
@@ -1902,6 +1955,11 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td>US-115</td>
 </tr>
 <tr>
+<td>Search: words, phrases and accents; Saved, one feed, Titles only and date filters; <code>/</code> from a feed&#39;s page; highlights; the no-matches message</td>
+<td>1</td>
+<td>US-116 to US-119</td>
+</tr>
+<tr>
 <td>Add any link: paste a website, pick among several feeds, preview headlines and posts per week, re-add a suggested feed</td>
 <td>1</td>
 <td>US-90 to US-92, US-94</td>
@@ -1961,8 +2019,12 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td>Not required. Data lives in the browser; with OAuth it&#39;s per account, per device.</td>
 </tr>
 <tr>
-<td>Full read/unread tracking with counts (a divider covers what&#39;s new), search, folders, OPML import/export, notifications, offline mode / PWA</td>
+<td>Full read/unread tracking with counts (a divider covers what&#39;s new), folders, OPML import/export, notifications, offline mode / PWA</td>
 <td>Good follow-ups, not part of this spec</td>
+</tr>
+<tr>
+<td>Search operators (OR, NOT), saved searches, and searching beyond what feeds hold now</td>
+<td>Needs a search index on a server. Basic search (US-116 to US-119) covers loaded and saved stories.</td>
 </tr>
 <tr>
 <td>Fetching full articles from publisher sites (scraping, &quot;reader mode&quot;), including <code>og:image</code> look-ups for image-less feeds</td>
@@ -2147,6 +2209,11 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td><strong>AI Catch me up</strong> (stretch)</td>
 <td>US-109 to US-112</td>
 </tr>
+<tr>
+<td>17</td>
+<td><strong>Search and filter</strong></td>
+<td>US-116 to US-119</td>
+</tr>
 </tbody></table></div>
 <p>Slices 13 to 16 are stretch work and come last, starting with 13.</p>
 <h3 id="settled-decisions">Settled decisions<a class="anchor" href="#settled-decisions" aria-label="Link to this section">#</a></h3>
@@ -2160,6 +2227,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li><strong>Ideas from other readers (2026-11-09):</strong> all seven: keyboard shortcuts, add any link, date headers, Today, List or Cards, reading settings, and the welcome note.</li>
 <li><strong>AI (2026-11-09):</strong> stretch work. Article actions, filter rules and Catch me up, on the reader&#39;s own keys, with an optional decision model.</li>
 <li><strong>Sidebar (2026-11-09):</strong> collapsible on desktop, to a slim icon rail; <code>[</code> toggles it.</li>
+<li><strong>Search (2026-11-09):</strong> basic search and filter in the browser, over loaded and saved stories, after looking at how Feedly, Inoreader, Feedbin and Miniflux do it.</li>
 </ul>
 <h3 id="known-risks">Known risks<a class="anchor" href="#known-risks" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>

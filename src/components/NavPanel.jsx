@@ -76,6 +76,14 @@ function Panel({
         Add feed
       </button>
 
+      <NavLink to="/search" className={styles.search} aria-keyshortcuts="/" onClick={onNavigate}>
+        <Icon name="search" size={18} />
+        <span className={styles.searchLabel}>Search</span>
+        <kbd className={styles.key} aria-hidden="true">
+          /
+        </kbd>
+      </NavLink>
+
       <ul className={styles.items}>
         <li>
           <NavLink to="/today" className={styles.item} onClick={onNavigate}>
@@ -138,6 +146,14 @@ function Panel({
                   </NavLink>
                 </li>
               </>
+            )}
+            {ai.rules && (
+              <li>
+                <NavLink to="/settings/rules" className={styles.item} onClick={onNavigate}>
+                  <Icon name="filter" />
+                  <span className={styles.label}>Rules</span>
+                </NavLink>
+              </li>
             )}
           </ul>
         </div>
@@ -230,6 +246,16 @@ function Rail({
         <Icon name="add" />
       </button>
 
+      <NavLink
+        to="/search"
+        className={styles.railItem}
+        aria-label="Search"
+        aria-keyshortcuts="/"
+        title="Search (/)"
+      >
+        <Icon name="search" />
+      </NavLink>
+
       <ul className={styles.railItems}>
         <li>
           <NavLink
@@ -315,6 +341,18 @@ function Rail({
               </NavLink>
             </li>
           </>
+        )}
+        {ai?.rules && (
+          <li>
+            <NavLink
+              to="/settings/rules"
+              className={styles.railItem}
+              aria-label="Rules"
+              title="Rules"
+            >
+              <Icon name="filter" />
+            </NavLink>
+          </li>
         )}
       </ul>
 

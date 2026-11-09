@@ -22,6 +22,7 @@ const TEXT_INPUTS = new Set(['text', 'search', 'url', 'email', 'password', 'numb
  * | S             | Save or unsave                         |
  * | R             | Refresh feeds                          |
  * | [             | Collapse or expand the sidebar         |
+ * | /             | Search (within the feed on a feed's page) |
  * | G then T/A/S  | Go to Today, All stories or Saved      |
  * | ?             | Show the shortcuts                     |
  *
@@ -59,6 +60,12 @@ export function useShortcuts({ onShowHelp }) {
         startGo: () => {
           goPressedAt.current = performance.now();
         },
+        search: () => {
+          const field = document.getElementById('search-field');
+          if (field) return field.focus();
+          const feedId = /^\/feeds\/([^/]+)/.exec(window.location.pathname)?.[1];
+          navigate(feedId ? `/search?in=${encodeURIComponent(feedId)}` : '/search');
+        },
       });
       if (handled) event.preventDefault();
     };
@@ -69,10 +76,10 @@ export function useShortcuts({ onShowHelp }) {
 
 /**
  * @param {string} key
- * @param {{ showHelp: () => void, startGo: () => void }} actions
+ * @param {{ showHelp: () => void, startGo: () => void, search: () => void }} actions
  * @returns {boolean} Whether the key was a shortcut
  */
-function act(key, { showHelp, startGo }) {
+function act(key, { showHelp, startGo, search }) {
   const storyPage = document.querySelector('[data-story-page]');
   switch (key) {
     case 'j':
@@ -104,6 +111,9 @@ function act(key, { showHelp, startGo }) {
       return true;
     case '?':
       showHelp();
+      return true;
+    case '/':
+      search();
       return true;
     default:
       return false;

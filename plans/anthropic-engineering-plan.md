@@ -6,7 +6,7 @@
 > - [`testing-strategy`](https://github.com/anthropics/knowledge-work-plugins/blob/main/engineering/skills/testing-strategy/SKILL.md) for the test plan.
 >
 > **Sources:** the "Simple RSS Reader" brief (`docs/` PDF), a live inspection of the sample feeds on 2026-11-06, and research into Feedly, Inoreader, NetNewsWire, Reeder, Feedbin and Readwise Reader on 2026-11-09.
-> **Status:** Proposed; ADR-001, ADR-007, ADR-008 and ADR-009 accepted; test approach confirmed · **Date:** 2026-11-06, updated 2026-11-09 · **Deciders:** the developer.
+> **Status:** Proposed; ADR-001, ADR-007, ADR-008, ADR-009 and ADR-010 accepted; test approach confirmed · **Date:** 2026-11-06, updated 2026-11-09 · **Deciders:** the developer.
 
 ---
 
@@ -18,6 +18,7 @@
 - **In the app:** Redux Toolkit holds state (RTK Query for feeds; slices for subscriptions, bookmarks and preferences). User data persists to `localStorage`. Styling is CSS Modules plus design tokens, with no CSS libraries.
 - **Reader comforts** (from research into popular readers): a Today view, date headers, a "New since your last visit" divider, List or Cards layouts, keyboard shortcuts, reading settings, and adding a feed from any website link (the Worker discovers the feed).
 - **Optional AI (stretch):** article actions, plain-English filter rules and a "Catch me up" digest, on the reader's own keys, called straight from the browser. There's no AI backend and no AI cost to us.
+- **Search** (M14): in the browser, over loaded and saved stories, with filters for feed, titles only and date (ADR-010).
 
 | # | Decision | Choice | Record |
 |---|---|---|---|
@@ -30,8 +31,9 @@
 | 7 | Hosting | Cloudflare Workers with static assets | [ADR-007](#adr-007-host-on-cloudflare-workers-with-static-assets) |
 | 8 | AI (stretch) | Bring your own keys, called from the browser; optional decision model | [ADR-008](#adr-008-ai-with-bring-your-own-keys-called-from-the-browser) |
 | 9 | What's new | A since-last-visit divider, not unread tracking | [ADR-009](#adr-009-a-since-last-visit-divider-not-unread-tracking) |
+| 10 | Search | In the browser, over loaded and saved stories; no server index | [ADR-010](#adr-010-search-in-the-browser-over-loaded-and-saved-stories) |
 
-**Effort:** about 52 hours for the app (M0–M9), plus about 23 for the optional AI features (M10–M13) ([§7](#7-implementation-plan)).
+**Effort:** about 52 hours for the app (M0–M9), plus about 23 for the optional AI features (M10–M13) and about 6 for search (M14) ([§7](#7-implementation-plan)).
 
 ---
 
@@ -72,6 +74,7 @@
 | FR-29 | AI filter rules (hide, highlight, tag) with Maybe and Hidden views; nothing ever deleted | Added (AI) | Stretch |
 | FR-30 | AI "Catch me up" digest, ranked, linking to sources | Added (AI) | Stretch |
 | FR-31 | Collapsible desktop sidebar (slim icon rail, `[` to toggle) | Added (reader research) | Should |
+| FR-32 | Search and filter stories: words in the title, summary, author or feed name; by feed, Saved, titles only and date; `/` to search | Added (2026-11-09, reader research) | Should |
 
 ### 1.2 Non-functional requirements
 
@@ -1235,6 +1238,37 @@ There must be no AI backend and no AI cost to us. Readers supply a key for a gen
 
 ---
 
+### ADR-010: Search in the browser, over loaded and saved stories
+
+**Status:** Accepted (2026-11-09) · **Date:** 2026-11-09 · **Deciders:** developer
+
+**Context.** Readers asked for a basic search and filter. Feedly's Power Search sits in the left navigation and searches your feeds (or the web), with a scope menu, Title-only and date filters, and operators. Inoreader adds a search box above every feed's list, and keeps saved searches ("monitoring feeds") and public-feed search for Pro. Feedbin and Miniflux focus search with `/`. All of them search an index of every article they've fetched. Feedolio has no database: the browser holds each feed's latest items (in RTK Query's cache) and full copies of saved stories.
+
+**Decision.**
+- Search in the browser over what it holds: every followed feed's current stories plus saved stories, de-duplicated by story id. Stories hidden by rules stay hidden.
+- Every word must appear, "quoted phrases" match exactly, and matching ignores case and accents. Fields are the title, excerpt, author and feed title, or the title only.
+- Filters: Search in (All feeds, Saved or one feed), Titles only, and Published (Any time, Today, This week). Newest first.
+- A lazily loaded `/search` route, with the query in the URL; entry points in the sidebar, rail and top bar; `/` opens it.
+
+| Option | Complexity | Cost | Reader value | Verdict |
+|---|---|---|---|---|
+| **A. In the browser, over loaded and saved stories** | Low | $0, nothing new to run | Finds anything in your feeds now and everything you saved | **Chosen** |
+| B. A search index in the Worker (D1 full-text search or similar) | High | Storage and writes on every fetch | Finds older stories that have left their feeds | Rejected for now |
+| C. Filter only the current list | Lowest | $0 | Can't search across feeds and Saved at once | Rejected |
+
+**Trade-off.** B would find older stories, as Feedly and Inoreader do, but it needs per-reader storage on a server, which Feedolio deliberately avoids. A covers the common case ("where was that story I saw today?"), and Saved covers what readers chose to keep.
+
+**Consequences**
+- *Easier:* no server changes; instant results; saved stories are searchable even when their feeds fail.
+- *Harder:* a story that has left its feed and wasn't saved can't be found. The no-matches state says so.
+- *Revisit:* an index (option B) if readers need history; saved searches and operators if they ask.
+
+**Action items**
+1. [ ] Add `matchStories` (unit-tested) and the lazily loaded `SearchPage` at `/search`.
+2. [ ] Add the sidebar, rail and top-bar entry points and the `/` shortcut, within the first-page budget.
+
+---
+
 ## 6. Test Plan
 
 > [!NOTE]
@@ -1309,6 +1343,10 @@ There must be no AI backend and no AI cost to us. Readers supply a key for a gen
 | T-31 | Journey | Rule "Hide event announcements and conference promotions" on the TechCrunch fixtures | Founder Summit stories move to Hidden; Unhide restores them; nothing is deleted |
 | T-32 | Journey | A 58% judgment from the decision model | Appears in Maybe; "Yes, apply" tags the story, and the answer survives a reload |
 | T-33 | Journey | Collapse the sidebar with `[`, then reload | The rail shows, the toggle reports `aria-expanded="false"`, every rail icon has an accessible name, and it's still collapsed after the reload |
+| T-34 | Unit | `matchStories` with several words, a quoted phrase, accents and Titles only | Every word must appear; a phrase matches only as written; "cafe" finds "café"; Titles only ignores the summary |
+| T-35 | Journey | Search "AI" from the sidebar; then Search in Saved; then Today | Matching stories from every feed with the words highlighted; then only saved stories; then only today's |
+| T-36 | Journey | Press `/` on The Verge's page, type, then Esc | Search opens within The Verge; Esc clears the field; Back returns to the results |
+| T-37 | Journey | Search for a word no story has, within one feed | "No stories match", what search covers, and "Search all feeds" |
 
 ### 6.5 What we deliberately don't test
 
@@ -1346,7 +1384,8 @@ Each milestone ends with something demoable, merged and deployed.
 | **M11: AI article actions** (stretch) | Summarize, Translate (language menu), Explain; streaming panel with provenance, Copy and Regenerate; caching; summary-only notice | US-100–103 | 4 h |
 | **M12: AI filter rules, Maybe and Hidden** (stretch) | Rules editor with "Test on recent stories"; batched checks; thresholds; judgments per rule version; highlight and tag styling; Maybe with remembered answers; Hidden with Unhide; tag pages | US-104–108 | 7 h |
 | **M13: AI Catch me up** (stretch) | Opened-story record and `lastCatchUpAt`; grouping with story-id citations; ranking; one summary per group; digest page; Mark all caught up | US-109–112 | 6 h |
-| | **Total** | | **About 52 h for the app (M0–M9), plus about 23 h for AI (M10–M13)** |
+| **M14: Search and filter** | `/search` page with Search in, Titles only and Published filters, highlights and a no-matches state; matching in the browser; sidebar, rail and top-bar entry points; `/` shortcut; Rules link in the AI group | US-116–119 | 6 h |
+| | **Total** | | **About 52 h for the app (M0–M9), plus about 23 h for AI (M10–M13) and about 6 h for search (M14)** |
 
 **Definition of done for each milestone**
 
@@ -1493,6 +1532,16 @@ Each milestone ends with something demoable, merged and deployed.
 
 **Done when** the fixture stories group into ranked stories, every source link opens a real story in Feedolio, and "Mark all caught up" starts a new window.
 
+#### M14 · Search and filter
+
+- [ ] `matchStories`: words, quoted phrases, accents and Titles only, with unit tests
+- [ ] `/search` page, loaded on demand: field, filters, highlighted results, count and a no-matches state; the query in the URL
+- [ ] Entry points: sidebar item, rail icon, top-bar button and `/` (within the current feed on a feed's page); Esc clears the field
+- [ ] A Rules link in the sidebar's AI group
+- [ ] First-page budget held: everything the first page loads in one chunk (a `$initial` code-splitting group in `vite.config.js`)
+
+**Done when** T-34 to T-37 pass, and search works at 390 px and 1280 px.
+
 ---
 
 ## 8. Risks and Mitigations
@@ -1545,6 +1594,7 @@ Each milestone ends with something demoable, merged and deployed.
 | Ideas from other readers | **All seven:** shortcuts, add any link, date headers, Today, List or Cards, reading settings, welcome note (2026-11-09). |
 | Sidebar | **Collapsible on desktop** to a slim icon rail; `[` toggles it; the choice is remembered (2026-11-09). |
 | AI | **Stretch:** article actions, filter rules and Catch me up, on the reader's own keys, with an optional decision model (ADR-008, 2026-11-09). |
+| Search | **Basic search and filter in the browser**, over loaded and saved stories, with no server index (ADR-010, 2026-11-09). |
 | Submission format | **Assumed:** a repository link plus a live `workers.dev` (or custom domain) URL. |
 
 Rows without a date were settled on 2026-11-08.
@@ -1589,3 +1639,4 @@ User-story IDs (US-xx) refer to the companion spec (`to-spec-plan.md`).
 | FR-29 AI filter rules | US-104 to US-108 | `rules` slice, `runRuleChecks`, `MaybeView`, `HiddenView` | T-29, T-31, T-32 |
 | FR-30 AI Catch me up | US-109 to US-112 | `buildDigest`, `CatchUp` | T-28 |
 | FR-31 Collapsible sidebar | US-115 | `AppShell`, `SidebarToggle`, preferences | T-33 |
+| FR-32 Search and filter | US-116 to US-119 | `SearchPage`, `matchStories`, the sidebar's Search item, the `/` shortcut | T-34 to T-37 |

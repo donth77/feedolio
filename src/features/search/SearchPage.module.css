@@ -1,0 +1,226 @@
+/* The search field, its filters, and the states around the results. */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.fieldIcon {
+  position: absolute;
+  left: 14px;
+  color: var(--color-ink-muted);
+  pointer-events: none;
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 52px 0 46px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font: 400 17px/1 var(--font-ui);
+}
+
+.input::placeholder {
+  color: var(--color-ink-muted);
+}
+
+/* The field has its own Clear button. */
+.input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.clear {
+  position: absolute;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-ink-muted);
+}
+
+.clear:hover {
+  background: var(--color-hover);
+  color: var(--color-ink);
+}
+
+/* Three filters, each labelled above, like the segmented controls. */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3) var(--space-5);
+}
+
+.scope {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Matches the segmented controls' legends. */
+.scopeLabel {
+  font: 600 14px/1.2 var(--font-ui);
+  white-space: nowrap;
+}
+
+.selectWrap {
+  position: relative;
+  display: flex;
+}
+
+.select {
+  max-width: 240px;
+  min-height: var(--tap-target);
+  padding: 0 38px 0 14px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font: 500 14px/1 var(--font-ui);
+  text-overflow: ellipsis;
+  cursor: pointer;
+  appearance: none;
+}
+
+.caret {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  color: var(--color-ink-muted);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.count {
+  min-height: 1.5em;
+  margin-bottom: var(--space-2);
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.mark {
+  border-radius: 3px;
+  background: var(--color-accent-soft);
+  color: inherit;
+  box-shadow: 0 0 0 1px var(--color-accent-soft);
+}
+
+.start {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-5);
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+.startTitle {
+  font: 600 21px/1.25 var(--font-read);
+}
+
+.tips {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.tips kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--color-line);
+  border-radius: 5px;
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font: 600 12px/1.4 var(--font-ui);
+}
+
+.covers {
+  margin-top: var(--space-4);
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 56px var(--space-5);
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--color-ink-muted);
+}
+
+.emptyTitle {
+  font: 600 21px/1.25 var(--font-read);
+  overflow-wrap: anywhere;
+}
+
+.emptyText {
+  max-width: 420px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font: var(--type-control);
+}
+
+.secondary:hover {
+  border-color: var(--color-line-hover);
+}
+
+.primary {
+  composes: secondary;
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.primary:hover {
+  border-color: var(--color-accent-hover);
+  background: var(--color-accent-hover);
+}

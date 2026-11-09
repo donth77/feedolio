@@ -38,6 +38,7 @@ function shortAuthors(author) {
  *   effects?: import('../features/ai/rules/ruleEffects.js').StoryEffects,
  *   note?: import('react').ReactNode,
  *   extra?: import('react').ReactNode,
+ *   mark?: (text: string, part: 'title'|'excerpt') => import('react').ReactNode,
  * }} props
  *   headingLevel: 3 under date headers, 2 in a plain list
  *   savedAt: shows when the story was saved instead of when it was published
@@ -45,6 +46,7 @@ function shortAuthors(author) {
  *   effects: what the reader's rules say about it
  *   note: a line under the excerpt, e.g. why a rule hid it
  *   extra: controls under the text, e.g. answers in Maybe
+ *   mark: draws the headline and excerpt, e.g. with search matches marked
  */
 export default function StoryRow({
   item,
@@ -56,6 +58,7 @@ export default function StoryRow({
   effects,
   note,
   extra,
+  mark,
 }) {
   const { story, feed } = item;
   const author = shortAuthors(story.author);
@@ -111,10 +114,12 @@ export default function StoryRow({
             data-story-link=""
             onClick={() => rememberOpenedStory(story.id)}
           >
-            {story.title}
+            {mark ? mark(story.title, 'title') : story.title}
           </Link>
         </Headline>
-        {story.excerpt && <p className={styles.excerpt}>{story.excerpt}</p>}
+        {story.excerpt && (
+          <p className={styles.excerpt}>{mark ? mark(story.excerpt, 'excerpt') : story.excerpt}</p>
+        )}
         <RuleBadges effects={effects} />
         {note && <p className={styles.note}>{note}</p>}
         {extra && <div className={styles.extra}>{extra}</div>}

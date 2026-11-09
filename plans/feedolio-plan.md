@@ -2,9 +2,9 @@
 
 > **Feedolio** is a fast, responsive web app for reading RSS and Atom feeds, with bookmarks that persist and optional AI help that runs on the reader's own keys.
 >
-> - **Status:** ready to build, with every decision settled · updated 2026-11-09
-> - **Effort:** about 52 hours for the app, plus about 23 for the optional AI features
-> - **Combines:** the [detailed spec](to-spec-plan.md) (115 user stories), the [engineering design](anthropic-engineering-plan.md) (architecture decisions, test plan), and research into Feedly, Inoreader, NetNewsWire, Reeder, Feedbin and Readwise Reader
+> - **Status:** ready to build, with every decision settled · updated 2026-11-09, adding search (M14)
+> - **Effort:** about 52 hours for the app, about 23 for the optional AI features, and about 6 for search
+> - **Combines:** the [detailed spec](to-spec-plan.md) (119 user stories), the [engineering design](anthropic-engineering-plan.md) (architecture decisions, test plan), and research into Feedly, Inoreader, NetNewsWire, Reeder, Feedbin and Readwise Reader
 > - **UI draft:** [Feedolio design canvas](https://claude.ai/artifact/FKB1FX259EvfETNCAx4Bgz)
 
 ## Summary
@@ -14,8 +14,9 @@
 - **Where data lives:** feeds come fresh from the Worker. Bookmarks, feed lists and settings live in the browser, and each bookmark keeps a full copy of its story so it never disappears.
 - **Comforts from popular readers:** a Today view, date headers, a "New since your last visit" divider, List or Cards layouts, keyboard shortcuts, reading settings and a collapsible sidebar.
 - **Optional AI (stretch):** summarize, translate and explain; plain-English filter rules; and a "Catch me up" digest. Readers bring their own keys, and requests go straight from the browser to the provider they chose. There's no AI backend and no AI cost to us.
+- **Search (M14):** one search for the stories in your feeds and everything you've saved, with filters for feed, titles only and date. `/` opens it from anywhere.
 - **How we test it:** we drive the real app the way a reader would, against saved copies of real feeds and recorded AI responses. Only the network and the clock are faked.
-- **Order of work:** ten milestones for the app (M0–M9), then four for AI (M10–M13). Everything the brief requires is done by M5 plus M8.
+- **Order of work:** ten milestones for the app (M0–M9), then four for AI (M10–M13), then search (M14). Everything the brief requires is done by M5 plus M8.
 
 > [!NOTE]
 > **Ready to build.** Every open question is settled. See [Settled decisions](#11-settled-decisions).
@@ -43,6 +44,7 @@
 | List or Cards layout, with density | Should | Remembered on the device |
 | Keyboard shortcuts | Should | J/K, Enter, V, S, R, and `?` for the full list |
 | Collapsible sidebar on desktop | Should | Shrinks to a slim icon rail; `[` toggles it; remembered |
+| Search and filter stories | Should | Your feeds' stories now and everything saved; filter by feed, titles only and date; `/` opens it |
 | Reading settings on the story page | Should | Text size, serif or sans, line width |
 | First-visit welcome note | Should | Explains the starter feeds; one tap to add your own |
 | Share to X, Facebook, LinkedIn or email | Should | Share links only, no tracking scripts |
@@ -53,7 +55,7 @@
 | AI filter rules: hide, highlight or tag new stories | Stretch | Uncertain matches go to "Maybe"; nothing is ever deleted |
 | AI "Catch me up" digest | Stretch | Groups unread stories and links to the sources |
 
-Every feature traces to user stories **US-01 to US-115** in the [detailed spec](to-spec-plan.md).
+Every feature traces to user stories **US-01 to US-119** in the [detailed spec](to-spec-plan.md).
 
 ## 2. How it works
 
@@ -98,6 +100,8 @@ flowchart LR
 
 **AI requests** (optional) go straight from the browser to the providers the reader chose, using their keys. They never pass through the Worker (§7).
 
+**Search** runs in the browser, over the stories already loaded for the reader's feeds and the copies kept with saved stories. There's no index on a server (M14).
+
 ## 3. Key decisions
 
 | Topic | Decision | Why |
@@ -115,6 +119,7 @@ flowchart LR
 | Sign-in | **Auth0 with GitHub** | No backend needed. Signing in only separates data per user on the device. |
 | AI (stretch) | **Bring your own key, straight from the browser** | No AI backend and no AI cost to us. The reader chooses the provider. |
 | AI providers | **Anthropic SDK** or any **OpenAI-compatible** endpoint, plus an optional **decision model** | Covers Claude, OpenAI, OpenRouter and local Ollama. Yes/no and scoring go to the decision model when there is one. |
+| Search | **In the browser, over loaded and saved stories** | Nothing to run or index on a server. It finds what the feeds hold now and everything saved, not years of history. |
 
 > [!WARNING]
 > **Cloudflare caching gotcha:** on Cloudflare, `s-maxage` quietly turns off `stale-while-revalidate` and `stale-if-error`. The Worker sets the edge cache with `Cloudflare-CDN-Cache-Control` instead (§6).
@@ -132,6 +137,7 @@ The [design canvas](https://claude.ai/artifact/FKB1FX259EvfETNCAx4Bgz) has every
 | One feed | `/feeds/:feedId` | That feed's stories |
 | Story | `/feeds/:feedId/stories/:storyId` | Title, byline, image, full body or summary with a "Continue reading" link, Save, Share, previous/next, reading settings (Aa) |
 | Saved | `/bookmarks` | Bookmarks, most recently saved first; Undo after removing one |
+| Search | `/search?q=` | A search field; Search in (All feeds, Saved or one feed), Titles only, and Any time, Today or This week; results newest first with matches highlighted; a no-matches state that says what search covers |
 | Add a feed | Dialog, from "+ Add feed" | Paste any link; preview with the latest headlines and posts a week; a choice when a page has several feeds |
 | Settings | `/settings` | Feeds (hide, remove, suggested feeds), Appearance (theme, layout, density, reading defaults), Account |
 | Keyboard shortcuts | Overlay, press `?` | Every shortcut |
@@ -145,6 +151,8 @@ The [design canvas](https://claude.ai/artifact/FKB1FX259EvfETNCAx4Bgz) has every
 | Under 640 px | Top bar, scrolling feed chips (Today first), bottom tabs (Stories · Saved · Settings) |
 | 640–1023 px | Feed list in a slide-out drawer |
 | 1024 px and up | Sidebar with feeds that collapses to a 64 px icon rail (button or `[`), expanded by default from 1280 px and collapsed at 1024–1279 px; reading column 680 px wide |
+
+Search sits at the top of the sidebar, as a magnifier on the rail, and as a button in the top bar on smaller screens.
 
 ## 5. Data
 
@@ -322,6 +330,7 @@ Readers add their keys in Settings › AI. Feedolio never sees them: every AI re
 | M11 | AI article actions | US-100–103 | 4 h |
 | M12 | AI filter rules, Maybe and Hidden | US-104–108 | 7 h |
 | M13 | AI Catch me up | US-109–112 | 6 h |
+| M14 | Search and filter | US-116–119 | 6 h |
 
 > [!TIP]
 > **Short on time?** M0–M5 plus M8 (about 38 hours) deliver everything the brief requires. Then add M6, M7 and M9. The AI milestones come last, starting with M10.
@@ -465,6 +474,20 @@ Readers add their keys in Settings › AI. Feedolio never sees them: every AI re
 
 **Done when** the fixture stories group into ranked stories, every source link opens a real story in Feedolio, and "Mark all caught up" starts a new window.
 
+### M14 · Search and filter
+
+How others do it (checked 2026-11-09): Feedly's Power Search sits in the left navigation, with a scope menu (all feeds, chosen feeds, Boards, the web), Title-only and date filters, and operators. Inoreader adds a search box above every feed's list, and keeps saved searches ("monitoring feeds") and public-feed search for Pro. Feedbin and Miniflux focus search with `/`. This milestone builds the basics they share. Operators, saved searches and searching beyond your feeds stay out (§12).
+
+- [ ] Search page (`/search?q=…`), loaded on demand: a search field, results newest first in the usual story rows, matching words highlighted, and a count. The query lives in the URL, so Back returns to the results.
+- [ ] Filters: Search in (All feeds, Saved or one feed), Titles only, and Published (Any time, Today, This week)
+- [ ] Matching: every word must appear, "quoted phrases" match exactly, and case and accents are ignored. Fields are the title, summary, author and feed name. Stories hidden by rules stay hidden.
+- [ ] Entry points: Search at the top of the sidebar, a magnifier on the rail, and a search button in the top bar on phones and tablets. `/` opens search from anywhere, within the current feed on a feed's page. Esc clears the field.
+- [ ] No matches: say what search covers (the stories in your feeds now, and everything saved), and offer to search all feeds or clear the filters
+- [ ] A Rules link in the sidebar's AI group, so filter rules are easy to find
+- [ ] First-page budget: the page loads on demand and the entry points cost a few hundred bytes. Everything the first page loads stays in one chunk (a `$initial` code-splitting group), because the bundler otherwise splits shared code into many small chunks once a lazy page shares it, which costs about 2 KB.
+
+**Done when** searching "AI" finds matching stories across feeds and Saved with the words highlighted, Titles only and the date filters narrow the results, `/` on a feed's page searches within that feed, and a search with no matches explains what search covers.
+
 ## 9. Testing
 
 **Approach (settled):** journey tests are the main tool. Unit tests cover only dense logic, and contract tests cover the Worker.
@@ -499,6 +522,8 @@ Readers add their keys in Settings › AI. Feedolio never sees them: every AI re
 | Digest cites an unknown story ID | Dropped; no model-made links appear |
 | Decision model set, then removed | Judging goes to the decision model, then to the general model with the wider Maybe band |
 | Any request to `/api/feed` | Never carries an AI key |
+| Search "AI chips", then Titles only, then a quoted phrase | Only stories with every word; then only those with them in the title; then the exact phrase. Matches are highlighted. |
+| Press `/` on The Verge's page, then Esc | Search opens within The Verge; Esc clears the field |
 
 ## 10. Risks
 
@@ -528,6 +553,7 @@ Readers add their keys in Settings › AI. Feedolio never sees them: every AI re
 | Ideas from other readers | **All seven:** shortcuts, add any link, date headers, Today, List or Cards, reading settings, welcome note. |
 | Sidebar | **Collapsible on desktop** to a slim icon rail; `[` toggles it; the choice is remembered. |
 | AI | **Stretch:** article actions, filter rules and Catch me up, on the reader's own keys, with an optional decision model. |
+| Search | **Basic search and filter (M14)** in the browser, over your feeds' stories and everything saved, after looking at Feedly, Inoreader, Feedbin and Miniflux. No operators, saved searches or server index. |
 
 Settled 2026-11-08 and 2026-11-09.
 
@@ -541,7 +567,8 @@ The feed itself is alive at `techcrunch.com/category/startups/feed/`. Source: li
 ## 12. Not in this version
 
 - Syncing across devices (not required), or any database of our own
-- Full read/unread tracking with counts (the divider covers "what's new"), search, folders, OPML import, notifications, offline mode
+- Full read/unread tracking with counts (the divider covers "what's new"), folders, OPML import, notifications, offline mode
+- Search operators (OR, NOT), saved searches, and searching beyond your feeds or further back than they go, which would need an index on a server
 - Pulling full articles from publisher sites, or finding images for feeds that have none
 - Facebook "Like" button or any social SDK
 - Embedded videos and iframes; these link to the original instead

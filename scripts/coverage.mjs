@@ -26,6 +26,7 @@ const UNIT_FILES = [
   'src/features/ai/rules/verdicts.js',
   'src/features/ai/storyText.js',
   'src/features/ai/usage.js',
+  'src/features/search/matchStories.js',
   'src/features/story/cleanStoryHtml.js',
   'src/features/subscriptions/addFeed.js',
   'src/lib/beacons.js',

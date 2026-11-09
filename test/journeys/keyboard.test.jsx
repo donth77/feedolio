@@ -122,7 +122,8 @@ describe('Keyboard shortcuts', () => {
     expect(within(dialog).getByText('Next or previous story')).toBeVisible();
     expect(within(dialog).getByText('Collapse or expand the sidebar')).toBeVisible();
     expect(within(dialog).getByText('Move the focused feed up or down')).toBeVisible();
-    expect(within(dialog).getAllByRole('term')).toHaveLength(12);
+    expect(within(dialog).getByText('Search (within the feed you’re in)')).toBeVisible();
+    expect(within(dialog).getAllByRole('term')).toHaveLength(13);
     await expectNoAxeViolations(dialog);
 
     // Keys don't act on the page behind it.

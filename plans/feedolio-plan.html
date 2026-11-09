@@ -176,6 +176,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li class="toc-l3"><a href="#m11-ai-article-actions">M11 · AI article actions</a></li>
 <li class="toc-l3"><a href="#m12-ai-filter-rules-maybe-and-hidden">M12 · AI filter rules, Maybe and Hidden</a></li>
 <li class="toc-l3"><a href="#m13-ai-catch-me-up">M13 · AI Catch me up</a></li>
+<li class="toc-l3"><a href="#m14-search-and-filter">M14 · Search and filter</a></li>
 <li class="toc-l2"><a href="#9-testing">9. Testing</a></li>
 <li class="toc-l2"><a href="#10-risks">10. Risks</a></li>
 <li class="toc-l2"><a href="#11-settled-decisions">11. Settled decisions</a></li>
@@ -221,6 +222,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li class="toc-l3"><a href="#m11-ai-article-actions">M11 · AI article actions</a></li>
 <li class="toc-l3"><a href="#m12-ai-filter-rules-maybe-and-hidden">M12 · AI filter rules, Maybe and Hidden</a></li>
 <li class="toc-l3"><a href="#m13-ai-catch-me-up">M13 · AI Catch me up</a></li>
+<li class="toc-l3"><a href="#m14-search-and-filter">M14 · Search and filter</a></li>
 <li class="toc-l2"><a href="#9-testing">9. Testing</a></li>
 <li class="toc-l2"><a href="#10-risks">10. Risks</a></li>
 <li class="toc-l2"><a href="#11-settled-decisions">11. Settled decisions</a></li>
@@ -232,9 +234,9 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <h1 id="feedolio-build-plan-for-a-simple-rss-reader">Feedolio: build plan for a simple RSS reader</h1>
 <blockquote class="meta"><p><strong>Feedolio</strong> is a fast, responsive web app for reading RSS and Atom feeds, with bookmarks that persist and optional AI help that runs on the reader&#39;s own keys.</p>
 <ul>
-<li><strong>Status:</strong> ready to build, with every decision settled · updated 2026-11-09</li>
-<li><strong>Effort:</strong> about 52 hours for the app, plus about 23 for the optional AI features</li>
-<li><strong>Combines:</strong> the <a href="to-spec-plan.html">detailed spec</a> (115 user stories), the <a href="anthropic-engineering-plan.html">engineering design</a> (architecture decisions, test plan), and research into Feedly, Inoreader, NetNewsWire, Reeder, Feedbin and Readwise Reader</li>
+<li><strong>Status:</strong> ready to build, with every decision settled · updated 2026-11-09, adding search (M14)</li>
+<li><strong>Effort:</strong> about 52 hours for the app, about 23 for the optional AI features, and about 6 for search</li>
+<li><strong>Combines:</strong> the <a href="to-spec-plan.html">detailed spec</a> (119 user stories), the <a href="anthropic-engineering-plan.html">engineering design</a> (architecture decisions, test plan), and research into Feedly, Inoreader, NetNewsWire, Reeder, Feedbin and Readwise Reader</li>
 <li><strong>UI draft:</strong> <a href="https://claude.ai/artifact/FKB1FX259EvfETNCAx4Bgz" target="_blank" rel="noopener noreferrer">Feedolio design canvas</a></li>
 </ul>
 </blockquote>
@@ -245,8 +247,9 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li><strong>Where data lives:</strong> feeds come fresh from the Worker. Bookmarks, feed lists and settings live in the browser, and each bookmark keeps a full copy of its story so it never disappears.</li>
 <li><strong>Comforts from popular readers:</strong> a Today view, date headers, a &quot;New since your last visit&quot; divider, List or Cards layouts, keyboard shortcuts, reading settings and a collapsible sidebar.</li>
 <li><strong>Optional AI (stretch):</strong> summarize, translate and explain; plain-English filter rules; and a &quot;Catch me up&quot; digest. Readers bring their own keys, and requests go straight from the browser to the provider they chose. There&#39;s no AI backend and no AI cost to us.</li>
+<li><strong>Search (M14):</strong> one search for the stories in your feeds and everything you&#39;ve saved, with filters for feed, titles only and date. <code>/</code> opens it from anywhere.</li>
 <li><strong>How we test it:</strong> we drive the real app the way a reader would, against saved copies of real feeds and recorded AI responses. Only the network and the clock are faked.</li>
-<li><strong>Order of work:</strong> ten milestones for the app (M0–M9), then four for AI (M10–M13). Everything the brief requires is done by M5 plus M8.</li>
+<li><strong>Order of work:</strong> ten milestones for the app (M0–M9), then four for AI (M10–M13), then search (M14). Everything the brief requires is done by M5 plus M8.</li>
 </ul>
 <aside class="callout callout-note"><p class="callout-title">Note</p><p><strong>Ready to build.</strong> Every open question is settled. See <a href="#11-settled-decisions">Settled decisions</a>.</p>
 </aside>
@@ -337,6 +340,11 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td>Shrinks to a slim icon rail; <code>[</code> toggles it; remembered</td>
 </tr>
 <tr>
+<td>Search and filter stories</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>Your feeds&#39; stories now and everything saved; filter by feed, titles only and date; <code>/</code> opens it</td>
+</tr>
+<tr>
 <td>Reading settings on the story page</td>
 <td><span class="pill pill-should">Should</span></td>
 <td>Text size, serif or sans, line width</td>
@@ -382,7 +390,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td>Groups unread stories and links to the sources</td>
 </tr>
 </tbody></table></div>
-<p>Every feature traces to user stories <strong>US-01 to US-115</strong> in the <a href="to-spec-plan.html">detailed spec</a>.</p>
+<p>Every feature traces to user stories <strong>US-01 to US-119</strong> in the <a href="to-spec-plan.html">detailed spec</a>.</p>
 <h2 id="2-how-it-works">2. How it works<a class="anchor" href="#2-how-it-works" aria-label="Link to this section">#</a></h2>
 <figure class="diagram" aria-label="Diagram 1"><pre class="mermaid">flowchart LR
   subgraph browser[&quot;Reader's browser&quot;]
@@ -421,6 +429,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li>Otherwise a friendly &quot;no longer available&quot; page with a link to the original.</li>
 </ol>
 <p><strong>AI requests</strong> (optional) go straight from the browser to the providers the reader chose, using their keys. They never pass through the Worker (§7).</p>
+<p><strong>Search</strong> runs in the browser, over the stories already loaded for the reader&#39;s feeds and the copies kept with saved stories. There&#39;s no index on a server (M14).</p>
 <h2 id="3-key-decisions">3. Key decisions<a class="anchor" href="#3-key-decisions" aria-label="Link to this section">#</a></h2>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
 <thead>
@@ -495,6 +504,11 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td><strong>Anthropic SDK</strong> or any <strong>OpenAI-compatible</strong> endpoint, plus an optional <strong>decision model</strong></td>
 <td>Covers Claude, OpenAI, OpenRouter and local Ollama. Yes/no and scoring go to the decision model when there is one.</td>
 </tr>
+<tr>
+<td>Search</td>
+<td><strong>In the browser, over loaded and saved stories</strong></td>
+<td>Nothing to run or index on a server. It finds what the feeds hold now and everything saved, not years of history.</td>
+</tr>
 </tbody></table></div>
 <aside class="callout callout-warning"><p class="callout-title">Warning</p><p><strong>Cloudflare caching gotcha:</strong> on Cloudflare, <code>s-maxage</code> quietly turns off <code>stale-while-revalidate</code> and <code>stale-if-error</code>. The Worker sets the edge cache with <code>Cloudflare-CDN-Cache-Control</code> instead (§6).</p>
 </aside>
@@ -533,6 +547,11 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td>Saved</td>
 <td><code>/bookmarks</code></td>
 <td>Bookmarks, most recently saved first; Undo after removing one</td>
+</tr>
+<tr>
+<td>Search</td>
+<td><code>/search?q=</code></td>
+<td>A search field; Search in (All feeds, Saved or one feed), Titles only, and Any time, Today or This week; results newest first with matches highlighted; a no-matches state that says what search covers</td>
 </tr>
 <tr>
 <td>Add a feed</td>
@@ -590,6 +609,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td>Sidebar with feeds that collapses to a 64 px icon rail (button or <code>[</code>), expanded by default from 1280 px and collapsed at 1024–1279 px; reading column 680 px wide</td>
 </tr>
 </tbody></table></div>
+<p>Search sits at the top of the sidebar, as a magnifier on the rail, and as a button in the top bar on smaller screens.</p>
 <h2 id="5-data">5. Data<a class="anchor" href="#5-data" aria-label="Link to this section">#</a></h2>
 <pre><code class="language-js">/** One story, the same shape for every feed format. */
 Story = {
@@ -950,6 +970,12 @@ Cache-Control: no-cache
 <td>US-109–112</td>
 <td>6 h</td>
 </tr>
+<tr>
+<td>M14</td>
+<td>Search and filter</td>
+<td>US-116–119</td>
+<td>6 h</td>
+</tr>
 </tbody></table></div>
 <aside class="callout callout-tip"><p class="callout-title">Tip</p><p><strong>Short on time?</strong> M0–M5 plus M8 (about 38 hours) deliver everything the brief requires. Then add M6, M7 and M9. The AI milestones come last, starting with M10.</p>
 </aside>
@@ -1079,6 +1105,18 @@ Cache-Control: no-cache
 <li><input disabled="" type="checkbox"> Digest page with importance, summaries and source links; &quot;Mark all caught up&quot;</li>
 </ul>
 <p><strong>Done when</strong> the fixture stories group into ranked stories, every source link opens a real story in Feedolio, and &quot;Mark all caught up&quot; starts a new window.</p>
+<h3 id="m14-search-and-filter">M14 · Search and filter<a class="anchor" href="#m14-search-and-filter" aria-label="Link to this section">#</a></h3>
+<p>How others do it (checked 2026-11-09): Feedly&#39;s Power Search sits in the left navigation, with a scope menu (all feeds, chosen feeds, Boards, the web), Title-only and date filters, and operators. Inoreader adds a search box above every feed&#39;s list, and keeps saved searches (&quot;monitoring feeds&quot;) and public-feed search for Pro. Feedbin and Miniflux focus search with <code>/</code>. This milestone builds the basics they share. Operators, saved searches and searching beyond your feeds stay out (§12).</p>
+<ul>
+<li><input disabled="" type="checkbox"> Search page (<code>/search?q=…</code>), loaded on demand: a search field, results newest first in the usual story rows, matching words highlighted, and a count. The query lives in the URL, so Back returns to the results.</li>
+<li><input disabled="" type="checkbox"> Filters: Search in (All feeds, Saved or one feed), Titles only, and Published (Any time, Today, This week)</li>
+<li><input disabled="" type="checkbox"> Matching: every word must appear, &quot;quoted phrases&quot; match exactly, and case and accents are ignored. Fields are the title, summary, author and feed name. Stories hidden by rules stay hidden.</li>
+<li><input disabled="" type="checkbox"> Entry points: Search at the top of the sidebar, a magnifier on the rail, and a search button in the top bar on phones and tablets. <code>/</code> opens search from anywhere, within the current feed on a feed&#39;s page. Esc clears the field.</li>
+<li><input disabled="" type="checkbox"> No matches: say what search covers (the stories in your feeds now, and everything saved), and offer to search all feeds or clear the filters</li>
+<li><input disabled="" type="checkbox"> A Rules link in the sidebar&#39;s AI group, so filter rules are easy to find</li>
+<li><input disabled="" type="checkbox"> First-page budget: the page loads on demand and the entry points cost a few hundred bytes. Everything the first page loads stays in one chunk (a <code>$initial</code> code-splitting group), because the bundler otherwise splits shared code into many small chunks once a lazy page shares it, which costs about 2 KB.</li>
+</ul>
+<p><strong>Done when</strong> searching &quot;AI&quot; finds matching stories across feeds and Saved with the words highlighted, Titles only and the date filters narrow the results, <code>/</code> on a feed&#39;s page searches within that feed, and a search with no matches explains what search covers.</p>
 <h2 id="9-testing">9. Testing<a class="anchor" href="#9-testing" aria-label="Link to this section">#</a></h2>
 <p><strong>Approach (settled):</strong> journey tests are the main tool. Unit tests cover only dense logic, and contract tests cover the Worker.</p>
 <p><strong>Principles:</strong></p>
@@ -1185,6 +1223,14 @@ Cache-Control: no-cache
 <td>Any request to <code>/api/feed</code></td>
 <td>Never carries an AI key</td>
 </tr>
+<tr>
+<td>Search &quot;AI chips&quot;, then Titles only, then a quoted phrase</td>
+<td>Only stories with every word; then only those with them in the title; then the exact phrase. Matches are highlighted.</td>
+</tr>
+<tr>
+<td>Press <code>/</code> on The Verge&#39;s page, then Esc</td>
+<td>Search opens within The Verge; Esc clears the field</td>
+</tr>
 </tbody></table></div>
 <h2 id="10-risks">10. Risks<a class="anchor" href="#10-risks" aria-label="Link to this section">#</a></h2>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
@@ -1279,6 +1325,10 @@ Cache-Control: no-cache
 <td>AI</td>
 <td><strong>Stretch:</strong> article actions, filter rules and Catch me up, on the reader&#39;s own keys, with an optional decision model.</td>
 </tr>
+<tr>
+<td>Search</td>
+<td><strong>Basic search and filter (M14)</strong> in the browser, over your feeds&#39; stories and everything saved, after looking at Feedly, Inoreader, Feedbin and Miniflux. No operators, saved searches or server index.</td>
+</tr>
 </tbody></table></div>
 <p>Settled 2026-11-08 and 2026-11-09.</p>
 <p><strong>What happened to the TechCrunch feed:</strong> TechCrunch moved its section pages and feeds under <code>/category/</code>.</p>
@@ -1291,7 +1341,8 @@ Cache-Control: no-cache
 <h2 id="12-not-in-this-version">12. Not in this version<a class="anchor" href="#12-not-in-this-version" aria-label="Link to this section">#</a></h2>
 <ul>
 <li>Syncing across devices (not required), or any database of our own</li>
-<li>Full read/unread tracking with counts (the divider covers &quot;what&#39;s new&quot;), search, folders, OPML import, notifications, offline mode</li>
+<li>Full read/unread tracking with counts (the divider covers &quot;what&#39;s new&quot;), folders, OPML import, notifications, offline mode</li>
+<li>Search operators (OR, NOT), saved searches, and searching beyond your feeds or further back than they go, which would need an index on a server</li>
 <li>Pulling full articles from publisher sites, or finding images for feeds that have none</li>
 <li>Facebook &quot;Like&quot; button or any social SDK</li>
 <li>Embedded videos and iframes; these link to the original instead</li>

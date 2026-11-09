@@ -188,6 +188,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li class="toc-l3"><a href="#adr-007-host-on-cloudflare-workers-with-static-assets">ADR-007: Host on Cloudflare Workers with static assets</a></li>
 <li class="toc-l3"><a href="#adr-008-ai-with-bring-your-own-keys-called-from-the-browser">ADR-008: AI with bring-your-own keys, called from the browser</a></li>
 <li class="toc-l3"><a href="#adr-009-a-since-last-visit-divider-not-unread-tracking">ADR-009: A since-last-visit divider, not unread tracking</a></li>
+<li class="toc-l3"><a href="#adr-010-search-in-the-browser-over-loaded-and-saved-stories">ADR-010: Search in the browser, over loaded and saved stories</a></li>
 <li class="toc-l2"><a href="#6-test-plan">6. Test Plan</a></li>
 <li class="toc-l3"><a href="#6-1-test-layers">6.1 Test layers</a></li>
 <li class="toc-l3"><a href="#6-2-what-to-test-by-area">6.2 What to test, by area</a></li>
@@ -253,6 +254,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li class="toc-l3"><a href="#adr-007-host-on-cloudflare-workers-with-static-assets">ADR-007: Host on Cloudflare Workers with static assets</a></li>
 <li class="toc-l3"><a href="#adr-008-ai-with-bring-your-own-keys-called-from-the-browser">ADR-008: AI with bring-your-own keys, called from the browser</a></li>
 <li class="toc-l3"><a href="#adr-009-a-since-last-visit-divider-not-unread-tracking">ADR-009: A since-last-visit divider, not unread tracking</a></li>
+<li class="toc-l3"><a href="#adr-010-search-in-the-browser-over-loaded-and-saved-stories">ADR-010: Search in the browser, over loaded and saved stories</a></li>
 <li class="toc-l2"><a href="#6-test-plan">6. Test Plan</a></li>
 <li class="toc-l3"><a href="#6-1-test-layers">6.1 Test layers</a></li>
 <li class="toc-l3"><a href="#6-2-what-to-test-by-area">6.2 What to test, by area</a></li>
@@ -277,7 +279,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li><a href="https://github.com/anthropics/knowledge-work-plugins/blob/main/engineering/skills/testing-strategy/SKILL.md" target="_blank" rel="noopener noreferrer"><code>testing-strategy</code></a> for the test plan.</li>
 </ul>
 <p><strong>Sources:</strong> the &quot;Simple RSS Reader&quot; brief (<code>docs/</code> PDF), a live inspection of the sample feeds on 2026-11-06, and research into Feedly, Inoreader, NetNewsWire, Reeder, Feedbin and Readwise Reader on 2026-11-09.
-<strong>Status:</strong> Proposed; ADR-001, ADR-007, ADR-008 and ADR-009 accepted; test approach confirmed · <strong>Date:</strong> 2026-11-06, updated 2026-11-09 · <strong>Deciders:</strong> the developer.</p>
+<strong>Status:</strong> Proposed; ADR-001, ADR-007, ADR-008, ADR-009 and ADR-010 accepted; test approach confirmed · <strong>Date:</strong> 2026-11-06, updated 2026-11-09 · <strong>Deciders:</strong> the developer.</p>
 </blockquote>
 <hr>
 <h2 id="0-summary">0. Summary<a class="anchor" href="#0-summary" aria-label="Link to this section">#</a></h2>
@@ -288,6 +290,7 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <li><strong>In the app:</strong> Redux Toolkit holds state (RTK Query for feeds; slices for subscriptions, bookmarks and preferences). User data persists to <code>localStorage</code>. Styling is CSS Modules plus design tokens, with no CSS libraries.</li>
 <li><strong>Reader comforts</strong> (from research into popular readers): a Today view, date headers, a &quot;New since your last visit&quot; divider, List or Cards layouts, keyboard shortcuts, reading settings, and adding a feed from any website link (the Worker discovers the feed).</li>
 <li><strong>Optional AI (stretch):</strong> article actions, plain-English filter rules and a &quot;Catch me up&quot; digest, on the reader&#39;s own keys, called straight from the browser. There&#39;s no AI backend and no AI cost to us.</li>
+<li><strong>Search</strong> (M14): in the browser, over loaded and saved stories, with filters for feed, titles only and date (ADR-010).</li>
 </ul>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
 <thead>
@@ -352,8 +355,14 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td>A since-last-visit divider, not unread tracking</td>
 <td><a href="#adr-009-a-since-last-visit-divider-not-unread-tracking">ADR-009</a></td>
 </tr>
+<tr>
+<td>10</td>
+<td>Search</td>
+<td>In the browser, over loaded and saved stories; no server index</td>
+<td><a href="#adr-010-search-in-the-browser-over-loaded-and-saved-stories">ADR-010</a></td>
+</tr>
 </tbody></table></div>
-<p><strong>Effort:</strong> about 52 hours for the app (M0–M9), plus about 23 for the optional AI features (M10–M13) (<a href="#7-implementation-plan">§7</a>).</p>
+<p><strong>Effort:</strong> about 52 hours for the app (M0–M9), plus about 23 for the optional AI features (M10–M13) and about 6 for search (M14) (<a href="#7-implementation-plan">§7</a>).</p>
 <hr>
 <h2 id="1-requirements">1. Requirements<a class="anchor" href="#1-requirements" aria-label="Link to this section">#</a></h2>
 <h3 id="1-1-functional-requirements">1.1 Functional requirements<a class="anchor" href="#1-1-functional-requirements" aria-label="Link to this section">#</a></h3>
@@ -550,6 +559,12 @@ li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
 <td>FR-31</td>
 <td>Collapsible desktop sidebar (slim icon rail, <code>[</code> to toggle)</td>
 <td>Added (reader research)</td>
+<td><span class="pill pill-should">Should</span></td>
+</tr>
+<tr>
+<td>FR-32</td>
+<td>Search and filter stories: words in the title, summary, author or feed name; by feed, Saved, titles only and date; <code>/</code> to search</td>
+<td>Added (2026-11-09, reader research)</td>
 <td><span class="pill pill-should">Should</span></td>
 </tr>
 </tbody></table></div>
@@ -2605,6 +2620,61 @@ export const parser = new XMLParser({
 <li><input disabled="" type="checkbox"> Add <code>NewSinceDivider</code> to All stories, Today and feed views, and <code>WelcomeNote</code> for a first visit.</li>
 </ol>
 <hr>
+<h3 id="adr-010-search-in-the-browser-over-loaded-and-saved-stories">ADR-010: Search in the browser, over loaded and saved stories<a class="anchor" href="#adr-010-search-in-the-browser-over-loaded-and-saved-stories" aria-label="Link to this section">#</a></h3>
+<p><strong>Status:</strong> Accepted (2026-11-09) · <strong>Date:</strong> 2026-11-09 · <strong>Deciders:</strong> developer</p>
+<p><strong>Context.</strong> Readers asked for a basic search and filter. Feedly&#39;s Power Search sits in the left navigation and searches your feeds (or the web), with a scope menu, Title-only and date filters, and operators. Inoreader adds a search box above every feed&#39;s list, and keeps saved searches (&quot;monitoring feeds&quot;) and public-feed search for Pro. Feedbin and Miniflux focus search with <code>/</code>. All of them search an index of every article they&#39;ve fetched. Feedolio has no database: the browser holds each feed&#39;s latest items (in RTK Query&#39;s cache) and full copies of saved stories.</p>
+<p><strong>Decision.</strong></p>
+<ul>
+<li>Search in the browser over what it holds: every followed feed&#39;s current stories plus saved stories, de-duplicated by story id. Stories hidden by rules stay hidden.</li>
+<li>Every word must appear, &quot;quoted phrases&quot; match exactly, and matching ignores case and accents. Fields are the title, excerpt, author and feed title, or the title only.</li>
+<li>Filters: Search in (All feeds, Saved or one feed), Titles only, and Published (Any time, Today, This week). Newest first.</li>
+<li>A lazily loaded <code>/search</code> route, with the query in the URL; entry points in the sidebar, rail and top bar; <code>/</code> opens it.</li>
+</ul>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Complexity</th>
+<th>Cost</th>
+<th>Reader value</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>A. In the browser, over loaded and saved stories</strong></td>
+<td>Low</td>
+<td>$0, nothing new to run</td>
+<td>Finds anything in your feeds now and everything you saved</td>
+<td><strong>Chosen</strong></td>
+</tr>
+<tr>
+<td>B. A search index in the Worker (D1 full-text search or similar)</td>
+<td>High</td>
+<td>Storage and writes on every fetch</td>
+<td>Finds older stories that have left their feeds</td>
+<td>Rejected for now</td>
+</tr>
+<tr>
+<td>C. Filter only the current list</td>
+<td>Lowest</td>
+<td>$0</td>
+<td>Can&#39;t search across feeds and Saved at once</td>
+<td>Rejected</td>
+</tr>
+</tbody></table></div>
+<p><strong>Trade-off.</strong> B would find older stories, as Feedly and Inoreader do, but it needs per-reader storage on a server, which Feedolio deliberately avoids. A covers the common case (&quot;where was that story I saw today?&quot;), and Saved covers what readers chose to keep.</p>
+<p><strong>Consequences</strong></p>
+<ul>
+<li><em>Easier:</em> no server changes; instant results; saved stories are searchable even when their feeds fail.</li>
+<li><em>Harder:</em> a story that has left its feed and wasn&#39;t saved can&#39;t be found. The no-matches state says so.</li>
+<li><em>Revisit:</em> an index (option B) if readers need history; saved searches and operators if they ask.</li>
+</ul>
+<p><strong>Action items</strong></p>
+<ol>
+<li><input disabled="" type="checkbox"> Add <code>matchStories</code> (unit-tested) and the lazily loaded <code>SearchPage</code> at <code>/search</code>.</li>
+<li><input disabled="" type="checkbox"> Add the sidebar, rail and top-bar entry points and the <code>/</code> shortcut, within the first-page budget.</li>
+</ol>
+<hr>
 <h2 id="6-test-plan">6. Test Plan<a class="anchor" href="#6-test-plan" aria-label="Link to this section">#</a></h2>
 <aside class="callout callout-note"><p class="callout-title">Note</p><p><strong>Approach confirmed 2026-11-09:</strong> journey tests are the main tool. Unit tests are written only where logic is dense enough that table-driven cases are clearer.</p>
 </aside>
@@ -2940,6 +3010,30 @@ export const parser = new XMLParser({
 <td>Collapse the sidebar with <code>[</code>, then reload</td>
 <td>The rail shows, the toggle reports <code>aria-expanded=&quot;false&quot;</code>, every rail icon has an accessible name, and it&#39;s still collapsed after the reload</td>
 </tr>
+<tr>
+<td>T-34</td>
+<td>Unit</td>
+<td><code>matchStories</code> with several words, a quoted phrase, accents and Titles only</td>
+<td>Every word must appear; a phrase matches only as written; &quot;cafe&quot; finds &quot;café&quot;; Titles only ignores the summary</td>
+</tr>
+<tr>
+<td>T-35</td>
+<td>Journey</td>
+<td>Search &quot;AI&quot; from the sidebar; then Search in Saved; then Today</td>
+<td>Matching stories from every feed with the words highlighted; then only saved stories; then only today&#39;s</td>
+</tr>
+<tr>
+<td>T-36</td>
+<td>Journey</td>
+<td>Press <code>/</code> on The Verge&#39;s page, type, then Esc</td>
+<td>Search opens within The Verge; Esc clears the field; Back returns to the results</td>
+</tr>
+<tr>
+<td>T-37</td>
+<td>Journey</td>
+<td>Search for a word no story has, within one feed</td>
+<td>&quot;No stories match&quot;, what search covers, and &quot;Search all feeds&quot;</td>
+</tr>
 </tbody></table></div>
 <h3 id="6-5-what-we-deliberately-don-t-test">6.5 What we deliberately don&#39;t test<a class="anchor" href="#6-5-what-we-deliberately-don-t-test" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -3052,10 +3146,16 @@ export const parser = new XMLParser({
 <td>6 h</td>
 </tr>
 <tr>
+<td><strong>M14: Search and filter</strong></td>
+<td><code>/search</code> page with Search in, Titles only and Published filters, highlights and a no-matches state; matching in the browser; sidebar, rail and top-bar entry points; <code>/</code> shortcut; Rules link in the AI group</td>
+<td>US-116–119</td>
+<td>6 h</td>
+</tr>
+<tr>
 <td></td>
 <td><strong>Total</strong></td>
 <td></td>
-<td><strong>About 52 h for the app (M0–M9), plus about 23 h for AI (M10–M13)</strong></td>
+<td><strong>About 52 h for the app (M0–M9), plus about 23 h for AI (M10–M13) and about 6 h for search (M14)</strong></td>
 </tr>
 </tbody></table></div>
 <p><strong>Definition of done for each milestone</strong></p>
@@ -3187,6 +3287,15 @@ export const parser = new XMLParser({
 <li><input disabled="" type="checkbox"> Digest page with importance, summaries and source links; &quot;Mark all caught up&quot;</li>
 </ul>
 <p><strong>Done when</strong> the fixture stories group into ranked stories, every source link opens a real story in Feedolio, and &quot;Mark all caught up&quot; starts a new window.</p>
+<h4 id="m14-search-and-filter">M14 · Search and filter<a class="anchor" href="#m14-search-and-filter" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><input disabled="" type="checkbox"> <code>matchStories</code>: words, quoted phrases, accents and Titles only, with unit tests</li>
+<li><input disabled="" type="checkbox"> <code>/search</code> page, loaded on demand: field, filters, highlighted results, count and a no-matches state; the query in the URL</li>
+<li><input disabled="" type="checkbox"> Entry points: sidebar item, rail icon, top-bar button and <code>/</code> (within the current feed on a feed&#39;s page); Esc clears the field</li>
+<li><input disabled="" type="checkbox"> A Rules link in the sidebar&#39;s AI group</li>
+<li><input disabled="" type="checkbox"> First-page budget held: everything the first page loads in one chunk (a <code>$initial</code> code-splitting group in <code>vite.config.js</code>)</li>
+</ul>
+<p><strong>Done when</strong> T-34 to T-37 pass, and search works at 390 px and 1280 px.</p>
 <hr>
 <h2 id="8-risks-and-mitigations">8. Risks and Mitigations<a class="anchor" href="#8-risks-and-mitigations" aria-label="Link to this section">#</a></h2>
 <div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
@@ -3347,6 +3456,10 @@ export const parser = new XMLParser({
 <tr>
 <td>AI</td>
 <td><strong>Stretch:</strong> article actions, filter rules and Catch me up, on the reader&#39;s own keys, with an optional decision model (ADR-008, 2026-11-09).</td>
+</tr>
+<tr>
+<td>Search</td>
+<td><strong>Basic search and filter in the browser</strong>, over loaded and saved stories, with no server index (ADR-010, 2026-11-09).</td>
 </tr>
 <tr>
 <td>Submission format</td>
@@ -3557,6 +3670,12 @@ export const parser = new XMLParser({
 <td>US-115</td>
 <td><code>AppShell</code>, <code>SidebarToggle</code>, preferences</td>
 <td>T-33</td>
+</tr>
+<tr>
+<td>FR-32 Search and filter</td>
+<td>US-116 to US-119</td>
+<td><code>SearchPage</code>, <code>matchStories</code>, the sidebar&#39;s Search item, the <code>/</code> shortcut</td>
+<td>T-34 to T-37</td>
 </tr>
 </tbody></table></div>
 
