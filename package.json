@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "node scripts/coverage.mjs",
+    "test:smoke": "playwright test",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
@@ -35,6 +36,7 @@
     "@cloudflare/vite-plugin": "1.67.0",
     "@cloudflare/vitest-plugin": "1.6.0",
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.0",
     "@testing-library/dom": "10.4.2",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",

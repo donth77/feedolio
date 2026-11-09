@@ -1,0 +1,34 @@
+name: Smoke test
+
+# Real browsers and real feeds against a deployed copy, such as a Workers
+# preview URL. Run it by hand from the Actions tab after a deploy.
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Address to test, e.g. https://<version>-feedolio.<account>.workers.dev
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: pnpm/action-setup@v6.1.1
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:smoke
+        env:
+          SMOKE_URL: ${{ inputs.url }}

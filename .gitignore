@@ -5,6 +5,8 @@ docs/
 node_modules/
 dist/
 coverage/
+test-results/
+playwright-report/
 
 # Cloudflare local state and secrets
 .wrangler/
