@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { tagPath, useAiNav, useWithoutHidden } from '../features/ai/rules/useRules.js';
@@ -63,7 +63,23 @@ export default function AppShell() {
   const sidebar = useSelector(selectSidebar);
   const roomy = useMediaQuery('(min-width: 1280px)', true);
   const railed = sidebar === 'collapsed' || (sidebar === 'auto' && !roomy);
-  const toggleSidebar = () => dispatch(sidebarChanged(railed ? 'expanded' : 'collapsed'));
+  // Switching fades the sidebar's contents in; on load they're simply there.
+  const [switched, setSwitched] = useState(false);
+  // The toggle is a new button after switching; a reader who pressed it keeps
+  // focus on it. With the [ shortcut, focus stays where it was.
+  const refocusToggle = useRef(false);
+  const toggleSidebar = () => {
+    refocusToggle.current = document.activeElement?.closest('[data-shortcut="sidebar"]') != null;
+    setSwitched(true);
+    dispatch(sidebarChanged(railed ? 'expanded' : 'collapsed'));
+  };
+  useEffect(() => {
+    if (!refocusToggle.current) return;
+    refocusToggle.current = false;
+    /** @type {HTMLElement|null} */ (
+      document.querySelector('#sidebar [data-shortcut="sidebar"]')
+    )?.focus();
+  }, [railed]);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -77,7 +93,7 @@ export default function AppShell() {
 
   return (
     <AddFeedContext.Provider value={openAddFeed}>
-      <div className={styles.shell} data-rail={railed}>
+      <div className={styles.shell} data-rail={railed} data-switched={switched || undefined}>
         <a href="#main" className={styles.skip} onClick={skipToMain}>
           Skip to content
         </a>

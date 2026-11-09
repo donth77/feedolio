@@ -194,20 +194,40 @@
 @media (min-width: 1024px) {
   .shell {
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    transition: grid-template-columns var(--duration-panel) var(--ease-out);
   }
 
   .shell[data-rail='true'] {
     grid-template-columns: var(--rail-width) minmax(0, 1fr);
   }
 
+  /* The column clips; the panel inside it scrolls. */
   .sidebar {
     position: sticky;
     top: 0;
     display: block;
     height: 100dvh;
-    overflow-y: auto;
+    overflow: hidden;
     border-right: 1px solid var(--color-line);
     background: var(--color-surface);
+  }
+
+  /* Each state keeps its own width while the column animates, so nothing
+     reflows: the panel is uncovered as the column widens, and the rail fades
+     in as it narrows. */
+  .sidebarPanel {
+    width: calc(var(--sidebar-width) - 1px);
+    height: 100%;
+    overflow: hidden auto;
+  }
+
+  .shell[data-rail='true'] .sidebarPanel {
+    width: calc(var(--rail-width) - 1px);
+  }
+
+  /* Only when the reader switches it, not on load. */
+  .shell[data-switched] .sidebarPanel {
+    animation: sidebar-in var(--duration-quick) var(--ease-out);
   }
 
   .topBar {
@@ -216,5 +236,11 @@
 
   .main {
     padding: 36px clamp(20px, 4vw, 56px) 72px;
+  }
+}
+
+@keyframes sidebar-in {
+  from {
+    opacity: 0;
   }
 }

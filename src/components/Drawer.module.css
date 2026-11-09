@@ -13,11 +13,24 @@
 }
 
 .drawer[open] {
-  animation: slide-in 160ms ease-out;
+  animation: slide-in var(--duration-quick) var(--ease-out);
+}
+
+/* Closing: it slides away, and Drawer.jsx closes it when the slide ends. */
+.drawer[open][data-closing] {
+  animation: slide-out var(--duration-quick) var(--ease-in) forwards;
 }
 
 .drawer::backdrop {
   background: var(--color-scrim);
+}
+
+.drawer[open]::backdrop {
+  animation: fade-in var(--duration-quick) var(--ease-out);
+}
+
+.drawer[open][data-closing]::backdrop {
+  animation: fade-out var(--duration-quick) var(--ease-in) forwards;
 }
 
 .inner {
@@ -52,5 +65,23 @@
 @keyframes slide-in {
   from {
     transform: translateX(-100%);
+  }
+}
+
+@keyframes slide-out {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
   }
 }

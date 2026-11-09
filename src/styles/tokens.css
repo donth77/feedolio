@@ -102,6 +102,12 @@
   --rail-width: 64px; /* collapsed sidebar */
   --list-width: 920px;
   --reading-width: 680px;
+
+  /* Motion. base.css turns it off for readers who ask for reduced motion. */
+  --duration-quick: 160ms; /* the drawer, fades */
+  --duration-panel: 220ms; /* the sidebar collapsing and expanding */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1); /* arriving, or moving in place */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* leaving */
 }
 
 :root[data-theme='dark'] {

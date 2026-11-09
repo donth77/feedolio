@@ -126,10 +126,10 @@ describe('The sidebar', () => {
     expect(within(sidebar()).getByRole('button', { name: 'Expand sidebar' })).toBeVisible();
 
     await second.user.click(within(sidebar()).getByRole('button', { name: 'Expand sidebar' }));
-    expect(within(sidebar()).getByRole('button', { name: 'Collapse sidebar' })).toHaveAttribute(
-      'aria-expanded',
-      'true',
-    );
+    const collapseAgain = within(sidebar()).getByRole('button', { name: 'Collapse sidebar' });
+    expect(collapseAgain).toHaveAttribute('aria-expanded', 'true');
+    // The button is new, but focus stays on it.
+    expect(collapseAgain).toHaveFocus();
     expect(within(sidebar()).getByRole('link', { name: 'Today, 16 stories' })).toHaveTextContent(
       'Today',
     );
