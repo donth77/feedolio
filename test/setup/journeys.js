@@ -6,9 +6,12 @@ import { afterAll, afterEach, beforeAll, expect } from 'vitest';
 import { closeCache } from '../../src/features/ai/cache.js';
 import { removeAllKeys } from '../../src/features/ai/keys.js';
 import { resetUsage } from '../../src/features/ai/usage.js';
+import { resetSignInStatus } from '../../src/features/auth/signInStatus.js';
 import { takeOpenedStory } from '../../src/lib/returnFocus.js';
 import { clearJudgeOverrides, KEY_HOSTS } from '../fixtures/ai.js';
+import { resetGitHub } from '../fixtures/github.js';
 import { server } from '../msw/server.js';
+import { resetWorker } from '../msw/worker.js';
 
 // Views that load their code on first use (the story page, Settings) can take
 // several seconds under coverage on a busy machine or CI runner.
@@ -101,6 +104,11 @@ afterEach(() => {
   removeAllKeys();
   resetUsage();
   clearJudgeOverrides();
+  // A fresh browser (no cookies), a Worker without sign-in settings, and an
+  // app that asks again whether sign-in is offered.
+  resetWorker();
+  resetGitHub();
+  resetSignInStatus();
   window.history.replaceState(null, '', '/');
 });
 

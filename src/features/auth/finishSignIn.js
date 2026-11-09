@@ -1,35 +1,18 @@
 import { toastShown } from '../../app/toastSlice.js';
-import { getAuthClient } from './authClient.js';
-import { signInStopped } from './authSlice.js';
+import { isAccountUser } from './session.js';
+
+/** What the reader is told when a sign-in comes back without them signed in. */
+const OUTCOMES = {
+  cancelled: 'Sign-in was cancelled.',
+  off: 'Sign-in isn’t set up on this copy of Feedolio.',
+  failed: 'Sign-in didn’t work. Try again in a moment.',
+};
 
 /**
- * What Feedolio keeps from Auth0's profile: who it is, a name and a picture.
- *
- * @param {import('@auth0/auth0-spa-js').User} profile
- * @returns {import('./session.js').AccountUser}
- */
-function accountUser(profile) {
-  return {
-    id: /** @type {string} */ (profile.sub),
-    name: profile.name || profile.nickname || 'GitHub reader',
-    avatarUrl: typeof profile.picture === 'string' ? profile.picture : null,
-  };
-}
-
-/**
- * Where to go after signing in: back where the reader started, if that was a
- * page of this app.
- *
- * @param {unknown} path
- */
-function returnPath(path) {
-  return typeof path === 'string' && /^\/(?!\/)/.test(path) ? path : '/';
-}
-
-/**
- * Completes a sign-in after Auth0 sends the reader back: swaps the code for
- * the user's profile, switches to their saved data and returns them to where
- * they started. Loaded only when a sign-in is being finished.
+ * Completes a sign-in after the Worker brings the reader back from GitHub with
+ * ?signin=ok (or cancelled, off, failed): collects the profile the Worker
+ * signed, switches to the reader's saved data and tidies the address. Loaded
+ * only when a sign-in is being finished.
  *
  * @param {{
  *   store: import('../../app/store.js').AppStore,
@@ -39,27 +22,43 @@ function returnPath(path) {
  * }} context
  */
 export async function finishSignIn({ store, navigate, params, pathname }) {
-  const client = await getAuthClient();
-  if (!client) return;
+  const outcome = params.get('signin');
+  const rest = new URLSearchParams(params);
+  rest.delete('signin');
+  const here = rest.size > 0 ? `${pathname}?${rest}` : pathname;
+
+  if (outcome === 'ok') {
+    const user = await collectProfile();
+    if (user) {
+      store.switchAccount(user);
+      navigate(here, { replace: true });
+      store.dispatch(toastShown({ message: `Signed in as ${user.name}` }));
+      return;
+    }
+  }
+  navigate(here, { replace: true });
+  store.dispatch(
+    toastShown({
+      message: outcome === 'cancelled' || outcome === 'off' ? OUTCOMES[outcome] : OUTCOMES.failed,
+      tone: 'warning',
+    }),
+  );
+}
+
+/**
+ * The profile the Worker left for this browser, collected once.
+ *
+ * @returns {Promise<import('./session.js').AccountUser|null>}
+ */
+async function collectProfile() {
   try {
-    const { appState } = await client.handleRedirectCallback();
-    const profile = await client.getUser();
-    if (!profile?.sub) throw new Error('Auth0 returned no user');
-    const user = accountUser(profile);
-    store.switchAccount(user);
-    navigate(returnPath(appState?.returnTo), { replace: true });
-    store.dispatch(toastShown({ message: `Signed in as ${user.name}` }));
+    const response = await fetch('/api/auth/session', {
+      method: 'POST',
+      headers: { Accept: 'application/json' },
+    });
+    const body = response.ok ? await response.json() : null;
+    return isAccountUser(body?.user) ? body.user : null;
   } catch {
-    store.dispatch(signInStopped());
-    store.dispatch(
-      toastShown({
-        message:
-          params.get('error') === 'access_denied'
-            ? 'Sign-in was cancelled.'
-            : 'Sign-in didn’t work. Try again in a moment.',
-        tone: 'warning',
-      }),
-    );
-    navigate(pathname, { replace: true });
+    return null;
   }
 }

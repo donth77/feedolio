@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Link, NavLink } from 'react-router';
 import { tagPath } from '../features/ai/rules/useRules.js';
-import { authConfig } from '../features/auth/authConfig.js';
 import Icon from './Icon.jsx';
 import { FeedDot } from './Monogram.jsx';
 import styles from './NavPanel.module.css';
@@ -360,7 +359,7 @@ function SidebarToggle({ id, expanded, onToggle }) {
   );
 }
 
-// Loaded only where sign-in is set up, so guests never download it.
+// Loaded after the first page; it asks the Worker whether sign-in is offered.
 const AccountPanel = lazy(() => import('../features/auth/AccountPanel.jsx'));
 
 /**
@@ -369,7 +368,6 @@ const AccountPanel = lazy(() => import('../features/auth/AccountPanel.jsx'));
  * @param {{ variant: 'sidebar'|'rail' }} props
  */
 function Account({ variant }) {
-  if (!authConfig()) return null;
   return (
     <Suspense fallback={null}>
       <AccountPanel variant={variant} />

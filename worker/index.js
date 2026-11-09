@@ -1,3 +1,4 @@
+import { handleAuthRequest } from './lib/auth.js';
 import { handleFeedRequest } from './lib/handleFeedRequest.js';
 import { errorResponse } from './lib/responses.js';
 
@@ -9,9 +10,11 @@ import { errorResponse } from './lib/responses.js';
 export default {
   /**
    * @param {Request} request
+   * @param {import('./lib/auth.js').AuthEnv} [env]
+   * @param {import('./lib/auth.js').WaitUntil} [ctx]
    * @returns {Promise<Response>}
    */
-  async fetch(request) {
+  async fetch(request, env, ctx) {
     const { pathname } = new URL(request.url);
 
     if (pathname === '/api/feed') {
@@ -22,6 +25,8 @@ export default {
       }
       return handleFeedRequest(request);
     }
+
+    if (pathname.startsWith('/api/auth/')) return handleAuthRequest(request, env ?? {}, ctx);
 
     if (pathname.startsWith('/api/')) {
       return errorResponse(404, 'NOT_FOUND', 'There is no API at this address.');

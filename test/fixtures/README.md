@@ -64,3 +64,7 @@ Served by `ai.js`, which also holds the fake test keys. Each provider accepts on
 | `openai-summary.sse`        | Written to OpenAI's documented chat-completions stream format                       | With the final usage chunk that `stream_options.include_usage` adds         |
 
 Recordings were made from a local script with the developer's own keys; no key appears in any file.
+
+## GitHub sign-in (`github.js`)
+
+Not recordings: GitHub's OAuth endpoints, faked from its docs ("Authorizing OAuth apps", read 2026-11-09). The token exchange checks the app's credentials, the code (single use), the callback address and the PKCE verifier, and answers errors as GitHub does: 200 with `{ error }`. The profile needs a live token, and revoking a token needs the app's credentials. No real GitHub account or token was used.

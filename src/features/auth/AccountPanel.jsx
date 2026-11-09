@@ -3,8 +3,8 @@ import { Link } from 'react-router';
 import { toastShown } from '../../app/toastSlice.js';
 import Icon from '../../components/Icon.jsx';
 import styles from './AccountPanel.module.css';
-import { authConfig } from './authConfig.js';
 import { guestImportClosed, selectAuth } from './authSlice.js';
+import { useSignInAvailable } from './signInStatus.js';
 import { useAuthActions } from './useAuth.js';
 
 /**
@@ -12,35 +12,35 @@ import { useAuthActions } from './useAuth.js';
  * - sidebar: a card at the foot of the sidebar
  * - rail: one icon in the collapsed sidebar
  * - settings: the Account section in Settings
- * Shows nothing (or, in Settings, a note) when sign-in isn't set up.
+ * Shows nothing (or, in Settings, a note) when sign-in isn't set up. Someone
+ * already signed in can always sign out.
  *
  * @param {{ variant: 'sidebar'|'rail'|'settings' }} props
  */
 export default function AccountPanel({ variant }) {
-  const { status, user } = useSelector(selectAuth);
-  const { signIn, signOut } = useAuthActions();
+  const { user } = useSelector(selectAuth);
+  const available = useSignInAvailable();
+  const { signInHref, signOut } = useAuthActions();
 
-  if (!authConfig()) {
-    return variant === 'settings' ? (
+  if (!user && available !== true) {
+    return variant === 'settings' && available === false ? (
       <p className={styles.text}>
         Sign-in isn’t set up on this copy of Feedolio, so everything is saved for this browser.
       </p>
     ) : null;
   }
 
-  const signingIn = status === 'signingIn';
+  // A link: the Worker takes the reader to GitHub and back.
   const signInButton = (
-    <button
-      type="button"
+    <a
+      href={signInHref}
       className={styles.button}
-      onClick={signIn}
-      disabled={signingIn}
       aria-label={variant === 'rail' ? 'Sign in with GitHub' : undefined}
       title={variant === 'rail' ? 'Sign in with GitHub' : undefined}
     >
       <Icon name="signIn" size={18} />
-      {variant !== 'rail' && (signingIn ? 'Opening GitHub…' : 'Sign in with GitHub')}
-    </button>
+      {variant !== 'rail' && 'Sign in with GitHub'}
+    </a>
   );
 
   if (variant === 'rail') {
