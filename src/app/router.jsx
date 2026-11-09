@@ -45,6 +45,10 @@ export const routes = [
                 lazy: lazyView(() => import('../features/bookmarks/SavedView.jsx')),
               },
               {
+                path: 'search',
+                lazy: lazyView(() => import('../features/search/SearchPage.jsx')),
+              },
+              {
                 path: 'settings',
                 lazy: lazyView(() => import('../features/subscriptions/Settings.jsx')),
               },

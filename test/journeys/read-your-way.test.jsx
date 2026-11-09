@@ -108,6 +108,7 @@ describe('The sidebar', () => {
         .map((link) => link.getAttribute('aria-label')),
     ).toEqual([
       'Feedolio',
+      'Search',
       'Today, 16 stories',
       'All stories',
       'Saved, 0 saved',

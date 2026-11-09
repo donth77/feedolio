@@ -6,6 +6,21 @@ import { defineConfig } from 'vite';
 // local runtime during `pnpm dev`, and builds the app and Worker together.
 export default defineConfig({
   plugins: [react(), cloudflare()],
+  environments: {
+    client: {
+      build: {
+        rolldownOptions: {
+          output: {
+            // Everything the first page loads goes in one chunk. Left to its own
+            // heuristics, the bundler splits shared code into many small chunks
+            // once a lazy page (search, say) shares it, which costs kilobytes of
+            // compression on the first page. Lazy pages still load on their own.
+            codeSplitting: { groups: [{ name: 'app', tags: ['$initial'] }] },
+          },
+        },
+      },
+    },
+  },
   server: {
     watch: {
       // Generated output. Watching it made every coverage run reload the page

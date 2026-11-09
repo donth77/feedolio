@@ -87,6 +87,15 @@
   background: var(--color-hover);
 }
 
+/* Search sits before Add feed, at the end of the top bar. */
+.searchButton {
+  composes: addButton;
+}
+
+.searchButton + .addButton {
+  margin-left: 0;
+}
+
 /* Chips, under 640 px: Today, All and each feed, scrolling sideways. */
 .chips {
   overflow-x: auto;

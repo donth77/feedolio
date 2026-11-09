@@ -3,7 +3,7 @@
 > **At a glance**
 > - **What:** a responsive React (JavaScript) web app for reading RSS and Atom feeds, with bookmarks that persist and optional AI help on the reader's own keys.
 > - **Hosting:** one Cloudflare Worker. It serves the app's static files and a small feed endpoint (`/api/feed`) that the browser needs because publishers block cross-site requests. AI requests never touch it: they go straight from the browser to the reader's chosen provider.
-> - **Scope:** the app (US-01 to US-94, and US-115), plus AI stretch features (US-95 to US-114).
+> - **Scope:** the app (US-01 to US-94, US-115, and search: US-116 to US-119), plus AI stretch features (US-95 to US-114).
 > - **Status:** ready for implementation. Test seams confirmed 2026-11-09. Triage label `ready-for-agent`.
 >
 > Written with Matt Pocock's [`to-spec`](https://github.com/mattpocock/skills/blob/main/skills/engineering/to-spec/SKILL.md) skill, which synthesises a spec from what's already known, without an interview. Sources: the "Simple RSS Reader" brief (`docs/` PDF), a live inspection of the sample feeds on 2026-11-06, and research into Feedly, Inoreader, NetNewsWire, Reeder, Feedbin and Readwise Reader on 2026-11-09.
@@ -46,7 +46,7 @@ If I choose to bring my own AI key, I'd also like help with long or foreign-lang
 
 ## User Stories
 
-Stories are numbered **US-01 to US-115**. US-82 to US-94 come from research into popular readers, US-95 to US-114 are the AI stretch features, and US-115 (a collapsible sidebar) was added last. Implementation, test and slice notes below refer to these IDs.
+Stories are numbered **US-01 to US-119**. US-82 to US-94 come from research into popular readers, US-95 to US-114 are the AI stretch features, US-115 (a collapsible sidebar) came next, and US-116 to US-119 (search) were added last. Implementation, test and slice notes below refer to these IDs.
 
 ### Browsing headlines
 
@@ -202,6 +202,15 @@ Stories are numbered **US-01 to US-115**. US-82 to US-94 come from research into
 | US-92 | reader | the preview to show the feed's latest headlines and about how many posts it publishes a week | I know what I'm signing up for |
 | US-93 | new reader | a welcome note that explains the starter feeds and how to add my own | I understand where my stories come from |
 | US-94 | reader | suggested feeds in Settings, including starter feeds I removed | I can bring a feed back in one tap |
+
+### Search (added 2026-11-09)
+
+| ID | As a… | I want… | So that… |
+|---|---|---|---|
+| US-116 | reader | to search my feeds and saved stories by words in the title, summary, author or feed name, newest first, with the matching words highlighted | I can find a story I half remember |
+| US-117 | reader | to narrow a search to one feed or to Saved, to titles only, or to today or this week | the results stay focused |
+| US-118 | keyboard user | to press `/` to search from anywhere, starting within the feed I'm reading, and Esc to clear the field | I can search without reaching for the mouse |
+| US-119 | reader | a clear message when nothing matches, saying what search covers, with a way to widen the search | I know whether the story is there at all |
 
 ### AI setup (stretch)
 
@@ -532,6 +541,17 @@ Feed ids are hashes of the URL, so a story URL only resolves for feeds the reade
 - The digest is capped at 60 stories.
 - Settings shows what is sent to the provider and this session's usage.
 
+### 14. Search
+
+**Purpose:** find stories by words, across feeds and Saved (US-116 to US-119).
+
+- **What it searches:** every followed feed's current stories (already in RTK Query's cache) plus saved stories, de-duplicated by story id. There's no index on a server, so a story that has left its feed is found only if it was saved. Stories hidden by rules stay hidden.
+- **Matching** (a small pure function, `matchStories`): the query splits into words and "quoted phrases", and every one must appear. Text is lower-cased with accents removed. Fields are the title, excerpt, author and feed title, or only the title with Titles only.
+- **Filters:** Search in (All feeds, Saved or one feed), Titles only, and Published (Any time, Today, This week). Results are newest first.
+- **Route:** `/search?q=…&in=…&match=title&when=today|week`, loaded on demand. The URL updates as the reader types (replacing the history entry), so Back returns to the results.
+- **Showing matches:** in the usual story rows, with the matching words wrapped in `<mark>` as React text, never as HTML.
+- **Entry points:** a Search item at the top of the sidebar, a magnifier on the rail, a button in the top bar on smaller screens, and `/` from anywhere (scoped to the feed on a feed's page). Esc in the field clears it, then leaves it.
+
 ### Vocabulary
 
 | Term | Meaning |
@@ -548,6 +568,7 @@ Feed ids are hashes of the URL, so a story URL only resolves for feeds the reade
 | **Maybe** | The view for uncertain rule matches, where the reader decides |
 | **Hidden** | The view for stories hidden by rules. Nothing is deleted. |
 | **Digest** | The "Catch me up" summary of unread stories, grouped into a few stories |
+| **Search** | Finding stories by words. It covers your feeds' current stories and everything saved. |
 | **General model** | The reader's main AI model: OpenAI-compatible or Anthropic |
 | **Decision model** | An optional model for yes/no and scoring, e.g. TypeSafe Jev |
 
@@ -602,6 +623,7 @@ Journey tests through seam 1 are the main tool. Seam 2 stays small, and unit tes
 | Read your way: List or Cards, density and reading settings survive a reload | 1 | US-85, US-86, US-89 |
 | Keyboard: J/K, Enter, V, S, R and the G shortcuts work; `?` opens the overlay; shortcuts are off while typing | 1 | US-87, US-88 |
 | Sidebar: the button and `[` collapse it to the rail and back; the choice survives a reload; rail icons keep accessible names | 1 | US-115 |
+| Search: words, phrases and accents; Saved, one feed, Titles only and date filters; `/` from a feed's page; highlights; the no-matches message | 1 | US-116 to US-119 |
 | Add any link: paste a website, pick among several feeds, preview headlines and posts per week, re-add a suggested feed | 1 | US-90 to US-92, US-94 |
 | AI setup: connect each provider type, Test connection errors, remember or forget keys, remove all keys | 1 | US-95 to US-99 |
 | AI article actions: streamed answers with provenance; model output containing HTML shows as text | 1 | US-100 to US-103 |
@@ -622,7 +644,8 @@ Journey tests through seam 1 are the main tool. Seam 2 stays small, and unit tes
 | Item | Why |
 |---|---|
 | Cross-device sync, or any database of our own | Not required. Data lives in the browser; with OAuth it's per account, per device. |
-| Full read/unread tracking with counts (a divider covers what's new), search, folders, OPML import/export, notifications, offline mode / PWA | Good follow-ups, not part of this spec |
+| Full read/unread tracking with counts (a divider covers what's new), folders, OPML import/export, notifications, offline mode / PWA | Good follow-ups, not part of this spec |
+| Search operators (OR, NOT), saved searches, and searching beyond what feeds hold now | Needs a search index on a server. Basic search (US-116 to US-119) covers loaded and saved stories. |
 | Fetching full articles from publisher sites (scraping, "reader mode"), including `og:image` look-ups for image-less feeds | Summary-only feeds stay summary-only, with a clear link out |
 | Facebook "Like" button and any other social SDK | Needs third-party tracking; share links are used instead |
 | Rendering embedded iframes from feed content | Replaced by links to the original |
@@ -678,6 +701,7 @@ These are input for a follow-up `to-issues` pass. Each slice is demoable end to 
 | 14 | **AI article actions** (stretch) | US-100 to US-103 |
 | 15 | **AI filter rules, Maybe and Hidden** (stretch) | US-104 to US-108 |
 | 16 | **AI Catch me up** (stretch) | US-109 to US-112 |
+| 17 | **Search and filter** | US-116 to US-119 |
 
 Slices 13 to 16 are stretch work and come last, starting with 13.
 
@@ -692,6 +716,7 @@ Slices 13 to 16 are stretch work and come last, starting with 13.
 - **Ideas from other readers (2026-11-09):** all seven: keyboard shortcuts, add any link, date headers, Today, List or Cards, reading settings, and the welcome note.
 - **AI (2026-11-09):** stretch work. Article actions, filter rules and Catch me up, on the reader's own keys, with an optional decision model.
 - **Sidebar (2026-11-09):** collapsible on desktop, to a slim icon rail; `[` toggles it.
+- **Search (2026-11-09):** basic search and filter in the browser, over loaded and saved stories, after looking at how Feedly, Inoreader, Feedbin and Miniflux do it.
 
 ### Known risks
 

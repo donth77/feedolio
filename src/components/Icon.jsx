@@ -75,6 +75,7 @@ const PATHS = {
       <path d="M20 20l-4.5-4.5" />
     </>
   ),
+  filter: <path d="M4.5 5.5h15l-6 7v5.5l-3 1.5v-7z" />,
   settings: (
     <>
       <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />

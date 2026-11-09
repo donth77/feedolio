@@ -176,8 +176,8 @@ describe('Adding a feed', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
     expect(screen.queryByRole('dialog', { name: 'Add a feed' })).toBeNull();
     expect(within(sidebar()).getAllByRole('link', { name: /./ })).toHaveLength(
-      // Today, All stories, Saved, the wordmark, five feeds and Settings
-      10,
+      // Search, Today, All stories, Saved, the wordmark, five feeds and Settings
+      11,
     );
   });
 

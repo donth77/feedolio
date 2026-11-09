@@ -30,10 +30,13 @@ export function useAiNav() {
   const tagged = useSelector(selectTagged);
   const catchUp = Boolean(ai.general && ai.features.catchUp);
   const ruleViews = rules.length > 0 || hidden > 0;
+  // The rules page, once there's a model to check rules with (or rules).
+  const rulesLink = Boolean(ai.general) || rules.length > 0;
   return {
-    show: catchUp || ruleViews,
+    show: catchUp || ruleViews || rulesLink,
     catchUp,
     ruleViews,
+    rules: rulesLink,
     maybe,
     hidden,
     tags: [...tagged].map(([tag, judgments]) => ({ tag, count: judgments.length })),

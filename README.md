@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestones M0 to M13 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser. They can also connect their own AI provider to summarize, translate or explain any story, to hide, highlight or tag stories with plain-English rules, and to get a "Catch me up" digest of what they missed.
+> **Status:** milestones M0 to M14 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, stories can be searched across feeds and Saved, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser. They can also connect their own AI provider to summarize, translate or explain any story, to hide, highlight or tag stories with plain-English rules, and to get a "Catch me up" digest of what they missed.
 >
 > **Live:** [feedolio.tdonohue.workers.dev](https://feedolio.tdonohue.workers.dev)
 
@@ -114,6 +114,7 @@ Everything works with the keyboard. A skip link leads past the navigation, and c
 | V                | Open the original on the publisher's site                |
 | S                | Save or unsave                                           |
 | R                | Refresh feeds                                            |
+| /                | Search (within the feed you're in)                       |
 | `[`              | Collapse or expand the sidebar                           |
 | Alt+↑ / Alt+↓    | Move the focused feed in the sidebar up or down          |
 | G then T, A or S | Go to Today, All stories or Saved                        |
@@ -121,6 +122,20 @@ Everything works with the keyboard. A skip link leads past the navigation, and c
 | Esc              | Close a dialog or menu                                   |
 
 "Selected" is simply the story whose headline has focus, so J and K move focus, and Tab works too. Shortcuts pause while typing in a field or while a dialog is open.
+
+## Searching
+
+**Search** (`/search`) finds stories by words, across your feeds and everything you've saved (US-116 to US-119). Open it from the top of the sidebar, the magnifier on the rail, the button in the top bar on phones and tablets, or with <kbd>/</kbd> from anywhere.
+
+- **Matching:** every word must appear, in the title, summary, author or feed name. Case and accents don't matter. Short words (up to three letters) must be whole words, give or take a plural, so "AI" doesn't find "said"; longer words match the start of a word, so "chip" finds "chips". Put "quotes" around an exact phrase.
+- **Filters:** Search in (All feeds, Saved or one feed), Titles only, and Any time, Today or This week. Results are newest first, with the matching words highlighted.
+- **From a feed:** <kbd>/</kbd> on a feed's page searches that feed. <kbd>Esc</kbd> clears the field, and a second <kbd>Esc</kbd> leaves it; <kbd>↓</kbd> moves to the results.
+- **The address keeps the search** (`?q=…&in=…&match=title&when=today`), so Back from a story returns to the same results.
+- **What it covers:** the stories in your feeds now (each feed's latest items) and everything saved. Search runs in the browser with no index on a server, so a story that has left its feed is found only if you saved it. When nothing matches, the page says so and offers to search all feeds.
+- **Stories hidden by your rules** stay hidden, with a note and a link to Hidden.
+- **Code loading:** the search page loads only when opened; on the first page, search costs a few hundred bytes.
+
+Other readers informed the design: Feedly (search in the left navigation, a scope menu, Title-only and date filters), Inoreader (a search box above each feed) and Feedbin and Miniflux (<kbd>/</kbd> to search). Operators (OR, NOT), saved searches and searching beyond your feeds are left out on purpose (ADR-010 in `plans/anthropic-engineering-plan.md`).
 
 ## Sharing
 
@@ -242,7 +257,7 @@ Readers write rules in plain English in **Settings › Rules** (`/settings/rules
 Journey tests are the main tool: they check what a reader sees and does, not how the code is arranged. Three Vitest projects run against saved copies of real feeds and pages (`test/fixtures`, with their sources in its README):
 
 - **Journeys** (`test/journeys`) render the real app in jsdom and fake only the network (MSW) and, when needed, the clock. Calls to `/api/feed` run the real Worker code in-process. A test "reload" saves as a browser would, then starts a fresh app from storage. Each view is also checked with axe.
-- **Unit** tests (`test/unit`) cover dense logic only: parsing, normalising, main images, feed discovery, the address guard, the story sanitiser, saved data, adding feeds, share links, the security headers, and the AI adapters, router, key store, cache, text formatter, rule verdicts and digest clean-up.
+- **Unit** tests (`test/unit`) cover dense logic only: parsing, normalising, main images, feed discovery, the address guard, the story sanitiser, saved data, adding feeds, share links, the security headers, and the AI adapters, router, key store, cache, text formatter, rule verdicts, digest clean-up and search matching.
 - **Worker contract** tests (`test/worker`) run inside Cloudflare's runtime through `@cloudflare/vitest-plugin`.
 - **AI providers** answer with responses recorded from Anthropic and TypeSafe, or written to OpenAI's documented format (`test/fixtures/ai`). Every journey test also checks every request it makes: a test key sent anywhere but its own provider fails the test.
 
@@ -306,7 +321,7 @@ src/
   features/     feeds · story · bookmarks · subscriptions · preferences · share ·
                 shortcuts · auth (GitHub sign-in, finished by the Worker) ·
                 ai (Settings › AI, provider adapters, task router, key store, cache,
-                story actions, filter rules, Catch me up)
+                story actions, filter rules, Catch me up) · search
   components/   AppShell, NavPanel, Drawer, StoryList, StoryRow, StoryCard, StoryImage,
                 Monogram, Toast, Segmented, Icon
   lib/          dates, images, feed tiles; shared with the Worker: JSDoc types, ids,
