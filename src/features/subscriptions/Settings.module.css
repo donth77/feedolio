@@ -23,7 +23,13 @@
 }
 
 .sectionTitle {
+  /* Clears the phone top bar when a Settings tab jumps here. */
+  scroll-margin-top: 80px;
   font: 600 26px/1.2 var(--font-read);
+}
+
+.sectionTitle:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .help {

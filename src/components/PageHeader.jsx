@@ -9,12 +9,14 @@ import styles from './PageHeader.module.css';
  *   title: string,
  *   description?: import('react').ReactNode,
  *   actions?: import('react').ReactNode,
+ *   documentTitle?: string,
  * }} props
+ *   documentTitle: names the tab when it should differ from the heading
  */
-export default function PageHeader({ title, description, actions }) {
+export default function PageHeader({ title, description, actions, documentTitle = title }) {
   useEffect(() => {
-    document.title = `${title} · Feedolio`;
-  }, [title]);
+    document.title = `${documentTitle} · Feedolio`;
+  }, [documentTitle]);
 
   return (
     <div className={styles.header}>

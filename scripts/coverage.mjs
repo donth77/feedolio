@@ -11,6 +11,18 @@ import { startVitest } from 'vitest/node';
 
 const UNIT_FILES = [
   'src/app/persistence.js',
+  'src/features/ai/cache.js',
+  'src/features/ai/errors.js',
+  'src/features/ai/formatText.js',
+  'src/features/ai/keys.js',
+  'src/features/ai/prompts.js',
+  'src/features/ai/providerInfo.js',
+  'src/features/ai/providers/anthropic.js',
+  'src/features/ai/providers/decision.js',
+  'src/features/ai/providers/http.js',
+  'src/features/ai/providers/openaiCompatible.js',
+  'src/features/ai/router.js',
+  'src/features/ai/usage.js',
   'src/features/story/cleanStoryHtml.js',
   'src/features/subscriptions/addFeed.js',
   'src/lib/beacons.js',
@@ -38,7 +50,7 @@ const RUNS = [
   {
     project: 'journeys',
     include: ['src/**/*.{js,jsx}'],
-    exclude: [...UNIT_FILES, 'src/main.jsx', 'src/lib/types.js'],
+    exclude: [...UNIT_FILES, 'src/main.jsx', 'src/lib/types.js', 'src/features/ai/types.js'],
     thresholds: { lines: 80 },
   },
 ];

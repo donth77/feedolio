@@ -32,4 +32,12 @@ describe('Security headers', () => {
     expect(directive('require-trusted-types-for')).toBe("require-trusted-types-for 'script'");
     expect(directive('trusted-types')).toBe('trusted-types dompurify');
   });
+
+  it('let the browser reach any https AI provider and local servers like Ollama, and nothing else', () => {
+    // Readers choose their own AI endpoints, so the policy can't name them;
+    // stopping script injection is what keeps keys safe (§7.4).
+    expect(directive('connect-src')).toBe(
+      "connect-src 'self' https: http://localhost:* http://127.0.0.1:*",
+    );
+  });
 });

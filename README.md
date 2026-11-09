@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestones M0 to M9 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser. The optional AI features (M10 to M13) come next.
+> **Status:** milestones M0 to M10 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser, and can connect their own AI provider in Settings › AI. The AI features that use it (M11 to M13) come next.
 >
 > **Live:** set this line after the first production deploy (see [Deploying](#deploying)).
 
@@ -153,6 +153,27 @@ To turn it on:
 
 Without them, sign-in is hidden. If you use an Auth0 custom domain, add it to `connect-src` in `public/_headers`.
 
+## AI, with your own key
+
+AI is optional and stays off until a reader sets it up in **Settings › AI** (`/settings/ai`). Feedolio has no AI backend: the browser calls the reader's chosen provider directly, with the reader's own key, and the reader's provider bills them.
+
+| Role                                | Providers                                                                                       | Does                                                         |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **General model** (required for AI) | Anthropic, OpenAI, OpenRouter, Ollama on the reader's computer, or any OpenAI-compatible server | Summaries, translations, explanations, the digest            |
+| **Decision model** (optional)       | TypeSafe Jev, through OpenRouter or TypeSafe's API                                              | Yes/no rule matching and ranking, with calibrated confidence |
+
+- **Connecting:** pick a provider, paste a key and press **Test connection**. Feedolio lists the provider's models (free) and shows "Connected · 14 models · 320 ms". Anthropic opens on `claude-opus-5-5`; readers can pick any model their key lists. A saved connection is checked again when Settings › AI opens.
+- **Plain-words errors:** a rejected key, a server that can't be reached, a bad address, or a provider turning a request down each get their own message. Anything a provider says is scrubbed of the key before it's shown.
+- **Ollama:** it must allow Feedolio's address. Start it with `OLLAMA_ORIGINS` set to the site's address (for example `OLLAMA_ORIGINS=https://feedolio.example.workers.dev ollama serve`), then test again. Some browsers ask before a website can reach a local server.
+- **Jev:** TypeSafe's own API only accepts requests from TypeSafe's console (checked 2026-11-09), so browsers can't reach it from Feedolio. OpenRouter serves the same API and does accept them, so "TypeSafe Jev · OpenRouter" is the route that works today. Without a decision model, the general model does the judging, with a wider "Maybe" band.
+- **Where keys live:** in `localStorage["feedolio:ai-keys:v1"]`, apart from all other data (never in `feedolio:v1`). With **Remember on this device** off they move to `sessionStorage` and go when the tab closes. Signed-in readers have their own (`…:<user id>`). Keys are never logged and never sent to `/api/feed`.
+- **Remove all keys** deletes every Feedolio AI key in the browser, for every account, and turns AI off. Settings stay, so AI works again after connecting.
+- **Which model does what:** writing goes to the general model; yes/no and scoring go to the decision model when there is one. Settings shows the table.
+- **Usage:** Settings › AI counts this session's requests and approximate tokens sent. Only stories the reader uses AI on, or that rules check, are sent.
+- **Anthropic details:** the official SDK runs in browser mode (`dangerouslyAllowBrowser`, safe because the key is the reader's own), pinned to `api.anthropic.com`. Answers stream at low effort; JSON uses structured output; a refusal is retried on Anthropic's recommended model (`fallbacks: "default"`).
+- **Code loading:** none of this is on the first page. Settings › AI is about 8 KB, and the Anthropic SDK (about 78 KB) loads only when an Anthropic model is used.
+- **Caching:** results will be kept in IndexedDB (`feedolio-ai`) for 30 days, so the same question is never paid for twice.
+
 ## Security
 
 - **Feed content is untrusted.** Story HTML is cleaned by DOMPurify plus Feedolio's own rules when it's shown (see [Reading a story](#reading-a-story)). Titles and excerpts are always text.
@@ -163,14 +184,16 @@ Without them, sign-in is hidden. If you use an Auth0 custom domain, add it to `c
   - Trusted Types are required, so no HTML string can reach the page except through DOMPurify's policy.
   - Pages also get `nosniff`, `X-Frame-Options: DENY`, a strict referrer policy and a locked-down permissions policy.
 - **No third-party scripts:** no analytics, no social widgets, no fonts from other sites.
+- **AI keys:** `connect-src` allows any https address and `localhost`, because readers choose their own AI providers (and Ollama runs locally). So the policy can't stop data leaving; keeping script injection out is what protects keys. Model output is only ever shown as text through Feedolio's own formatter, and feed text is fenced and labelled as untrusted in every prompt.
 
 ## Testing
 
 Journey tests are the main tool: they check what a reader sees and does, not how the code is arranged. Three Vitest projects run against saved copies of real feeds and pages (`test/fixtures`, with their sources in its README):
 
 - **Journeys** (`test/journeys`) render the real app in jsdom and fake only the network (MSW) and, when needed, the clock. Calls to `/api/feed` run the real Worker code in-process. A test "reload" saves as a browser would, then starts a fresh app from storage. Each view is also checked with axe.
-- **Unit** tests (`test/unit`) cover dense logic only: parsing, normalising, main images, feed discovery, the address guard, the story sanitiser, saved data, adding feeds, share links and the security headers.
+- **Unit** tests (`test/unit`) cover dense logic only: parsing, normalising, main images, feed discovery, the address guard, the story sanitiser, saved data, adding feeds, share links, the security headers, and the AI adapters, router, key store, cache and text formatter.
 - **Worker contract** tests (`test/worker`) run inside Cloudflare's runtime through `@cloudflare/vitest-plugin`.
+- **AI providers** answer with responses recorded from Anthropic and TypeSafe, or written to OpenAI's documented format (`test/fixtures/ai`). Every journey test also checks every request it makes: a test key sent anywhere but its own provider fails the test.
 
 Coverage targets are 90% of lines and branches for the Worker and dense logic, and 80% of lines for the app. `scripts/coverage.mjs` measures each project separately.
 
@@ -184,20 +207,21 @@ They need a browser: run `pnpm exec playwright install chromium` once, or set `P
 
 ## Decisions and trade-offs
 
-| Decision                                                 | Why                                                                                                                  | Trade-off                                                                        |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| A small Cloudflare Worker fetches feeds                  | Publishers don't allow browsers to read their feeds directly (CORS), and parsing XML on a server keeps the app light | One server-side piece to run; its URL checks keep it from becoming an open proxy |
-| Cloudflare's edge caches feed answers for 10 minutes     | Keeps the Worker within the free plan and makes repeat loads instant                                                 | A story can appear up to 10 minutes late; the list says how fresh it is          |
-| Feed HTML is cleaned in the browser, when shown          | One place to audit, and better rules protect old bookmarks too                                                       | About 17 KB more on the story page, loaded only there                            |
-| Saved data lives in `localStorage`                       | Synchronous, tiny and easy to test; nothing to sign up for                                                           | Per device and about 5 MB; a warning appears if it fills up                      |
-| Bookmarks keep a full copy of the story                  | Feeds keep only their latest items, so saved stories would otherwise disappear                                       | Uses more storage than a link would                                              |
-| Redux Toolkit with RTK Query                             | Feed data gets caching, retries and loading states without hand-written code; reader data stays in plain slices      | More moving parts than React state alone                                         |
-| JavaScript with JSDoc, CSS Modules and design tokens     | As the brief asks: no TypeScript, no CSS libraries                                                                   | Types are documented, not compiled                                               |
-| A "new since your last visit" divider, not unread counts | Shows where the reader left off without tracking every story                                                         | Doesn't remember individual stories read                                         |
+| Decision                                                 | Why                                                                                                                  | Trade-off                                                                                                      |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| A small Cloudflare Worker fetches feeds                  | Publishers don't allow browsers to read their feeds directly (CORS), and parsing XML on a server keeps the app light | One server-side piece to run; its URL checks keep it from becoming an open proxy                               |
+| Cloudflare's edge caches feed answers for 10 minutes     | Keeps the Worker within the free plan and makes repeat loads instant                                                 | A story can appear up to 10 minutes late; the list says how fresh it is                                        |
+| Feed HTML is cleaned in the browser, when shown          | One place to audit, and better rules protect old bookmarks too                                                       | About 17 KB more on the story page, loaded only there                                                          |
+| Saved data lives in `localStorage`                       | Synchronous, tiny and easy to test; nothing to sign up for                                                           | Per device and about 5 MB; a warning appears if it fills up                                                    |
+| Bookmarks keep a full copy of the story                  | Feeds keep only their latest items, so saved stories would otherwise disappear                                       | Uses more storage than a link would                                                                            |
+| Redux Toolkit with RTK Query                             | Feed data gets caching, retries and loading states without hand-written code; reader data stays in plain slices      | More moving parts than React state alone                                                                       |
+| JavaScript with JSDoc, CSS Modules and design tokens     | As the brief asks: no TypeScript, no CSS libraries                                                                   | Types are documented, not compiled                                                                             |
+| A "new since your last visit" divider, not unread counts | Shows where the reader left off without tracking every story                                                         | Doesn't remember individual stories read                                                                       |
+| AI runs in the browser on the reader's own keys          | No AI backend and no AI cost to us; any provider, including local models                                             | Providers must allow browser requests; keys share the page with feed content, so injection defences are strict |
 
 ## What's next
 
-- **AI features (M10 to M13), optional:** summaries and translation, plain-English filter rules, and a "Catch me up" digest, on the reader's own keys.
+- **AI features (M11 to M13), optional:** Summarize, Translate and Explain on stories, plain-English filter rules, and a "Catch me up" digest, on the connection set up in Settings › AI.
 - **Later:** sync across devices, search, OPML import, offline reading, and rate limiting on the feed endpoint.
 
 ## The feed endpoint
@@ -227,7 +251,8 @@ Errors look like `{ "error": { "code": "NO_FEED_FOUND", "message": "…" } }`.
 src/
   app/          store, router, saved data (persistence.js), visits, route-level states
   features/     feeds · story · bookmarks · subscriptions · preferences · share ·
-                shortcuts · auth (GitHub sign-in through Auth0)
+                shortcuts · auth (GitHub sign-in through Auth0) ·
+                ai (Settings › AI, provider adapters, task router, key store, cache)
   components/   AppShell, NavPanel, Drawer, StoryList, StoryRow, StoryCard, StoryImage,
                 Monogram, Toast, Segmented, Icon
   lib/          dates, images, feed tiles; shared with the Worker: JSDoc types, ids,

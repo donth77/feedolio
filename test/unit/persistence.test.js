@@ -42,6 +42,20 @@ const BOOKMARK = {
   story: { id: 's_1', title: 'A story' },
 };
 
+/** AI setup, which never holds a key: keys are kept apart (features/ai/keys.js). */
+const AI_SETTINGS = {
+  general: {
+    provider: 'anthropic',
+    baseUrl: 'https://api.anthropic.com',
+    model: 'claude-opus-5-5',
+    traits: {},
+  },
+  decision: null,
+  features: { actions: true, rules: true, catchUp: true },
+  translateTo: 'es',
+  rememberKeys: true,
+};
+
 /** A store state with the saved slices, as the app holds them. */
 function appState() {
   return {
@@ -54,6 +68,7 @@ function appState() {
       openedIds: ['s_1'],
       cutoff: '2026-11-04T00:00:00.000Z',
     },
+    aiSettings: AI_SETTINGS,
     feedApi: {},
   };
 }
@@ -91,6 +106,7 @@ describe('loadSaved', () => {
       bookmarks: [BOOKMARK, { ...BOOKMARK, story: 'a story' }],
       preferences: { theme: 'dark' },
       visits: 'yesterday',
+      aiSettings: ['not', 'settings'],
     });
 
     expect(loadSaved()).toEqual({
@@ -98,6 +114,9 @@ describe('loadSaved', () => {
       bookmarks: [BOOKMARK],
       preferences: { theme: 'dark' },
     });
+
+    store({ version: 1, aiSettings: AI_SETTINGS });
+    expect(loadSaved()).toEqual({ aiSettings: AI_SETTINGS });
   });
 
   it('copes with storage the browser blocks', () => {
@@ -162,6 +181,7 @@ describe('save', () => {
         lastCatchUpAt: null,
         openedIds: ['s_1'],
       },
+      aiSettings: AI_SETTINGS,
     });
   });
 

@@ -4,11 +4,12 @@
 # script-src allows our own files plus the inline theme script in index.html,
 # by its hash (test/unit/headers.test.js checks the hash still matches).
 # Trusted Types stop any HTML string reaching the page outside DOMPurify's
-# policy. Story images come from anywhere, so img-src is open. Signing in
-# exchanges a code with Auth0, so connect-src allows its domains.
+# policy. Story images come from anywhere, so img-src is open. connect-src
+# allows any https host and local servers: readers choose their own AI
+# providers (and Ollama runs on localhost), and sign-in talks to Auth0.
 
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-C2Lh8o/GIBXDhk6UeX50GK18gi8mBwHsNo3Ee3oWZw4='; style-src 'self'; img-src * data:; font-src 'self'; connect-src 'self' https://*.auth0.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests; require-trusted-types-for 'script'; trusted-types dompurify
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-C2Lh8o/GIBXDhk6UeX50GK18gi8mBwHsNo3Ee3oWZw4='; style-src 'self'; img-src * data:; font-src 'self'; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests; require-trusted-types-for 'script'; trusted-types dompurify
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()

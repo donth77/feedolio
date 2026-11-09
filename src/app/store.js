@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import aiSettings, { restoreAiSettings } from '../features/ai/aiSettingsSlice.js';
 import auth, {
   authStateFor,
   guestImportClosed,
@@ -70,6 +71,7 @@ export function makeStore() {
       bookmarks,
       preferences,
       visits,
+      aiSettings,
       auth,
       toast,
       [feedApi.reducerPath]: feedApi.reducer,
@@ -79,6 +81,7 @@ export function makeStore() {
       bookmarks: restoreBookmarks(saved.bookmarks),
       preferences: restorePreferences(saved.preferences),
       visits: restoreVisits(saved.visits),
+      aiSettings: restoreAiSettings(saved.aiSettings),
       auth: authStateFor(user),
     },
     middleware: (getDefault) => getDefault().concat(feedApi.middleware, saveChanges),

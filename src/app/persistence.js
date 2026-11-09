@@ -6,7 +6,9 @@
  *
  * Stored shape (version 1):
  *   { version: 1, subscriptions: Subscription[], bookmarks: Bookmark[],
- *     preferences: Preferences, visits: Visits }
+ *     preferences: Preferences, visits: Visits, aiSettings: AiSettings }
+ *
+ * AI keys are never part of it: they live apart, in features/ai/keys.js.
  *
  * Anything missing, corrupted or unreadable falls back to defaults; storage
  * that can't be used (private browsing, blocked cookies) never breaks the app.
@@ -31,6 +33,7 @@ export const SAVE_INTERVAL_MS = 500;
  * @property {Bookmark[]} [bookmarks]
  * @property {Partial<Preferences>} [preferences]
  * @property {Record<string, unknown>} [visits]
+ * @property {Record<string, unknown>} [aiSettings]
  */
 
 /** @returns {Storage|null} */
@@ -96,6 +99,7 @@ export function loadSaved(key = STORAGE_KEY) {
   if (Array.isArray(parsed.bookmarks)) saved.bookmarks = parsed.bookmarks.filter(isBookmark);
   if (isObject(parsed.preferences)) saved.preferences = parsed.preferences;
   if (isObject(parsed.visits)) saved.visits = parsed.visits;
+  if (isObject(parsed.aiSettings)) saved.aiSettings = parsed.aiSettings;
   return saved;
 }
 
@@ -126,6 +130,7 @@ export function save(state, key = STORAGE_KEY) {
       lastCatchUpAt: state.visits.lastCatchUpAt,
       openedIds: state.visits.openedIds,
     },
+    aiSettings: state.aiSettings,
   };
   const target = storage();
   if (!target) return 'unavailable';
@@ -149,7 +154,13 @@ function isQuotaError(error) {
 }
 
 /** The slices that are saved; a change to any of them schedules a save. */
-const SAVED_SLICES = /** @type {const} */ (['subscriptions', 'bookmarks', 'preferences', 'visits']);
+const SAVED_SLICES = /** @type {const} */ ([
+  'subscriptions',
+  'bookmarks',
+  'preferences',
+  'visits',
+  'aiSettings',
+]);
 
 /**
  * Saves after the saved slices change, at most every SAVE_INTERVAL_MS, and at
