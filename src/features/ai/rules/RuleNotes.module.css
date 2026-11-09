@@ -1,0 +1,29 @@
+.note,
+.status {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-ink-muted);
+}
+
+.note {
+  margin-bottom: var(--space-4);
+}
+
+.status {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-line);
+  font-size: 13px;
+}
+
+.icon {
+  flex: none;
+  margin-top: 1px;
+}
+
+.problem .icon {
+  color: var(--color-danger);
+}

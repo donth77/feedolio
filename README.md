@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestones M0 to M11 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser, and can connect their own AI provider to summarize, translate or explain any story. AI filter rules and a "Catch me up" digest (M12, M13) come next.
+> **Status:** milestones M0 to M12 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser, and can connect their own AI provider to summarize, translate or explain any story, and to hide, highlight or tag stories with plain-English rules. A "Catch me up" digest (M13) comes next.
 >
 > **Live:** set this line after the first production deploy (see [Deploying](#deploying)).
 
@@ -186,6 +186,20 @@ With AI set up, a story page shows **Summarize**, **Translate** (with a language
 - **Off switch:** Settings › AI can turn article actions off. If a key kept for one tab is gone, the buttons point back to Settings.
 - **Code loading:** the actions (about 5 KB) load only for readers who set up AI.
 
+### Filter rules
+
+Readers write rules in plain English in **Settings › Rules** (`/settings/rules`), such as "Hide event announcements and conference promotions", and pick what happens: **Hide**, **Highlight** or **Tag as…** (US-104 to US-108).
+
+- **Test on recent stories** shows what a rule would catch, with each verdict and its confidence, before saving.
+- **Checking:** new stories are checked a moment after they load, in batches of up to 25, once per story and rule version, and never again on refresh. Editing a rule checks stories again. Judgments live in IndexedDB.
+- **Who judges:** Jev when there's a decision model, otherwise the general model (with structured output).
+- **Confidence bands:** with Jev, 75% or more applies the rule, 40–75% goes to **Maybe**, and less is ignored. A general model's confidence is self-reported, so its bands are wider: 85%+ applies, 30–85% is Maybe.
+- **Maybe** (`/maybe`): the reader answers "Yes" or "Not a match", with Undo. The answer is remembered and wins over the model.
+- **Hidden** (`/hidden`): hidden stories leave the lists ("3 stories hidden by your rules · View hidden") and wait here with the reason, until the reader unhides them. Nothing is ever deleted: hidden stories stay even if their rule is switched off, edited or removed, and a copy of each story is kept so it outlives its feed.
+- **Highlights and tags:** highlighted stories get a light accent and "Highlighted · New AI devices"; tags appear as chips and get their own page (`/tags/:tag`). The sidebar gains **AI** (Maybe, Hidden) and **Tags** groups, the collapsed rail shows Maybe and Hidden, and phones show them as chips.
+- **When something goes wrong,** All stories says so under the list ("Rules couldn’t check new stories. …") and checking resumes with the next new stories.
+- **Code loading:** the rules pages and the checker load only for readers with rules; on the first page, rules cost about 2 KB.
+
 ## Security
 
 - **Feed content is untrusted.** Story HTML is cleaned by DOMPurify plus Feedolio's own rules when it's shown (see [Reading a story](#reading-a-story)). Titles and excerpts are always text.
@@ -233,7 +247,7 @@ They need a browser: run `pnpm exec playwright install chromium` once, or set `P
 
 ## What's next
 
-- **AI features (M12, M13), optional:** plain-English filter rules with Maybe and Hidden views, and a "Catch me up" digest, on the connection set up in Settings › AI.
+- **AI Catch me up (M13), optional:** a digest of what the reader missed, grouped into stories, ranked and summarised, on the connection set up in Settings › AI.
 - **Later:** sync across devices, search, OPML import, offline reading, and rate limiting on the feed endpoint.
 
 ## The feed endpoint

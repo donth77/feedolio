@@ -1,5 +1,24 @@
 import { configureStore } from '@reduxjs/toolkit';
-import aiSettings, { restoreAiSettings } from '../features/ai/aiSettingsSlice.js';
+import aiSettings, {
+  decisionRemoved,
+  decisionSaved,
+  featureToggled,
+  generalModelChosen,
+  generalSaved,
+  restoreAiSettings,
+} from '../features/ai/aiSettingsSlice.js';
+import judgments, {
+  judgmentAnswered,
+  judgmentsCleared,
+  judgmentsLoaded,
+} from '../features/ai/rules/judgmentsSlice.js';
+import rules, {
+  restoreRules,
+  ruleAdded,
+  ruleEdited,
+  ruleRestored,
+  ruleToggled,
+} from '../features/ai/rules/rulesSlice.js';
 import auth, {
   authStateFor,
   guestImportClosed,
@@ -65,6 +84,8 @@ export function makeStore() {
     };
   };
 
+  const checks = ruleCheckListener();
+
   const store = configureStore({
     reducer: {
       subscriptions,
@@ -72,6 +93,8 @@ export function makeStore() {
       preferences,
       visits,
       aiSettings,
+      rules,
+      judgments,
       auth,
       toast,
       [feedApi.reducerPath]: feedApi.reducer,
@@ -82,10 +105,23 @@ export function makeStore() {
       preferences: restorePreferences(saved.preferences),
       visits: restoreVisits(saved.visits),
       aiSettings: restoreAiSettings(saved.aiSettings),
+      rules: restoreRules(saved.rules),
       auth: authStateFor(user),
     },
-    middleware: (getDefault) => getDefault().concat(feedApi.middleware, saveChanges),
+    middleware: (getDefault) =>
+      getDefault().concat(feedApi.middleware, saveChanges, checks.middleware),
   });
+
+  /** Reads the current account's rule judgments, if it has any. */
+  const loadJudgments = () => {
+    const { rules: current } = store.getState();
+    if (current.ids.length === 0 && !current.judged) {
+      store.dispatch(judgmentsLoaded([]));
+      return;
+    }
+    void import('../features/ai/rules/ruleChecks.js').then((module) => module.loadJudgments(store));
+  };
+  loadJudgments();
 
   /**
    * Switches whose data is shown: saves the current account's changes, then
@@ -102,6 +138,8 @@ export function makeStore() {
     const firstTime = next !== null && !hasSaved(key);
     store.dispatch(next ? signedIn(next) : signedOut());
     store.dispatch(persistedStateHydrated(loadSaved(key)));
+    store.dispatch(judgmentsCleared());
+    loadJudgments();
     const guestBookmarks = loadSaved(STORAGE_KEY).bookmarks?.length ?? 0;
     if (firstTime && guestBookmarks > 0) store.dispatch(guestImportOffered(guestBookmarks));
   };
@@ -109,8 +147,11 @@ export function makeStore() {
   return Object.assign(store, {
     /** Saves pending changes now, e.g. when the page is closing. */
     flushSaves: () => saver?.flush(),
-    /** Stops saving, for a store that's being replaced (tests start a new app per test). */
-    stopSaving: () => saver?.cancel(),
+    /** Stops saving and rule checks, for a store that's being replaced (tests start a new app per test). */
+    stopSaving: () => {
+      saver?.cancel();
+      checks.stop();
+    },
     /** Where the current account's data is saved. */
     storageKey: () => keyOf(store.getState()),
     /** Takes in what another tab saved for the current account. */
@@ -131,6 +172,70 @@ export function makeStore() {
       return guest.length;
     },
   });
+}
+
+/**
+ * Checks new stories against the reader's rules, a moment after anything
+ * that could need it: new feed data, a rule change, judgments loading, or AI
+ * being set up. A newer trigger replaces a check in progress. The checking
+ * code loads only for readers with rules.
+ */
+function ruleCheckListener() {
+  const TRIGGERS = [
+    ruleAdded,
+    ruleEdited,
+    ruleToggled,
+    ruleRestored,
+    judgmentsLoaded,
+    generalSaved,
+    generalModelChosen,
+    decisionSaved,
+    decisionRemoved,
+    featureToggled,
+  ];
+  const load = () => import('../features/ai/rules/ruleChecks.js');
+  /** @type {ReturnType<typeof setTimeout>|null} */
+  let waiting = null;
+  /** @type {AbortController|null} */
+  let running = null;
+
+  const stop = () => {
+    if (waiting) clearTimeout(waiting);
+    waiting = null;
+    running?.abort();
+    running = null;
+  };
+
+  /** @type {import('@reduxjs/toolkit').Middleware} */
+  const middleware = (api) => (next) => (action) => {
+    const result = next(action);
+    // The reader's answers in Maybe and Hidden are saved as they're given.
+    if (judgmentAnswered.match(action)) {
+      void load().then((module) => module.saveAnswer(api.getState(), action.payload));
+      return result;
+    }
+    const trigger =
+      feedApi.endpoints.getFeed.matchFulfilled(action) ||
+      TRIGGERS.some((creator) => creator.match(action));
+    const state = /** @type {RootState} */ (api.getState());
+    if (!trigger || state.rules.ids.length === 0 || !state.aiSettings.general) return result;
+    stop();
+    waiting = setTimeout(async () => {
+      waiting = null;
+      const controller = new AbortController();
+      running = controller;
+      const { runRuleChecks } = await load();
+      if (controller.signal.aborted) return;
+      await runRuleChecks({
+        getState: api.getState,
+        dispatch: api.dispatch,
+        signal: controller.signal,
+      });
+      if (running === controller) running = null;
+    }, 700);
+    return result;
+  };
+  return { middleware, stop };
 }
 
 /** @typedef {ReturnType<typeof makeStore>} AppStore */

@@ -1,0 +1,100 @@
+.button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-control);
+  font: var(--type-control);
+  white-space: nowrap;
+}
+
+.primary {
+  composes: button;
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.secondary {
+  composes: button;
+  border: 1px solid var(--color-line);
+  background: var(--color-raised);
+  color: var(--color-ink);
+}
+
+.secondary:hover {
+  border-color: var(--color-line-hover);
+}
+
+.answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.headerLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  color: var(--color-ink-muted);
+  font: 600 14px/1 var(--font-ui);
+  text-decoration: none;
+}
+
+.headerLink:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 780px;
+  margin-bottom: var(--space-6);
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--color-maybe-bg);
+  color: var(--color-maybe-ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.note svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.why {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+/* How sure the rule was: a 64 px track, filled to the confidence. */
+.meter {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 64px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--color-line);
+}
+
+.meter span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: var(--color-maybe-ink);
+}

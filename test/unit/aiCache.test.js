@@ -5,6 +5,7 @@ import {
   answerKey,
   closeCache,
   MAX_AGE_MS,
+  readAllCached,
   readCached,
   writeCached,
 } from '../../src/features/ai/cache.js';
@@ -74,6 +75,22 @@ describe('The AI cache', () => {
     expect(records).toEqual(['newer']);
   });
 
+  it('never trims what it was told to keep, and reads one account’s entries at once', async () => {
+    await writeCached('judgments', 'guest|s1|r1', { verdict: 'match' }, { keep: true });
+    await writeCached('judgments', 'guest|s2|r1', { verdict: 'no' });
+    await writeCached('judgments', 'github|42|s1|r1', { verdict: 'maybe' }, { keep: true });
+    expect(await readAllCached('judgments', 'guest|')).toEqual([
+      { verdict: 'match' },
+      { verdict: 'no' },
+    ]);
+
+    vi.setSystemTime(NOW.getTime() + MAX_AGE_MS + 1);
+    await closeCache();
+    expect(await readAllCached('judgments', 'guest|')).toEqual([{ verdict: 'match' }]);
+    expect(await readAllCached('judgments', 'github|42|')).toEqual([{ verdict: 'maybe' }]);
+    expect(await readCached('judgments', 'guest|s1|r1')).toEqual({ verdict: 'match' });
+  });
+
   it('keeps results in memory where IndexedDB is missing or fails', async () => {
     globalThis.indexedDB = /** @type {any} */ ({
       open() {
@@ -83,6 +100,9 @@ describe('The AI cache', () => {
     await writeCached('answers', 'a', 'In memory');
     expect(await readCached('answers', 'a')).toBe('In memory');
     expect(await readCached('answers', 'b')).toBeNull();
+    await writeCached('judgments', 'guest|s1|r1', 'Kept', { keep: true });
+    await writeCached('judgments', 'github|42|s1|r1', 'Theirs');
+    expect(await readAllCached('judgments', 'guest|')).toEqual(['Kept']);
   });
 
   it('copes with a database that won’t open', async () => {

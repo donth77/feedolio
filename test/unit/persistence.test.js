@@ -69,9 +69,22 @@ function appState() {
       cutoff: '2026-11-04T00:00:00.000Z',
     },
     aiSettings: AI_SETTINGS,
+    rules: { ids: ['r1'], entities: { r1: RULE }, judged: true },
+    judgments: { entities: {}, loaded: true },
     feedApi: {},
   };
 }
+
+/** A filter rule, saved with the reader's data. Its judgments live in IndexedDB. */
+const RULE = {
+  id: 'r1',
+  text: 'Hide event announcements',
+  action: 'hide',
+  tag: null,
+  enabled: true,
+  version: 2,
+  createdAt: '2026-11-08T00:00:00.000Z',
+};
 
 /** @param {unknown} data */
 const store = (data) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -115,8 +128,11 @@ describe('loadSaved', () => {
       preferences: { theme: 'dark' },
     });
 
-    store({ version: 1, aiSettings: AI_SETTINGS });
-    expect(loadSaved()).toEqual({ aiSettings: AI_SETTINGS });
+    store({ version: 1, aiSettings: AI_SETTINGS, rules: { list: [RULE], judged: true } });
+    expect(loadSaved()).toEqual({
+      aiSettings: AI_SETTINGS,
+      rules: { list: [RULE], judged: true },
+    });
   });
 
   it('copes with storage the browser blocks', () => {
@@ -182,6 +198,7 @@ describe('save', () => {
         openedIds: ['s_1'],
       },
       aiSettings: AI_SETTINGS,
+      rules: { list: [RULE], judged: true },
     });
   });
 

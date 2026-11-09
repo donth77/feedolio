@@ -52,6 +52,22 @@ export const routes = [
                 path: 'settings/ai',
                 lazy: lazyView(() => import('../features/ai/AiSettings.jsx')),
               },
+              {
+                path: 'settings/rules',
+                lazy: lazyView(() => import('../features/ai/rules/RulesEditor.jsx')),
+              },
+              {
+                path: 'maybe',
+                lazy: lazyView(() => import('../features/ai/rules/MaybeView.jsx')),
+              },
+              {
+                path: 'hidden',
+                lazy: lazyView(() => import('../features/ai/rules/HiddenView.jsx')),
+              },
+              {
+                path: 'tags/:tag',
+                lazy: lazyView(() => import('../features/ai/rules/TagView.jsx')),
+              },
               { path: '*', Component: NotFound },
             ],
           },

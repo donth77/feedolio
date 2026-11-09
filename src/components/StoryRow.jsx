@@ -3,6 +3,7 @@ import BookmarkButton from '../features/bookmarks/BookmarkButton.jsx';
 import { sizedImageUrl } from '../lib/images.js';
 import { rememberOpenedStory } from '../lib/returnFocus.js';
 import { fullTime, savedWhen, storyTime } from '../lib/time.js';
+import RuleBadges from './RuleBadges.jsx';
 import StoryImage from './StoryImage.jsx';
 import styles from './StoryRow.module.css';
 
@@ -33,13 +34,29 @@ function shortAuthors(author) {
  *   from?: { pathname: string, label: string },
  *   headingLevel?: 2|3,
  *   savedAt?: string,
- *   action?: import('react').ReactNode,
+ *   action?: import('react').ReactNode | false,
+ *   effects?: import('../features/ai/rules/ruleEffects.js').StoryEffects,
+ *   note?: import('react').ReactNode,
+ *   extra?: import('react').ReactNode,
  * }} props
  *   headingLevel: 3 under date headers, 2 in a plain list
  *   savedAt: shows when the story was saved instead of when it was published
- *   action: replaces the Save button
+ *   action: replaces the Save button; false leaves it out
+ *   effects: what the reader's rules say about it
+ *   note: a line under the excerpt, e.g. why a rule hid it
+ *   extra: controls under the text, e.g. answers in Maybe
  */
-export default function StoryRow({ item, now, from, headingLevel = 3, savedAt, action }) {
+export default function StoryRow({
+  item,
+  now,
+  from,
+  headingLevel = 3,
+  savedAt,
+  action,
+  effects,
+  note,
+  extra,
+}) {
   const { story, feed } = item;
   const author = shortAuthors(story.author);
   const Headline = headingLevel === 2 ? 'h2' : 'h3';
@@ -50,6 +67,7 @@ export default function StoryRow({ item, now, from, headingLevel = 3, savedAt, a
       data-story-row=""
       data-story-id={story.id}
       data-original={story.link}
+      data-highlight={effects?.highlight ? '' : undefined}
     >
       <div className={styles.thumb}>
         <StoryImage
@@ -97,11 +115,16 @@ export default function StoryRow({ item, now, from, headingLevel = 3, savedAt, a
           </Link>
         </Headline>
         {story.excerpt && <p className={styles.excerpt}>{story.excerpt}</p>}
+        <RuleBadges effects={effects} />
+        {note && <p className={styles.note}>{note}</p>}
+        {extra && <div className={styles.extra}>{extra}</div>}
         <KeyHint />
       </div>
-      <div className={styles.action}>
-        {action ?? <BookmarkButton story={story} feedTitle={feed.title} />}
-      </div>
+      {action !== false && (
+        <div className={styles.action}>
+          {action ?? <BookmarkButton story={story} feedTitle={feed.title} />}
+        </div>
+      )}
     </li>
   );
 }

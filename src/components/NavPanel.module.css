@@ -135,7 +135,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-.feeds {
+.feeds,
+.group {
   display: flex;
   flex-direction: column;
   gap: 6px;
