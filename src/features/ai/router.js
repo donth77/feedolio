@@ -1,6 +1,19 @@
 import { AiError } from './errors.js';
 import { getKey } from './keys.js';
-import { JUDGE_SYSTEM, JUDGMENTS_SCHEMA, judgePrompt } from './prompts.js';
+import {
+  DIGEST_SUMMARY_SYSTEM,
+  digestSummaryPrompt,
+  GROUP_SYSTEM,
+  groupPrompt,
+  GROUPS_SCHEMA,
+  IMPORTANCE_LEVELS,
+  JUDGE_SYSTEM,
+  JUDGMENTS_SCHEMA,
+  judgePrompt,
+  RANK_SYSTEM,
+  rankPrompt,
+  RANKS_SCHEMA,
+} from './prompts.js';
 import { GENERAL_PROVIDERS } from './providerInfo.js';
 import { estimateTokens, recordUsage } from './usage.js';
 
@@ -15,6 +28,7 @@ import { estimateTokens, recordUsage } from './usage.js';
 /** @typedef {import('./providerInfo.js').GeneralProvider} GeneralProvider */
 /** @typedef {import('./providerInfo.js').DecisionProvider} DecisionProvider */
 /** @typedef {import('./prompts.js').PromptStory} PromptStory */
+/** @typedef {import('./prompts.js').PromptGroup} PromptGroup */
 /** @typedef {import('./types.js').TextRequest} TextRequest */
 /** @typedef {import('./types.js').TokenCount} TokenCount */
 /** @typedef {{ settings: AiSettings, userId: string|null }} AiContext */
@@ -174,6 +188,113 @@ export async function judge({ rule, stories, signal }, context) {
     by: 'general',
     model: result.model,
   };
+}
+
+/**
+ * Groups stories into main stories with the general model. Returns what the
+ * model said; callers keep only ids they know (T-28).
+ *
+ * @param {{ stories: PromptStory[], signal?: AbortSignal }} request
+ * @param {AiContext} context
+ * @returns {Promise<{ groups: { headline: unknown, storyIds: unknown }[], model: string }>}
+ */
+export async function groupStories({ stories, signal }, context) {
+  const adapter = await generalAdapter(context);
+  const prompt = groupPrompt(stories);
+  const result = await adapter.json({
+    system: GROUP_SYSTEM,
+    prompt,
+    name: 'groups',
+    schema: GROUPS_SCHEMA,
+    effort: 'medium',
+    signal,
+  });
+  count(result.usage, GROUP_SYSTEM + prompt, JSON.stringify(result.data));
+  return {
+    groups: Array.isArray(result.data?.groups) ? result.data.groups : [],
+    model: result.model,
+  };
+}
+
+/**
+ * How important each main story is, from 0 to 100: the decision model when
+ * there is one, the general model otherwise.
+ *
+ * @param {{ groups: PromptGroup[], signal?: AbortSignal }} request
+ * @param {AiContext} context
+ * @returns {Promise<{ scores: { id: string, importance: number }[], by: 'decision'|'general', model: string }>}
+ */
+export async function rankGroups({ groups, signal }, context) {
+  const role = roleFor('rank', context);
+  if (!role) throw new AiError('setup');
+  const known = new Set(groups.map((group) => group.id));
+
+  if (role === 'decision' && context.settings.decision) {
+    const { createDecisionAdapter } = await import('./providers/decision.js');
+    const adapter = createDecisionAdapter({
+      provider: context.settings.decision.provider,
+      apiKey: getKey(context.userId, 'decision') ?? '',
+    });
+    const items = groups.map((group) => ({
+      id: group.id,
+      text: [group.headline, ...group.stories.map((story) => `- ${story.title}`)].join('\n'),
+    }));
+    const result = await adapter.score({
+      question: 'How much this main news story matters to a general reader of technology news',
+      items,
+      levels: IMPORTANCE_LEVELS,
+      signal,
+    });
+    count(result.usage, items.map((item) => item.text).join(''), '');
+    return {
+      scores: result.scores.filter((score) => known.has(score.id)),
+      by: 'decision',
+      model: result.model,
+    };
+  }
+
+  const adapter = await generalAdapter(context);
+  const prompt = rankPrompt(groups);
+  const result = await adapter.json({
+    system: RANK_SYSTEM,
+    prompt,
+    name: 'ranks',
+    schema: RANKS_SCHEMA,
+    effort: 'medium',
+    signal,
+  });
+  count(result.usage, RANK_SYSTEM + prompt, JSON.stringify(result.data));
+  const ranks = Array.isArray(result.data?.ranks) ? result.data.ranks : [];
+  /** @type {Map<string, number>} */
+  const scores = new Map();
+  for (const rank of ranks) {
+    if (!known.has(rank?.id) || scores.has(rank.id) || typeof rank.importance !== 'number')
+      continue;
+    scores.set(rank.id, Math.round(Math.min(100, Math.max(0, rank.importance))));
+  }
+  return {
+    scores: [...scores].map(([id, importance]) => ({ id, importance })),
+    by: 'general',
+    model: result.model,
+  };
+}
+
+/**
+ * A short summary of one main story, from its reports.
+ *
+ * @param {{ group: PromptGroup, signal?: AbortSignal }} request
+ * @param {AiContext} context
+ */
+export function summarizeGroup({ group, signal }, context) {
+  return generate(
+    {
+      system: DIGEST_SUMMARY_SYSTEM,
+      prompt: digestSummaryPrompt(group),
+      effort: 'medium',
+      signal,
+    },
+    context,
+  );
 }
 
 /**

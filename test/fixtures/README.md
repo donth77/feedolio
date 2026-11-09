@@ -50,6 +50,10 @@ Served by `ai.js`, which also holds the fake test keys. Each provider accepts on
 | `jev-judgments-events.json` | Recorded 2026-11-09: Jev on all 71 fixture stories, rule "Hide event announcements and conference promotions" | Founder Summit stories 0.92–0.95; a podcast launch 0.50 (Maybe) |
 | `jev-judgments-funding.json` | Recorded 2026-11-09: Jev on all 71 fixture stories, rule "Tag startup funding and valuation news as Funding" | Five raises 0.97–0.99; Wonder's IPO filing 0.70 (Maybe) |
 | `anthropic-judgments-events.json` | Recorded 2026-11-09: Claude Opus 5.5 on the same stories and events rule, structured output | Only the three Founder Summit stories match |
+| `anthropic-digest-groups.json` | Recorded 2026-11-09: Claude Opus 5.5 grouping the 44 unread fixture stories for Catch me up, structured output | Eight main stories citing 21 stories; the other 23 go under Everything else |
+| `anthropic-digest-ranks.json` | Recorded 2026-11-09: Claude Opus 5.5 ranking those eight, structured output | Importance 8–82, for when there's no decision model |
+| `anthropic-digest-summaries.json` | Recorded 2026-11-09: the eight streamed summaries, keyed by headline | Each value is the raw event stream |
+| `jev-digest-ranks.json`     | Recorded 2026-11-09: Jev scoring the same eight with `score` questions on a three-level scale | The Binance hack scored highest (1.67 of 2) |
 | `jev-models.json`           | Recorded 2026-11-09: `GET https://api.typesafe.ai/v1/models`                        |                                                                             |
 | `jev-systemone.json`        | Recorded 2026-11-09: `POST https://api.typesafe.ai/v1/systemone`, three yes/no questions | The conference story came back at 0.53: a "Maybe"                     |
 | `openrouter-models.json`    | Recorded 2026-11-09: `GET https://openrouter.ai/api/v1/models` (public)            | Five of the 461 models, keeping only the fields Feedolio reads              |

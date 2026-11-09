@@ -1,4 +1,7 @@
 import { http, HttpResponse } from 'msw';
+import anthropicDigestGroups from './ai/anthropic-digest-groups.json';
+import anthropicDigestRanks from './ai/anthropic-digest-ranks.json';
+import anthropicDigestSummaries from './ai/anthropic-digest-summaries.json';
 import anthropicJudgmentsEvents from './ai/anthropic-judgments-events.json';
 import anthropicJudgments from './ai/anthropic-judgments.json';
 import anthropicModels from './ai/anthropic-models.json';
@@ -7,6 +10,7 @@ import anthropicSummarizePandemic from './ai/anthropic-summarize-pandemic.sse?ra
 import anthropicSummary from './ai/anthropic-summary.sse?raw';
 import anthropicTranslateStocksEs from './ai/anthropic-translate-stocks-es.sse?raw';
 import customModels from './ai/custom-models.json';
+import jevDigestRanks from './ai/jev-digest-ranks.json';
 import jevJudgmentsEvents from './ai/jev-judgments-events.json';
 import jevJudgmentsFunding from './ai/jev-judgments-funding.json';
 import jevModels from './ai/jev-models.json';
@@ -24,6 +28,9 @@ import openrouterModels from './ai/openrouter-models.json';
  */
 
 const RECORDED = {
+  'anthropic-digest-groups.json': anthropicDigestGroups,
+  'anthropic-digest-ranks.json': anthropicDigestRanks,
+  'jev-digest-ranks.json': jevDigestRanks,
   'anthropic-judgments.json': anthropicJudgments,
   'anthropic-models.json': anthropicModels,
   'custom-models.json': customModels,
@@ -120,9 +127,51 @@ export const eventStream = (stream) =>
 function anthropicAnswer(body) {
   const system = String(body?.system ?? '');
   if (system.startsWith('You check news stories')) return anthropicJudgment(body);
+  if (system.startsWith('You build a news digest')) return HttpResponse.json(digestGroups());
+  if (system.startsWith('You rank the main news stories')) {
+    return HttpResponse.json(structuredClone(anthropicDigestRanks));
+  }
+  if (system.startsWith('You summarise one main news story')) return digestSummary(body);
   if (system.startsWith('You translate')) return eventStream('anthropic-translate-stocks-es.sse');
   if (system.startsWith('You explain')) return eventStream('anthropic-explain-stocks.sse');
   return eventStream('anthropic-summarize-pandemic.sse');
+}
+
+/**
+ * The recorded digest of the fixture stories (Claude grouped and summarised,
+ * Jev ranked, 2026-11-09), with any change a test makes to the grouping.
+ */
+let groupingChange = (/** @type {any} */ groups) => groups;
+
+/**
+ * Changes the recorded grouping for one test, e.g. to cite a story that
+ * doesn't exist. Cleared after each test.
+ *
+ * @param {(groups: { headline: string, storyIds: string[] }[]) => unknown[]} change
+ */
+export function changeDigestGroups(change) {
+  groupingChange = change;
+}
+
+function digestGroups() {
+  const message = structuredClone(anthropicDigestGroups);
+  const block = message.content.find((/** @type {any} */ part) => part.type === 'text');
+  block.text = JSON.stringify({ groups: groupingChange(JSON.parse(block.text).groups) });
+  return message;
+}
+
+/**
+ * A main story's recorded summary, streamed as Anthropic sent it.
+ *
+ * @param {any} body
+ */
+function digestSummary(body) {
+  const prompt = String(body?.messages?.[0]?.content ?? '');
+  const headline = JSON.parse(/^Main story: (".*")$/m.exec(prompt)?.[1] ?? '""');
+  const recordedStream = /** @type {Record<string, string>} */ (anthropicDigestSummaries)[headline];
+  return new HttpResponse(recordedStream ?? anthropicSummary, {
+    headers: { 'Content-Type': 'text/event-stream' },
+  });
 }
 
 /**
@@ -148,7 +197,10 @@ const overrides = new Map();
 export function judgeAs(storyId, confidence) {
   overrides.set(storyId, confidence);
 }
-export const clearJudgeOverrides = () => overrides.clear();
+export const clearJudgeOverrides = () => {
+  overrides.clear();
+  groupingChange = (groups) => groups;
+};
 
 /**
  * Jev's answer, from the recording for the rule asked about. Stories nobody
@@ -157,6 +209,15 @@ export const clearJudgeOverrides = () => overrides.clear();
  * @param {any} body
  */
 function jevAnswer(body) {
+  if (Object.values(body?.questions ?? {}).some((question) => question?.type === 'score')) {
+    // Ranking a digest: the recorded scores for the groups asked about.
+    const answers = Object.fromEntries(
+      Object.keys(body.questions)
+        .filter((id) => jevDigestRanks.answers[id])
+        .map((id) => [id, jevDigestRanks.answers[id]]),
+    );
+    return HttpResponse.json({ ...jevDigestRanks, answers });
+  }
   const recording = JEV_JUDGMENTS.find((judged) => judged.rule === body?.state?.rule);
   const ids = Object.keys(body?.questions ?? {});
   return HttpResponse.json({

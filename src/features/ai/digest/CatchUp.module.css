@@ -1,0 +1,348 @@
+.help {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-control);
+  font: var(--type-control);
+}
+
+.primary {
+  composes: button;
+  align-self: flex-start;
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.primary:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.secondary {
+  composes: button;
+  border: 1px solid var(--color-line);
+  background: var(--color-raised);
+  color: var(--color-ink);
+}
+
+.secondary:hover {
+  border-color: var(--color-line-hover);
+}
+
+.inline {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Before the digest */
+
+.start {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 780px;
+  padding: var(--space-6);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-raised);
+}
+
+.startTitle {
+  font: 600 20px/1.3 var(--font-read);
+}
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--color-danger-soft);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.alert svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--color-danger);
+}
+
+.building {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 780px;
+}
+
+.buildingText {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-accent);
+  font: 600 15px/1.4 var(--font-ui);
+}
+
+.skeletonCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: var(--space-6);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+.skeletonCard span {
+  height: 14px;
+  border-radius: 7px;
+  background: var(--color-skeleton);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.skeletonCard span:first-child {
+  width: 30%;
+}
+
+.skeletonCard span:nth-child(2) {
+  width: 80%;
+  height: 22px;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* The digest */
+
+.provenance,
+.newer,
+.hiddenNote {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: 780px;
+  margin-bottom: var(--space-5);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.provenance svg,
+.hiddenNote svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.provenance svg {
+  color: var(--color-accent);
+}
+
+.newer {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 780px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 22px var(--space-6);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-raised);
+}
+
+.cardTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: var(--color-bg);
+  font: 700 14px/1 var(--font-ui);
+}
+
+.importance {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font: 700 12px/1 var(--font-ui);
+  letter-spacing: 0.02em;
+}
+
+.importance[data-level='High'] {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.importance[data-level='Medium'] {
+  background: var(--color-warn-soft);
+  color: var(--color-warn);
+}
+
+.score {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.headline {
+  font: 600 24px/1.25 var(--font-read);
+  text-wrap: balance;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font: 400 17px/1.6 var(--font-read);
+}
+
+.sourcesTitle {
+  margin-top: var(--space-2);
+  color: var(--color-ink-muted);
+  font: var(--type-overline);
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
+}
+
+.sources {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.source {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 0;
+  border-top: 1px solid var(--color-line);
+}
+
+.sourceText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sourceMeta {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.sourceLink {
+  color: var(--color-ink);
+  font: 600 15px/1.35 var(--font-ui);
+  text-decoration: none;
+}
+
+.sourceLink:hover {
+  text-decoration: underline;
+}
+
+.others {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 780px;
+  margin-top: var(--space-8);
+}
+
+.othersHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.othersTitle {
+  font: 600 20px/1.3 var(--font-read);
+}
+
+.others .secondary {
+  align-self: flex-start;
+}
+
+.hiddenNote {
+  margin-top: var(--space-6);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 780px;
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-line);
+}
+
+@media (max-width: 639px) {
+  .card,
+  .start {
+    padding: 18px var(--space-4);
+  }
+
+  .headline {
+    font-size: 21px;
+  }
+
+  .summary {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonCard span {
+    animation: none;
+  }
+}

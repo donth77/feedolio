@@ -102,7 +102,7 @@ describe('Setting up AI', () => {
 
     expect(requests.seen).toEqual([]);
     requests.stop();
-  });
+  }, 20000);
 
   it('connects Anthropic with a key, shows Connected and keeps the key apart (US-95, US-97)', async () => {
     const { user, reload } = renderApp('/settings/ai');

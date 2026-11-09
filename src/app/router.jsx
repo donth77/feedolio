@@ -57,6 +57,10 @@ export const routes = [
                 lazy: lazyView(() => import('../features/ai/rules/RulesEditor.jsx')),
               },
               {
+                path: 'catch-up',
+                lazy: lazyView(() => import('../features/ai/digest/CatchUp.jsx')),
+              },
+              {
                 path: 'maybe',
                 lazy: lazyView(() => import('../features/ai/rules/MaybeView.jsx')),
               },

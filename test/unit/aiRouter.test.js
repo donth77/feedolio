@@ -5,9 +5,12 @@ import { defaultAiSettings } from '../../src/features/ai/aiSettingsSlice.js';
 import { removeAllKeys, setKey } from '../../src/features/ai/keys.js';
 import {
   generate,
+  groupStories,
   isReady,
   judge,
+  rankGroups,
   roleFor,
+  summarizeGroup,
   TASK_ROLES,
   testDecision,
   testGeneral,
@@ -248,5 +251,122 @@ describe('The task router', () => {
     await expect(
       generate({ system: 's', prompt: 'p' }, { settings: settings(), userId: null }),
     ).rejects.toMatchObject({ code: 'setup' });
+    await expect(rankGroups({ groups: [] }, none)).rejects.toMatchObject({ code: 'setup' });
+  });
+});
+
+describe('Digest tasks', () => {
+  const GROUPS = [
+    { id: 'g1', headline: 'Markets', stories: [{ id: 's1', title: 'Stocks fall' }] },
+    { id: 'g2', headline: 'Hack', stories: [{ id: 's2', title: 'Exchange hacked' }] },
+  ];
+
+  it('group stories with the general model, at medium effort (recorded)', async () => {
+    /** @type {any} */
+    let sent = null;
+    server.use(
+      http.post('https://api.anthropic.com/v1/messages', async ({ request }) => {
+        sent = await request.json();
+        return HttpResponse.json(recorded('anthropic-digest-groups.json'));
+      }),
+    );
+    setKey(null, 'general', TEST_KEYS.anthropic, true);
+    const result = await groupStories({ stories: STORIES }, { settings: settings(), userId: null });
+    expect(result.groups).toHaveLength(8);
+    expect(result.groups[0].headline).toBe('AI stocks swing after Democratic midterm wins');
+    expect(sent.output_config.effort).toBe('medium');
+    expect(sent.system).toMatch(/^You build a news digest/);
+
+    server.use(
+      http.post('https://api.anthropic.com/v1/messages', () => {
+        const answer = recorded('anthropic-digest-groups.json');
+        answer.content = [{ type: 'text', text: '{"groups": "none"}' }];
+        return HttpResponse.json(answer);
+      }),
+    );
+    expect(
+      (await groupStories({ stories: STORIES }, { settings: settings(), userId: null })).groups,
+    ).toEqual([]);
+  });
+
+  it('rank main stories with Jev’s scores, as 0 to 100 (recorded)', async () => {
+    /** @type {any} */
+    let sent = null;
+    server.use(
+      http.post('https://openrouter.ai/api/v1/systemone', async ({ request }) => {
+        sent = await request.json();
+        return HttpResponse.json(recorded('jev-digest-ranks.json'));
+      }),
+    );
+    setKey(null, 'general', TEST_KEYS.anthropic, true);
+    setKey(null, 'decision', TEST_KEYS.openrouter, true);
+    const result = await rankGroups(
+      { groups: GROUPS },
+      { settings: settings({ decision: { provider: 'openrouter' } }), userId: null },
+    );
+    // The recording answers for g1 to g8; only the groups asked about count.
+    expect(result).toEqual({
+      scores: [
+        { id: 'g1', importance: 65 },
+        { id: 'g2', importance: 60 },
+      ],
+      by: 'decision',
+      model: 'jev-1.14.0',
+    });
+    expect(sent.questions.g1.type).toBe('score');
+    expect(sent.questions.g1.criteria).toHaveLength(3);
+    expect(sent.state.items.g2).toBe('Hack\n- Exchange hacked');
+  });
+
+  it('rank with the general model otherwise, keeping only known groups (recorded)', async () => {
+    const answer = recorded('anthropic-digest-ranks.json');
+    answer.content = [
+      {
+        type: 'text',
+        text: JSON.stringify({
+          ranks: [
+            { id: 'g1', importance: 120 },
+            { id: 'g2', importance: -4 },
+            { id: 'g1', importance: 10 },
+            { id: 'g9', importance: 99 },
+            { id: 'g2', importance: 'high' },
+          ],
+        }),
+      },
+    ];
+    server.use(http.post('https://api.anthropic.com/v1/messages', () => HttpResponse.json(answer)));
+    setKey(null, 'general', TEST_KEYS.anthropic, true);
+    const result = await rankGroups({ groups: GROUPS }, { settings: settings(), userId: null });
+    expect(result.by).toBe('general');
+    expect(result.scores).toEqual([
+      { id: 'g1', importance: 100 },
+      { id: 'g2', importance: 0 },
+    ]);
+
+    answer.content = [{ type: 'text', text: '{"ranks": null}' }];
+    expect(
+      (await rankGroups({ groups: GROUPS }, { settings: settings(), userId: null })).scores,
+    ).toEqual([]);
+  });
+
+  it('summarise one main story, streamed (recorded)', async () => {
+    /** @type {any} */
+    let sent = null;
+    server.use(
+      http.post('https://api.anthropic.com/v1/messages', async ({ request }) => {
+        sent = await request.json();
+        return new HttpResponse(recordedStream('anthropic-summary.sse'), {
+          headers: { 'Content-Type': 'text/event-stream' },
+        });
+      }),
+    );
+    setKey(null, 'general', TEST_KEYS.anthropic, true);
+    const result = await summarizeGroup(
+      { group: GROUPS[0] },
+      { settings: settings(), userId: null },
+    );
+    expect(result.text).toMatch(/^On Tuesday/);
+    expect(sent.system).toMatch(/^You summarise one main news story/);
+    expect(sent.messages[0].content).toMatch(/^Main story: "Markets"/);
   });
 });

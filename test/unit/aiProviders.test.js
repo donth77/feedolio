@@ -548,6 +548,47 @@ describe('The decision adapter (Jev)', () => {
     });
   });
 
+  it('scores items on a scale, as 0 to 100 (recorded)', async () => {
+    /** @type {any} */
+    let sent = null;
+    server.use(
+      http.post('https://api.typesafe.ai/v1/systemone', async ({ request }) => {
+        sent = await request.json();
+        const answer = recorded('jev-digest-ranks.json');
+        answer.answers.g9 = { type: 'score', score: 'n/a' };
+        return HttpResponse.json(answer);
+      }),
+    );
+    const jev = createDecisionAdapter({ provider: 'typesafe', apiKey: TEST_KEYS.typesafe });
+    const result = await jev.score({
+      question: 'How much it matters',
+      items: [
+        { id: 'g3', text: 'Binance hack' },
+        { id: 'g6', text: 'Founder Summit' },
+        { id: 'g9', text: 'Nothing recorded' },
+      ],
+      levels: ['Minor', 'Worth knowing', 'Major'],
+    });
+    expect(result).toEqual({
+      scores: [
+        { id: 'g3', importance: 84 },
+        { id: 'g6', importance: 26 },
+      ],
+      model: 'jev-1.14.0',
+      usage: { tokensSent: expect.any(Number), tokensReceived: expect.any(Number) },
+    });
+    expect(sent.questions.g3).toEqual({
+      type: 'score',
+      instructions: 'How much it matters (item g3)',
+      criteria: ['Minor', 'Worth knowing', 'Major'],
+    });
+
+    server.use(http.post('https://api.typesafe.ai/v1/systemone', () => HttpResponse.json({})));
+    expect(
+      (await failure(() => jev.score({ question: 'q', items: [], levels: ['a', 'b'] }))).code,
+    ).toBe('bad-response');
+  });
+
   it('uses OpenRouter’s copy of the same API, and rejects odd answers', async () => {
     /** @type {string|null} */
     let model = null;

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import { storyOpened } from '../../app/visitsSlice.js';
 import Icon from '../../components/Icon.jsx';
 import { FeedDot } from '../../components/Monogram.jsx';
 import { monogramFor, tintFor, tintForId } from '../../lib/feeds.js';
@@ -146,6 +147,12 @@ function Article({ story, lookup, feedId, back }) {
     monogram: monogramFor(feedTitle),
     tint: lookup.subscription ? tintFor(lookup.subscription.url) : tintForId(story.feedId),
   };
+
+  // Opening a story marks it read, so Catch me up leaves it out.
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(storyOpened(story.id));
+  }, [dispatch, story.id]);
 
   // Moving to the next or previous story puts focus on its title, as a new page would.
   const heading = useRef(/** @type {HTMLHeadingElement|null} */ (null));

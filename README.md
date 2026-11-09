@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestones M0 to M12 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser, and can connect their own AI provider to summarize, translate or explain any story, and to hide, highlight or tag stories with plain-English rules. A "Catch me up" digest (M13) comes next.
+> **Status:** milestones M0 to M13 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser. They can also connect their own AI provider to summarize, translate or explain any story, to hide, highlight or tag stories with plain-English rules, and to get a "Catch me up" digest of what they missed.
 >
 > **Live:** set this line after the first production deploy (see [Deploying](#deploying)).
 
@@ -200,6 +200,19 @@ Readers write rules in plain English in **Settings › Rules** (`/settings/rules
 - **When something goes wrong,** All stories says so under the list ("Rules couldn’t check new stories. …") and checking resumes with the next new stories.
 - **Code loading:** the rules pages and the checker load only for readers with rules; on the first page, rules cost about 2 KB.
 
+### Catch me up
+
+**Catch me up** (`/catch-up`, in the sidebar and the phone chips) turns what the reader missed into a short digest (US-109 to US-112).
+
+- **What it covers:** stories since the last catch-up (the last week, before the first) that the reader hasn't opened and rules haven't hidden; the newest 60 at most. The page says how many ("From the last week · 44 unread stories") before anything is sent.
+- **Building it:** nothing is sent until the reader presses **Catch me up**. Then up to 10 requests: the general model groups the stories into at most eight main stories, the decision model ranks them (Jev scores each on a three-level scale; without Jev, the general model ranks them), and the general model writes a two-sentence summary of each. The page shows each step as it happens.
+- **The digest:** main stories, most important first, each with an importance label ("High · Importance 84 of 100"), a headline, a summary and its sources; then **Everything else** for stories that fit no main story. A line says who ranked and who wrote it ("Ranked by Jev (decision model) · Summaries by claude-opus-5-5").
+- **Links come only from Feedolio:** the model cites story ids, and ids Feedolio didn't give it are dropped (T-28). Sources link to the stories in Feedolio, never to anything the model wrote. Headlines and summaries are shown as text.
+- **Kept:** the digest is saved in IndexedDB (per account, window and model), so coming back from a source, or opening Catch me up again, shows it without new requests. If more stories arrive, it says so and offers **Regenerate**.
+- **Mark all caught up** starts the next window from now, with Undo.
+- **Errors** name the provider that failed, including Jev while ranking, and **Try again** starts over.
+- **Off switch:** Settings › AI can turn Catch me up off. **Code loading:** the page (about 4 KB) loads only when opened.
+
 ## Security
 
 - **Feed content is untrusted.** Story HTML is cleaned by DOMPurify plus Feedolio's own rules when it's shown (see [Reading a story](#reading-a-story)). Titles and excerpts are always text.
@@ -217,7 +230,7 @@ Readers write rules in plain English in **Settings › Rules** (`/settings/rules
 Journey tests are the main tool: they check what a reader sees and does, not how the code is arranged. Three Vitest projects run against saved copies of real feeds and pages (`test/fixtures`, with their sources in its README):
 
 - **Journeys** (`test/journeys`) render the real app in jsdom and fake only the network (MSW) and, when needed, the clock. Calls to `/api/feed` run the real Worker code in-process. A test "reload" saves as a browser would, then starts a fresh app from storage. Each view is also checked with axe.
-- **Unit** tests (`test/unit`) cover dense logic only: parsing, normalising, main images, feed discovery, the address guard, the story sanitiser, saved data, adding feeds, share links, the security headers, and the AI adapters, router, key store, cache and text formatter.
+- **Unit** tests (`test/unit`) cover dense logic only: parsing, normalising, main images, feed discovery, the address guard, the story sanitiser, saved data, adding feeds, share links, the security headers, and the AI adapters, router, key store, cache, text formatter, rule verdicts and digest clean-up.
 - **Worker contract** tests (`test/worker`) run inside Cloudflare's runtime through `@cloudflare/vitest-plugin`.
 - **AI providers** answer with responses recorded from Anthropic and TypeSafe, or written to OpenAI's documented format (`test/fixtures/ai`). Every journey test also checks every request it makes: a test key sent anywhere but its own provider fails the test.
 
@@ -244,10 +257,11 @@ They need a browser: run `pnpm exec playwright install chromium` once, or set `P
 | JavaScript with JSDoc, CSS Modules and design tokens     | As the brief asks: no TypeScript, no CSS libraries                                                                   | Types are documented, not compiled                                                                             |
 | A "new since your last visit" divider, not unread counts | Shows where the reader left off without tracking every story                                                         | Doesn't remember individual stories read                                                                       |
 | AI runs in the browser on the reader's own keys          | No AI backend and no AI cost to us; any provider, including local models                                             | Providers must allow browser requests; keys share the page with feed content, so injection defences are strict |
+| The digest cites story ids; Feedolio makes the links     | Feed text can try to steer a model, so nothing a model writes becomes a link                                         | A source the model names wrongly is dropped rather than guessed                                                |
 
 ## What's next
 
-- **AI Catch me up (M13), optional:** a digest of what the reader missed, grouped into stories, ranked and summarised, on the connection set up in Settings › AI.
+- **Launch:** the first production deploy and GitHub sign-in setup (see [Deploying](#deploying) and [Signing in](#signing-in)).
 - **Later:** sync across devices, search, OPML import, offline reading, and rate limiting on the feed endpoint.
 
 ## The feed endpoint
@@ -278,7 +292,8 @@ src/
   app/          store, router, saved data (persistence.js), visits, route-level states
   features/     feeds · story · bookmarks · subscriptions · preferences · share ·
                 shortcuts · auth (GitHub sign-in through Auth0) ·
-                ai (Settings › AI, provider adapters, task router, key store, cache)
+                ai (Settings › AI, provider adapters, task router, key store, cache,
+                story actions, filter rules, Catch me up)
   components/   AppShell, NavPanel, Drawer, StoryList, StoryRow, StoryCard, StoryImage,
                 Monogram, Toast, Segmented, Icon
   lib/          dates, images, feed tiles; shared with the Worker: JSDoc types, ids,

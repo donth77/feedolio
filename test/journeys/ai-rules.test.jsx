@@ -322,7 +322,10 @@ describe('Filter rules', () => {
     seedAi({ general: 'anthropic' });
     renderApp('/');
     await storiesLoaded();
-    expect(within(sidebar()).queryByRole('heading', { name: 'AI' })).toBeNull();
+    // With AI set up, only Catch me up is offered.
+    expect(within(sidebar()).getByRole('link', { name: 'Catch me up' })).toBeVisible();
+    expect(within(sidebar()).queryByRole('link', { name: /^Maybe/ })).toBeNull();
+    expect(within(sidebar()).queryByRole('link', { name: /^Hidden/ })).toBeNull();
     expect(screen.queryByText(/hidden by your rules/)).toBeNull();
     expect(screen.queryByText(/^Rules /)).toBeNull();
   });
