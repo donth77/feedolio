@@ -1,4 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react';
+import { http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { feedIdFor } from '../../src/lib/url.js';
 import { changeDigestGroups, seedAi } from '../fixtures/ai.js';
@@ -40,6 +41,26 @@ function watchAi() {
   return seen;
 }
 
+/**
+ * Holds back the grouping answer until the test lets it go, so the progress
+ * can be checked however fast the fake model is. Returns the release.
+ */
+function holdGrouping() {
+  /** @type {(value?: unknown) => void} */
+  let release = () => {};
+  const held = new Promise((resolve) => {
+    release = resolve;
+  });
+  server.use(
+    http.post('https://api.anthropic.com/v1/messages', async ({ request }) => {
+      const { system } = await request.clone().json();
+      if (String(system).startsWith('You build a news digest')) await held;
+      // Returning nothing passes the request on to the recorded answers.
+    }),
+  );
+  return release;
+}
+
 describe('Catch me up', () => {
   it('groups unread stories into ranked main stories whose sources open in Feedolio (US-109 to US-111)', async () => {
     seedAi({ general: 'anthropic', decision: 'openrouter' });
@@ -52,8 +73,10 @@ describe('Catch me up', () => {
     );
     // Nothing is sent until the reader asks.
     expect(requests).toEqual([]);
+    const releaseGrouping = holdGrouping();
     await user.click(screen.getByRole('button', { name: 'Catch me up' }));
     expect(await screen.findByText(/^Grouping 44 stories into main stories/)).toBeVisible();
+    releaseGrouping();
 
     const list = await mainStories();
     expect(headlines(list)).toEqual([

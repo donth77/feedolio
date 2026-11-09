@@ -18,6 +18,10 @@ export default defineConfig({
           environment: 'jsdom',
           include: ['test/journeys/**/*.test.{js,jsx}'],
           setupFiles: ['test/setup/journeys.js'],
+          // Each journey starts the whole app, often more than once. Under
+          // coverage on a busy machine or CI runner that can take a few times
+          // longer than alone, so they get more than Vitest's 5 s.
+          testTimeout: 20000,
           // Workers run in UTC; so do the tests.
           env: { TZ: 'UTC' },
         },

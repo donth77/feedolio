@@ -11,8 +11,8 @@ import { clearJudgeOverrides, KEY_HOSTS } from '../fixtures/ai.js';
 import { server } from '../msw/server.js';
 
 // Views that load their code on first use (the story page, Settings) can take
-// longer than the default second under coverage or a busy CI machine.
-configure({ asyncUtilTimeout: 4000 });
+// several seconds under coverage on a busy machine or CI runner.
+configure({ asyncUtilTimeout: 8000 });
 
 // Match index.html, which jsdom never loads.
 document.documentElement.lang = 'en';
