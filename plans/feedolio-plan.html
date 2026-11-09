@@ -1,0 +1,1416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Feedolio Build Plan</title>
+<meta name="description" content="Feedolio: build plan for a simple RSS reader">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: sticky contents rail on the left, one readable column on the right; tables and diagrams may run wider. */
+:root {
+  --bg: #ffffff;
+  --surface: #f4f6f9;
+  --surface-2: #e9edf3;
+  --ink: #141820;
+  --ink-muted: #4f5868;
+  --line: #dde2ea;
+  --accent: #2552E0;
+  --accent-ink: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--bg));
+  --accent-line: color-mix(in srgb, var(--accent) 28%, var(--bg));
+  --note: #2f6fdf; --tip: #1d8a5a; --important: #7a4cd8; --warning: #b26a00; --caution: #c23b3b;
+  --code-bg: #f2f4f8;
+  --radius: 10px;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101318; --surface: #161a21; --surface-2: #1d222b; --ink: #e7eaf0; --ink-muted: #a2abba; --line: #2a303b;
+    --accent: color-mix(in srgb, #2552E0 58%, white); --accent-ink: #101318;
+    --note: #7aa7f5; --tip: #5cc795; --important: #b497f2; --warning: #e0a64a; --caution: #ef8080;
+    --code-bg: #181c24; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101318; --surface: #161a21; --surface-2: #1d222b; --ink: #e7eaf0; --ink-muted: #a2abba; --line: #2a303b;
+  --accent: color-mix(in srgb, #2552E0 58%, white); --accent-ink: #101318;
+  --note: #7aa7f5; --tip: #5cc795; --important: #b497f2; --warning: #e0a64a; --caution: #ef8080;
+  --code-bg: #181c24; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.65 var(--font-body); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+.layout { display: grid; grid-template-columns: 272px minmax(0, 1fr); max-width: 1360px; margin: 0 auto; }
+.sidebar { position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; overflow-y: auto; padding: 32px 18px 40px 24px; border-right: 1px solid var(--line); background: var(--surface); }
+.brand { font: 700 12px/1.3 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 6px; }
+.brand-title { font: 600 21px/1.2 var(--font-display); margin: 0 0 18px; color: var(--ink); text-wrap: balance; }
+.theme-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; margin-bottom: 18px; background: var(--bg); }
+.theme-toggle button { font: 600 12px var(--font-body); border: 0; background: transparent; color: var(--ink-muted); padding: 6px 11px; border-radius: 999px; cursor: pointer; min-height: 32px; }
+.theme-toggle button[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); }
+.toc { list-style: none; margin: 0; padding: 0; font-size: 14px; line-height: 1.4; }
+.toc li { margin: 0; }
+.toc a { display: block; padding: 5px 8px; border-radius: 6px; color: var(--ink-muted); text-decoration: none; }
+.toc a:hover { background: var(--surface-2); color: var(--ink); }
+.toc a.active { color: var(--accent); background: var(--accent-soft); }
+.toc .toc-l2 { margin-top: 6px; }
+.toc .toc-l2 > a { font-weight: 700; color: var(--ink); }
+.toc .toc-l2 > a.active { color: var(--accent); }
+.toc .toc-l3 a { padding-left: 20px; font-size: 13px; }
+
+main { padding-block: 48px 96px; padding-left: max(16px, env(safe-area-inset-left, 0px), 5vw); padding-right: max(16px, env(safe-area-inset-right, 0px), 5vw); min-width: 0; }
+.eyebrow { display: inline-block; font: 700 12px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-line); padding: 7px 11px; border-radius: 999px; margin-bottom: 18px; }
+article { max-width: 920px; }
+article > p, article > ul, article > ol, article > blockquote, article > aside, .callout p { max-width: 72ch; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; letter-spacing: -.01em; text-wrap: balance; }
+h1 { font-size: clamp(34px, 4.6vw, 50px); margin: 0 0 22px; }
+h2 { font-size: 31px; margin: 72px 0 16px; padding-top: 28px; border-top: 1px solid var(--line); }
+h3 { font-size: 23px; margin: 40px 0 10px; }
+h4 { font: 700 16px/1.4 var(--font-body); margin: 28px 0 8px; }
+.anchor { margin-left: 8px; color: var(--ink-muted); text-decoration: none; font-weight: 400; opacity: 0; transition: opacity .15s; }
+h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus-visible { opacity: .7; }
+p, ul, ol { margin: 0 0 16px; }
+li { margin: 5px 0; }
+li > ul, li > ol { margin: 6px 0; }
+ol > li::marker { color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+strong { font-weight: 700; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
+blockquote { margin: 20px 0; padding: 14px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+blockquote > :last-child, .callout > :last-child { margin-bottom: 0; }
+blockquote.meta { font-size: 16px; background: var(--accent-soft); border-color: var(--accent-line); padding: 18px 22px; }
+blockquote.meta ul { margin-bottom: 12px; }
+.callout { --c: var(--note); margin: 22px 0; padding: 14px 18px 14px 18px; border-radius: var(--radius); background: color-mix(in srgb, var(--c) 8%, var(--bg)); border: 1px solid color-mix(in srgb, var(--c) 30%, var(--bg)); }
+.callout-tip { --c: var(--tip); } .callout-important { --c: var(--important); } .callout-warning { --c: var(--warning); } .callout-caution { --c: var(--caution); }
+.callout-title { font: 700 13px/1.2 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--c); margin: 0 0 6px; }
+code { font: 0.86em/1.5 var(--font-mono); background: var(--code-bg); border: 1px solid var(--line); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; overflow-x: auto; line-height: 1.5; margin: 0 0 20px; }
+pre code { background: none; border: 0; padding: 0; font-size: 13px; overflow-wrap: normal; white-space: pre; }
+.diagram { margin: 8px 0 24px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); overflow-x: auto; }
+.diagram pre.mermaid { background: none; border: 0; padding: 0; margin: 0; text-align: center; font: 13px/1.4 var(--font-mono); color: var(--ink-muted); white-space: pre; }
+.diagram svg { max-width: 100%; height: auto; }
+.table-wrap { overflow-x: auto; margin: 0 0 22px; border: 1px solid var(--line); border-radius: var(--radius); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--surface); font-weight: 700; white-space: nowrap; font-size: 14px; }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 55%, var(--bg)); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td code { white-space: nowrap; }
+.pill { display: inline-block; font: 700 12px/1 var(--font-body); padding: 5px 9px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+.pill-must { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+.pill-should { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-line); }
+.pill-could, .pill-stretch, .pill-planned { color: var(--ink-muted); background: var(--surface); border-color: var(--line); }
+.pill-wont { color: var(--ink-muted); background: transparent; border-color: var(--line); text-decoration: line-through; }
+.pill-done { color: var(--tip); background: color-mix(in srgb, var(--tip) 10%, var(--bg)); border-color: color-mix(in srgb, var(--tip) 35%, var(--bg)); }
+.docref { font-weight: 700; border-bottom: 1px dotted var(--ink-muted); }
+input[type="checkbox"] { accent-color: var(--accent); margin-right: 6px; }
+li:has(> input[type="checkbox"]) { list-style: none; margin-left: -22px; }
+.footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-muted); font-size: 14px; }
+
+.toc-mobile { display: none; }
+@media (max-width: 960px) {
+  .layout { display: block; }
+  .sidebar { display: none; }
+  .toc-mobile { display: block; margin: 0 0 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  .toc-mobile summary { cursor: pointer; padding: 12px 16px; font-weight: 700; min-height: 44px; }
+  .toc-mobile .toc { padding: 0 8px 12px; }
+  .toc-mobile .theme-toggle { margin: 0 16px 12px; }
+  main { padding-block: 28px 72px; }
+  h2 { font-size: 27px; margin-top: 52px; }
+  body { font-size: 16.5px; }
+}
+@media print {
+  .sidebar, .toc-mobile, .anchor { display: none !important; }
+  .layout { display: block; }
+  main { padding: 0; }
+  h2 { break-after: avoid; }
+  pre, table, .diagram { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" aria-label="Contents">
+    <p class="brand">Build plan · combined</p>
+    <p class="brand-title">Feedolio: build plan for a simple RSS reader</p>
+    <div class="theme-toggle" role="group" aria-label="Color theme">
+        <button type="button" data-set-theme="system">System</button>
+        <button type="button" data-set-theme="light">Light</button>
+        <button type="button" data-set-theme="dark">Dark</button>
+      </div>
+    <ul class="toc">
+<li class="toc-l2"><a href="#summary">Summary</a></li>
+<li class="toc-l2"><a href="#1-what-we-re-building">1. What we're building</a></li>
+<li class="toc-l2"><a href="#2-how-it-works">2. How it works</a></li>
+<li class="toc-l2"><a href="#3-key-decisions">3. Key decisions</a></li>
+<li class="toc-l2"><a href="#4-screens">4. Screens</a></li>
+<li class="toc-l2"><a href="#5-data">5. Data</a></li>
+<li class="toc-l2"><a href="#6-feed-endpoint">6. Feed endpoint</a></li>
+<li class="toc-l2"><a href="#7-ai-features-stretch">7. AI features (stretch)</a></li>
+<li class="toc-l3"><a href="#7-1-bring-your-own-key">7.1 Bring your own key</a></li>
+<li class="toc-l3"><a href="#7-2-the-three-features">7.2 The three features</a></li>
+<li class="toc-l3"><a href="#7-3-which-model-does-what">7.3 Which model does what</a></li>
+<li class="toc-l3"><a href="#7-4-keeping-keys-safe">7.4 Keeping keys safe</a></li>
+<li class="toc-l3"><a href="#7-5-cost-and-speed-the-reader-pays">7.5 Cost and speed (the reader pays)</a></li>
+<li class="toc-l2"><a href="#8-build-plan">8. Build plan</a></li>
+<li class="toc-l3"><a href="#m0-foundations">M0 · Foundations</a></li>
+<li class="toc-l3"><a href="#m1-feed-worker">M1 · Feed Worker</a></li>
+<li class="toc-l3"><a href="#m2-app-shell-headline-list-today-and-date-headers">M2 · App shell, headline list, Today and date headers</a></li>
+<li class="toc-l3"><a href="#m3-story-page-and-reading-settings">M3 · Story page and reading settings</a></li>
+<li class="toc-l3"><a href="#m4-bookmarks">M4 · Bookmarks</a></li>
+<li class="toc-l3"><a href="#m5-multiple-feeds-settings-add-any-link-divider">M5 · Multiple feeds, Settings, add any link, divider</a></li>
+<li class="toc-l3"><a href="#m6-polish-dark-mode-accessibility-shortcuts-layouts-sidebar">M6 · Polish: dark mode, accessibility, shortcuts, layouts, sidebar</a></li>
+<li class="toc-l3"><a href="#m7-sharing">M7 · Sharing</a></li>
+<li class="toc-l3"><a href="#m8-ship">M8 · Ship</a></li>
+<li class="toc-l3"><a href="#m9-github-sign-in">M9 · GitHub sign-in</a></li>
+<li class="toc-l3"><a href="#m10-ai-foundations-keys-providers-safety">M10 · AI foundations: keys, providers, safety</a></li>
+<li class="toc-l3"><a href="#m11-ai-article-actions">M11 · AI article actions</a></li>
+<li class="toc-l3"><a href="#m12-ai-filter-rules-maybe-and-hidden">M12 · AI filter rules, Maybe and Hidden</a></li>
+<li class="toc-l3"><a href="#m13-ai-catch-me-up">M13 · AI Catch me up</a></li>
+<li class="toc-l2"><a href="#9-testing">9. Testing</a></li>
+<li class="toc-l2"><a href="#10-risks">10. Risks</a></li>
+<li class="toc-l2"><a href="#11-settled-decisions">11. Settled decisions</a></li>
+<li class="toc-l2"><a href="#12-not-in-this-version">12. Not in this version</a></li>
+<li class="toc-l2"><a href="#appendix-notes-for-implementers">Appendix: notes for implementers</a></li>
+    </ul>
+  </nav>
+  <main>
+    <span class="eyebrow">Build plan · combined</span>
+    <details class="toc-mobile">
+      <summary>Contents</summary>
+      <div class="theme-toggle" role="group" aria-label="Color theme">
+        <button type="button" data-set-theme="system">System</button>
+        <button type="button" data-set-theme="light">Light</button>
+        <button type="button" data-set-theme="dark">Dark</button>
+      </div>
+      <ul class="toc">
+<li class="toc-l2"><a href="#summary">Summary</a></li>
+<li class="toc-l2"><a href="#1-what-we-re-building">1. What we're building</a></li>
+<li class="toc-l2"><a href="#2-how-it-works">2. How it works</a></li>
+<li class="toc-l2"><a href="#3-key-decisions">3. Key decisions</a></li>
+<li class="toc-l2"><a href="#4-screens">4. Screens</a></li>
+<li class="toc-l2"><a href="#5-data">5. Data</a></li>
+<li class="toc-l2"><a href="#6-feed-endpoint">6. Feed endpoint</a></li>
+<li class="toc-l2"><a href="#7-ai-features-stretch">7. AI features (stretch)</a></li>
+<li class="toc-l3"><a href="#7-1-bring-your-own-key">7.1 Bring your own key</a></li>
+<li class="toc-l3"><a href="#7-2-the-three-features">7.2 The three features</a></li>
+<li class="toc-l3"><a href="#7-3-which-model-does-what">7.3 Which model does what</a></li>
+<li class="toc-l3"><a href="#7-4-keeping-keys-safe">7.4 Keeping keys safe</a></li>
+<li class="toc-l3"><a href="#7-5-cost-and-speed-the-reader-pays">7.5 Cost and speed (the reader pays)</a></li>
+<li class="toc-l2"><a href="#8-build-plan">8. Build plan</a></li>
+<li class="toc-l3"><a href="#m0-foundations">M0 · Foundations</a></li>
+<li class="toc-l3"><a href="#m1-feed-worker">M1 · Feed Worker</a></li>
+<li class="toc-l3"><a href="#m2-app-shell-headline-list-today-and-date-headers">M2 · App shell, headline list, Today and date headers</a></li>
+<li class="toc-l3"><a href="#m3-story-page-and-reading-settings">M3 · Story page and reading settings</a></li>
+<li class="toc-l3"><a href="#m4-bookmarks">M4 · Bookmarks</a></li>
+<li class="toc-l3"><a href="#m5-multiple-feeds-settings-add-any-link-divider">M5 · Multiple feeds, Settings, add any link, divider</a></li>
+<li class="toc-l3"><a href="#m6-polish-dark-mode-accessibility-shortcuts-layouts-sidebar">M6 · Polish: dark mode, accessibility, shortcuts, layouts, sidebar</a></li>
+<li class="toc-l3"><a href="#m7-sharing">M7 · Sharing</a></li>
+<li class="toc-l3"><a href="#m8-ship">M8 · Ship</a></li>
+<li class="toc-l3"><a href="#m9-github-sign-in">M9 · GitHub sign-in</a></li>
+<li class="toc-l3"><a href="#m10-ai-foundations-keys-providers-safety">M10 · AI foundations: keys, providers, safety</a></li>
+<li class="toc-l3"><a href="#m11-ai-article-actions">M11 · AI article actions</a></li>
+<li class="toc-l3"><a href="#m12-ai-filter-rules-maybe-and-hidden">M12 · AI filter rules, Maybe and Hidden</a></li>
+<li class="toc-l3"><a href="#m13-ai-catch-me-up">M13 · AI Catch me up</a></li>
+<li class="toc-l2"><a href="#9-testing">9. Testing</a></li>
+<li class="toc-l2"><a href="#10-risks">10. Risks</a></li>
+<li class="toc-l2"><a href="#11-settled-decisions">11. Settled decisions</a></li>
+<li class="toc-l2"><a href="#12-not-in-this-version">12. Not in this version</a></li>
+<li class="toc-l2"><a href="#appendix-notes-for-implementers">Appendix: notes for implementers</a></li>
+      </ul>
+    </details>
+    <article>
+<h1 id="feedolio-build-plan-for-a-simple-rss-reader">Feedolio: build plan for a simple RSS reader</h1>
+<blockquote class="meta"><p><strong>Feedolio</strong> is a fast, responsive web app for reading RSS and Atom feeds, with bookmarks that persist and optional AI help that runs on the reader&#39;s own keys.</p>
+<ul>
+<li><strong>Status:</strong> ready to build, with every decision settled · updated 2026-11-09</li>
+<li><strong>Effort:</strong> about 52 hours for the app, plus about 23 for the optional AI features</li>
+<li><strong>Combines:</strong> the <a href="to-spec-plan.html">detailed spec</a> (115 user stories), the <a href="anthropic-engineering-plan.html">engineering design</a> (architecture decisions, test plan), and research into Feedly, Inoreader, NetNewsWire, Reeder, Feedbin and Readwise Reader</li>
+<li><strong>UI draft:</strong> <a href="https://claude.ai/artifact/FKB1FX259EvfETNCAx4Bgz" target="_blank" rel="noopener noreferrer">Feedolio design canvas</a></li>
+</ul>
+</blockquote>
+<h2 id="summary">Summary<a class="anchor" href="#summary" aria-label="Link to this section">#</a></h2>
+<ul>
+<li><strong>What we&#39;re building:</strong> a reader that shows headlines from several feeds, opens each story on its own page, and saves stories so they&#39;re still there next week. It works on phone, tablet and desktop.</li>
+<li><strong>How it works:</strong> a React app plus one Cloudflare Worker. The Worker fetches feeds on the app&#39;s behalf, because publishers block direct browser requests, and turns the XML into clean JSON. It can also find a site&#39;s feed from an ordinary website link.</li>
+<li><strong>Where data lives:</strong> feeds come fresh from the Worker. Bookmarks, feed lists and settings live in the browser, and each bookmark keeps a full copy of its story so it never disappears.</li>
+<li><strong>Comforts from popular readers:</strong> a Today view, date headers, a &quot;New since your last visit&quot; divider, List or Cards layouts, keyboard shortcuts, reading settings and a collapsible sidebar.</li>
+<li><strong>Optional AI (stretch):</strong> summarize, translate and explain; plain-English filter rules; and a &quot;Catch me up&quot; digest. Readers bring their own keys, and requests go straight from the browser to the provider they chose. There&#39;s no AI backend and no AI cost to us.</li>
+<li><strong>How we test it:</strong> we drive the real app the way a reader would, against saved copies of real feeds and recorded AI responses. Only the network and the clock are faked.</li>
+<li><strong>Order of work:</strong> ten milestones for the app (M0–M9), then four for AI (M10–M13). Everything the brief requires is done by M5 plus M8.</li>
+</ul>
+<aside class="callout callout-note"><p class="callout-title">Note</p><p><strong>Ready to build.</strong> Every open question is settled. See <a href="#11-settled-decisions">Settled decisions</a>.</p>
+</aside>
+<h2 id="1-what-we-re-building">1. What we&#39;re building<a class="anchor" href="#1-what-we-re-building" aria-label="Link to this section">#</a></h2>
+<p><strong>The problem:</strong> following several publications means visiting each site, wading through clutter, and losing stories you meant to come back to. Raw RSS feeds fix the &quot;structured data&quot; part, but nobody wants to read XML.</p>
+<p><strong>What a reader can do:</strong></p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Priority</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Browse story headlines in a list</td>
+<td><span class="pill pill-must">Must</span></td>
+<td>Source, author, time, short excerpt</td>
+</tr>
+<tr>
+<td>Open a story on its own page, with everything the feed provides</td>
+<td><span class="pill pill-must">Must</span></td>
+<td>Summary-only feeds (TechCrunch) link out clearly</td>
+</tr>
+<tr>
+<td>Bookmark a story, with a clear saved state</td>
+<td><span class="pill pill-must">Must</span></td>
+<td>Filled icon plus a &quot;Saved&quot; label</td>
+</tr>
+<tr>
+<td>Keep bookmarks across sessions</td>
+<td><span class="pill pill-must">Must</span></td>
+<td>Each bookmark stores a full story copy</td>
+</tr>
+<tr>
+<td>Follow multiple feeds, plus a merged &quot;All stories&quot; view</td>
+<td><span class="pill pill-must">Must</span></td>
+<td></td>
+</tr>
+<tr>
+<td>Add your own feeds by link; manage and remove them</td>
+<td><span class="pill pill-must">Must</span></td>
+<td>Paste a website or feed link. Feedolio finds the feed and previews it. Everyone starts with five starter feeds.</td>
+</tr>
+<tr>
+<td>Use it on phone, tablet and desktop</td>
+<td><span class="pill pill-must">Must</span></td>
+<td>Bottom tabs, drawer, sidebar</td>
+</tr>
+<tr>
+<td>No CSS libraries</td>
+<td><span class="pill pill-must">Must</span></td>
+<td>Plain CSS Modules plus design tokens</td>
+</tr>
+<tr>
+<td>Automated tests</td>
+<td><span class="pill pill-must">Must</span></td>
+<td>A bonus in the brief, treated as required</td>
+</tr>
+<tr>
+<td>See each story&#39;s main image in the list</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>A fallback tile when there&#39;s no image</td>
+</tr>
+<tr>
+<td>Today view and date headers</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>Today, Yesterday, Earlier this week, Older</td>
+</tr>
+<tr>
+<td>&quot;New since your last visit&quot; divider</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>A line between new and older stories, instead of read/unread tracking</td>
+</tr>
+<tr>
+<td>List or Cards layout, with density</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>Remembered on the device</td>
+</tr>
+<tr>
+<td>Keyboard shortcuts</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>J/K, Enter, V, S, R, and <code>?</code> for the full list</td>
+</tr>
+<tr>
+<td>Collapsible sidebar on desktop</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>Shrinks to a slim icon rail; <code>[</code> toggles it; remembered</td>
+</tr>
+<tr>
+<td>Reading settings on the story page</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>Text size, serif or sans, line width</td>
+</tr>
+<tr>
+<td>First-visit welcome note</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>Explains the starter feeds; one tap to add your own</td>
+</tr>
+<tr>
+<td>Share to X, Facebook, LinkedIn or email</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>Share links only, no tracking scripts</td>
+</tr>
+<tr>
+<td>Redux for state</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>Redux Toolkit</td>
+</tr>
+<tr>
+<td>Light and dark theme</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>Follows the system by default</td>
+</tr>
+<tr>
+<td>Sign in with GitHub (OAuth)</td>
+<td><span class="pill pill-should">Should</span></td>
+<td>Optional for readers; data stays per device</td>
+</tr>
+<tr>
+<td>AI article actions: Summarize, Translate, Explain</td>
+<td><span class="pill pill-stretch">Stretch</span></td>
+<td>The reader&#39;s own key</td>
+</tr>
+<tr>
+<td>AI filter rules: hide, highlight or tag new stories</td>
+<td><span class="pill pill-stretch">Stretch</span></td>
+<td>Uncertain matches go to &quot;Maybe&quot;; nothing is ever deleted</td>
+</tr>
+<tr>
+<td>AI &quot;Catch me up&quot; digest</td>
+<td><span class="pill pill-stretch">Stretch</span></td>
+<td>Groups unread stories and links to the sources</td>
+</tr>
+</tbody></table></div>
+<p>Every feature traces to user stories <strong>US-01 to US-115</strong> in the <a href="to-spec-plan.html">detailed spec</a>.</p>
+<h2 id="2-how-it-works">2. How it works<a class="anchor" href="#2-how-it-works" aria-label="Link to this section">#</a></h2>
+<figure class="diagram" aria-label="Diagram 1"><pre class="mermaid">flowchart LR
+  subgraph browser[&quot;Reader's browser&quot;]
+    app[&quot;React app&lt;br/&gt;views + Redux store&quot;]
+    store[(&quot;localStorage&lt;br/&gt;feeds · bookmarks · settings · AI keys&quot;)]
+  end
+  subgraph cloudflare[&quot;Cloudflare&quot;]
+    assets[&quot;Static assets&lt;br/&gt;the built app&quot;]
+    cache[&quot;Workers Caching&lt;br/&gt;fresh 10 min&quot;]
+    worker[&quot;Feed Worker&lt;br/&gt;GET /api/feed&quot;]
+  end
+  pubs[&quot;Publisher feeds and sites&lt;br/&gt;Medium · TechCrunch · BBC · The Verge&quot;]
+  subgraph ai[&quot;AI providers · optional, the reader's own keys&quot;]
+    general[&quot;General model&lt;br/&gt;OpenAI-compatible or Anthropic&quot;]
+    decision[&quot;Decision model&lt;br/&gt;e.g. TypeSafe Jev&quot;]
+  end
+  app -- &quot;load the app&quot; --&gt; assets
+  app -- &quot;get feed JSON&quot; --&gt; cache
+  cache -- &quot;on a miss&quot; --&gt; worker
+  worker -- &quot;fetch XML or find the feed&quot; --&gt; pubs
+  app &lt;-- &quot;save and restore&quot; --&gt; store
+  app -.-&gt;|summaries and digests| general
+  app -.-&gt;|yes or no and scores| decision</pre></figure>
+<p><strong>A feed request, step by step:</strong></p>
+<ol>
+<li>The app asks <code>GET /api/feed?url=&lt;feed or website URL&gt;</code> for each feed the reader follows.</li>
+<li>Cloudflare answers from its cache when it can. A feed is fresh for 10 minutes, and stale copies cover publisher outages.</li>
+<li>On a cache miss, the Worker fetches the XML, parses it, and maps it into one simple <strong>Story</strong> shape (§5). If the link is a web page, it finds the page&#39;s feed first.</li>
+<li>The app merges the feeds, sorts them newest first, and shows them. A failed feed shows its own Retry row, and the other feeds still appear.</li>
+</ol>
+<p><strong>Opening a story</strong> (<code>/feeds/:feedId/stories/:storyId</code>) looks in four places, in order:</p>
+<ol>
+<li>Feeds already loaded.</li>
+<li>A fresh fetch of that feed.</li>
+<li>The bookmark copy.</li>
+<li>Otherwise a friendly &quot;no longer available&quot; page with a link to the original.</li>
+</ol>
+<p><strong>AI requests</strong> (optional) go straight from the browser to the providers the reader chose, using their keys. They never pass through the Worker (§7).</p>
+<h2 id="3-key-decisions">3. Key decisions<a class="anchor" href="#3-key-decisions" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Decision</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Getting feed data</td>
+<td><strong>Our own Worker proxy</strong></td>
+<td>Publishers block cross-site browser requests. Owning the proxy also gives us one clean data shape, caching and testability.</td>
+</tr>
+<tr>
+<td>Adding feeds</td>
+<td><strong>Feed discovery in the Worker</strong></td>
+<td>Readers paste whatever link they have. The Worker follows the page&#39;s <code>&lt;link rel=&quot;alternate&quot;&gt;</code> to its feed.</td>
+</tr>
+<tr>
+<td>Hosting</td>
+<td><strong>Cloudflare Workers</strong> (static assets plus one Worker)</td>
+<td>Cloudflare now recommends Workers over Pages for new projects. One deployable, and the free plan fits.</td>
+</tr>
+<tr>
+<td>Parsing XML</td>
+<td><strong><code>fast-xml-parser</code></strong> and our own normaliser</td>
+<td>Pure JavaScript, so it runs on Workers. About 1 ms on the largest feed, against a 10 ms CPU limit on the free plan.</td>
+</tr>
+<tr>
+<td>App state</td>
+<td><strong>Redux Toolkit</strong> and <strong>RTK Query</strong></td>
+<td>Covers the Redux bonus. Caching, retries and loading states come built in.</td>
+</tr>
+<tr>
+<td>Saving data</td>
+<td><strong><code>localStorage</code></strong>, versioned, storing full story copies</td>
+<td>Saved stories survive when they leave the feed or their feed is removed. Simple and synchronous.</td>
+</tr>
+<tr>
+<td>What&#39;s new</td>
+<td><strong>A &quot;since your last visit&quot; divider</strong>, not read/unread tracking</td>
+<td>Returning readers see what&#39;s new at a glance, with no counts to maintain. This is Reeder&#39;s approach.</td>
+</tr>
+<tr>
+<td>Styling</td>
+<td><strong>CSS Modules</strong> plus design tokens</td>
+<td>CSS libraries aren&#39;t allowed. Tokens make dark mode a value swap.</td>
+</tr>
+<tr>
+<td>Story HTML</td>
+<td><strong>DOMPurify</strong> when rendering</td>
+<td>Feed content is untrusted, so scripts and unsafe links are removed.</td>
+</tr>
+<tr>
+<td>Sharing</td>
+<td><strong>Plain share links</strong> and the Web Share API</td>
+<td>No social SDKs or trackers. A Facebook &quot;Like&quot; button would need both.</td>
+</tr>
+<tr>
+<td>Sign-in</td>
+<td><strong>Auth0 with GitHub</strong></td>
+<td>No backend needed. Signing in only separates data per user on the device.</td>
+</tr>
+<tr>
+<td>AI (stretch)</td>
+<td><strong>Bring your own key, straight from the browser</strong></td>
+<td>No AI backend and no AI cost to us. The reader chooses the provider.</td>
+</tr>
+<tr>
+<td>AI providers</td>
+<td><strong>Anthropic SDK</strong> or any <strong>OpenAI-compatible</strong> endpoint, plus an optional <strong>decision model</strong></td>
+<td>Covers Claude, OpenAI, OpenRouter and local Ollama. Yes/no and scoring go to the decision model when there is one.</td>
+</tr>
+</tbody></table></div>
+<aside class="callout callout-warning"><p class="callout-title">Warning</p><p><strong>Cloudflare caching gotcha:</strong> on Cloudflare, <code>s-maxage</code> quietly turns off <code>stale-while-revalidate</code> and <code>stale-if-error</code>. The Worker sets the edge cache with <code>Cloudflare-CDN-Cache-Control</code> instead (§6).</p>
+</aside>
+<p>The trade-offs behind each choice are written up as decision records in the <a href="anthropic-engineering-plan.html#5-trade-off-analysis-architecture-decision-records">engineering design</a>.</p>
+<h2 id="4-screens">4. Screens<a class="anchor" href="#4-screens" aria-label="Link to this section">#</a></h2>
+<p>The <a href="https://claude.ai/artifact/FKB1FX259EvfETNCAx4Bgz" target="_blank" rel="noopener noreferrer">design canvas</a> has every screen below, plus colour and type tokens and component sheets.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Screen</th>
+<th>Route</th>
+<th>What&#39;s on it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>All stories</td>
+<td><code>/</code></td>
+<td>Every enabled feed merged, newest first, under date headers; the &quot;New since your last visit&quot; divider; a lead story card on desktop</td>
+</tr>
+<tr>
+<td>Today</td>
+<td><code>/today</code></td>
+<td>Stories from the last 24 hours</td>
+</tr>
+<tr>
+<td>One feed</td>
+<td><code>/feeds/:feedId</code></td>
+<td>That feed&#39;s stories</td>
+</tr>
+<tr>
+<td>Story</td>
+<td><code>/feeds/:feedId/stories/:storyId</code></td>
+<td>Title, byline, image, full body or summary with a &quot;Continue reading&quot; link, Save, Share, previous/next, reading settings (Aa)</td>
+</tr>
+<tr>
+<td>Saved</td>
+<td><code>/bookmarks</code></td>
+<td>Bookmarks, most recently saved first; Undo after removing one</td>
+</tr>
+<tr>
+<td>Add a feed</td>
+<td>Dialog, from &quot;+ Add feed&quot;</td>
+<td>Paste any link; preview with the latest headlines and posts a week; a choice when a page has several feeds</td>
+</tr>
+<tr>
+<td>Settings</td>
+<td><code>/settings</code></td>
+<td>Feeds (hide, remove, suggested feeds), Appearance (theme, layout, density, reading defaults), Account</td>
+</tr>
+<tr>
+<td>Keyboard shortcuts</td>
+<td>Overlay, press <code>?</code></td>
+<td>Every shortcut</td>
+</tr>
+<tr>
+<td><em>AI:</em> Catch me up</td>
+<td><code>/catch-up</code></td>
+<td>Grouped stories ranked by importance, with summaries and source links</td>
+</tr>
+<tr>
+<td><em>AI:</em> Maybe and Hidden</td>
+<td><code>/maybe</code>, <code>/hidden</code></td>
+<td>Uncertain rule matches to confirm; stories hidden by rules, with Unhide</td>
+</tr>
+<tr>
+<td><em>AI:</em> Tags</td>
+<td><code>/tags/:tag</code></td>
+<td>Stories a rule tagged</td>
+</tr>
+<tr>
+<td><em>AI:</em> Settings</td>
+<td><code>/settings/ai</code>, <code>/settings/rules</code></td>
+<td>Keys and models; plain-English filter rules</td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Screen width</th>
+<th>Layout</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Under 640 px</td>
+<td>Top bar, scrolling feed chips (Today first), bottom tabs (Stories · Saved · Settings)</td>
+</tr>
+<tr>
+<td>640–1023 px</td>
+<td>Feed list in a slide-out drawer</td>
+</tr>
+<tr>
+<td>1024 px and up</td>
+<td>Sidebar with feeds that collapses to a 64 px icon rail (button or <code>[</code>), expanded by default from 1280 px and collapsed at 1024–1279 px; reading column 680 px wide</td>
+</tr>
+</tbody></table></div>
+<h2 id="5-data">5. Data<a class="anchor" href="#5-data" aria-label="Link to this section">#</a></h2>
+<pre><code class="language-js">/** One story, the same shape for every feed format. */
+Story = {
+  id, feedId,          // stable hashes
+  title, link,         // link = publisher&#39;s page (what Share uses)
+  author, publishedAt, // publishedAt may be null; those sort last
+  categories,          // string[]
+  excerpt,             // plain text, ~200 chars
+  contentHtml,         // raw HTML; sanitised only when rendered
+  hasFullContent,      // false for summary-only feeds
+  imageUrl,            // main image, or null (UI shows a monogram tile)
+}
+
+Subscription = { id, url, title, enabled, isDefault, addedAt }
+Bookmark     = { id, feedId, feedTitle, savedAt, story /* full Story copy */ }
+Preferences  = { theme, layout /* list | cards */, density, reading: { size, font, width },
+                 sidebar /* auto | expanded | collapsed; auto = rail at 1024–1279 px */ }
+Visits       = { lastVisitAt, lastCatchUpAt, openedIds /* most recent 2,000 */ }
+
+// localStorage[&quot;feedolio:v1&quot;] = { version: 1, subscriptions, bookmarks, preferences, visits }
+
+// AI (stretch)
+AiSettings = { general: { provider, baseUrl, model }, decision: { provider, model } | null,
+               features, translateTo, rememberKeys }
+Rule       = { id, text, action /* hide | highlight | tag */, tag, enabled, version }
+Judgment   = { storyId, ruleId, ruleVersion, verdict /* match | maybe | no */, confidence,
+               by /* decision | general */, readerSaid /* yes | no | undefined */ }
+
+// localStorage[&quot;feedolio:v1&quot;] also holds aiSettings and rules (never keys)
+// localStorage[&quot;feedolio:ai-keys:v1&quot;] holds keys only (sessionStorage when &quot;Remember&quot; is off)
+// IndexedDB &quot;feedolio-ai&quot; holds judgments and cached AI output
+</code></pre>
+<p><strong>The &quot;New since your last visit&quot; divider:</strong></p>
+<ul>
+<li>At start-up, the app reads <code>lastVisitAt</code> from the previous session and uses it as this session&#39;s cut-off.</li>
+<li>Stories published after the cut-off sit above the divider.</li>
+<li><code>lastVisitAt</code> moves forward when the reader leaves the page.</li>
+<li>A first visit has no cut-off, so it shows the welcome note instead.</li>
+</ul>
+<p><strong>Picking the main image.</strong> The first rule that matches wins:</p>
+<ol>
+<li><code>media:content</code> or <code>media:thumbnail</code> (largest wins).</li>
+<li>An image <code>enclosure</code>.</li>
+<li>The first real <code>&lt;img&gt;</code> in the body, skipping tracking pixels, <code>data:</code> URIs and icons.</li>
+<li>None: the UI shows a tile with the publication&#39;s initial.</li>
+</ol>
+<p><strong>Starter feeds.</strong> Every new reader starts with these five. Readers can hide or remove any of them, add their own by link, and restore the starters from Settings.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Feed</th>
+<th>Format</th>
+<th>What it tests</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Backchannel, The Economist (Medium)</td>
+<td>RSS, full HTML</td>
+<td>Images in the body; a tracking pixel to skip. Both are archived (last posts 2018 and 2020).</td>
+</tr>
+<tr>
+<td>TechCrunch Startups (<code>/category/startups/feed/</code>)</td>
+<td>RSS, summary only</td>
+<td>No images and no full body. TechCrunch moved its feeds under <code>/category/</code>, and the brief&#39;s old address now returns 404.</td>
+</tr>
+<tr>
+<td>BBC Technology</td>
+<td>RSS + Media RSS</td>
+<td><code>media:thumbnail</code> images</td>
+</tr>
+<tr>
+<td>The Verge</td>
+<td>Atom</td>
+<td>Atom parsing</td>
+</tr>
+</tbody></table></div>
+<h2 id="6-feed-endpoint">6. Feed endpoint<a class="anchor" href="#6-feed-endpoint" aria-label="Link to this section">#</a></h2>
+<p><code>GET /api/feed?url=&lt;feed or website URL&gt;</code> returns <code>{ feed, stories, fetchedAt }</code>. <code>feed.postsPerWeek</code> is worked out from the story dates and shown in the add-feed preview.</p>
+<p><strong>Finding the feed from a website link:</strong></p>
+<ul>
+<li>If the link returns a web page, the Worker reads up to 1 MB of it and looks for <code>&lt;link rel=&quot;alternate&quot;&gt;</code> tags of type RSS or Atom.</li>
+<li><strong>One feed:</strong> the Worker fetches it, under the same safety rules.</li>
+<li><strong>Several feeds:</strong> it returns <code>{ choices: [{ title, url }] }</code> so the reader can pick one.</li>
+<li><strong>None:</strong> it returns <code>NO_FEED_FOUND</code>.</li>
+</ul>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Error code</th>
+<th>HTTP</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>INVALID_URL</code></td>
+<td>400</td>
+<td>Not an absolute http(s) URL</td>
+</tr>
+<tr>
+<td><code>BLOCKED_HOST</code></td>
+<td>400</td>
+<td><code>localhost</code>, a private or reserved IP, or a port other than 80/443</td>
+</tr>
+<tr>
+<td><code>UPSTREAM_TIMEOUT</code></td>
+<td>504</td>
+<td>No answer within 8 s</td>
+</tr>
+<tr>
+<td><code>UPSTREAM_ERROR</code></td>
+<td>502</td>
+<td>Publisher returned an error status or the connection failed</td>
+</tr>
+<tr>
+<td><code>NOT_A_FEED</code></td>
+<td>422</td>
+<td>Neither a feed nor a web page, e.g. an image or JSON</td>
+</tr>
+<tr>
+<td><code>NO_FEED_FOUND</code></td>
+<td>422</td>
+<td>A web page with no feed link</td>
+</tr>
+<tr>
+<td><code>TOO_LARGE</code></td>
+<td>502</td>
+<td>Body over 5 MB</td>
+</tr>
+</tbody></table></div>
+<p>Response headers on success:</p>
+<pre><code class="language-http">Cloudflare-CDN-Cache-Control: max-age=600, stale-while-revalidate=3600, stale-if-error=86400
+Cache-Control: no-cache
+</code></pre>
+<p><strong>Safety rules:</strong></p>
+<ul>
+<li>Only http(s), on ports 80 and 443.</li>
+<li>At most 3 redirects, each one re-checked; the same checks apply to a discovered feed link.</li>
+<li>An 8 s timeout and a 5 MB cap.</li>
+<li>Errors are never cached.</li>
+</ul>
+<h2 id="7-ai-features-stretch">7. AI features (stretch)<a class="anchor" href="#7-ai-features-stretch" aria-label="Link to this section">#</a></h2>
+<aside class="callout callout-note"><p class="callout-title">Note</p><p><strong>Optional and last.</strong> Build this after M0–M9. Feedolio works fully without AI; AI controls appear only after a reader adds a key.</p>
+</aside>
+<h3 id="7-1-bring-your-own-key">7.1 Bring your own key<a class="anchor" href="#7-1-bring-your-own-key" aria-label="Link to this section">#</a></h3>
+<p>Readers add their keys in Settings › AI. Feedolio never sees them: every AI request goes from the browser straight to the provider.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Options</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>General model</strong> (required for AI)</td>
+<td><strong>Anthropic</strong>, or any <strong>OpenAI-compatible</strong> endpoint: OpenAI, OpenRouter, Ollama on the reader&#39;s computer, or a custom URL</td>
+<td>Summaries, translations, explanations; grouping and summarising the digest</td>
+</tr>
+<tr>
+<td><strong>Decision model</strong> (optional)</td>
+<td><strong>TypeSafe Jev</strong>, through TypeSafe&#39;s API, or OpenRouter once it&#39;s served there</td>
+<td>Yes/no rule matching and importance scores, with calibrated confidence</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><strong>Without a decision model,</strong> the general model does the judging too. It returns <code>{ match, confidence }</code> through structured output, but its confidence is self-reported, so Feedolio uses a wider &quot;Maybe&quot; band (§7.2).</li>
+<li><strong>Browser access, checked 2026-11-09:</strong><ul>
+<li>Anthropic, OpenAI and OpenRouter accept requests straight from a web page.</li>
+<li>Ollama needs <code>OLLAMA_ORIGINS</code> set to Feedolio&#39;s address, and some browsers ask permission before a website can reach a local server.</li>
+<li>Other OpenAI-compatible servers work only if they allow browser requests. &quot;Test connection&quot; says so in plain words.</li>
+</ul>
+</li>
+<li><strong>Anthropic:</strong> use the official SDK in browser mode (<code>dangerouslyAllowBrowser: true</code>, safe here because the key is the reader&#39;s own).<ul>
+<li>The default model is <code>claude-opus-5-5</code>; readers can pick any model from the list their key returns.</li>
+<li>Effort is set per task: low for quick actions, medium for the digest.</li>
+<li>JSON answers use structured output.</li>
+<li>Refusals are handled with Anthropic&#39;s server-side fallback.</li>
+</ul>
+</li>
+<li><strong>OpenAI-compatible:</strong> a small <code>fetch</code> adapter for <code>/chat/completions</code>, with streaming. It uses <code>response_format: json_schema</code> where supported, and validated JSON otherwise.</li>
+<li><strong>Jev:</strong> TypeSafe&#39;s public API reference couldn&#39;t be found on 2026-11-09. OpenRouter lists <code>~typesafe/jev-latest</code> with a &quot;decisions&quot; output, but no serving endpoints yet. Confirm the request format before M12. Until then, the general model covers judging.</li>
+</ul>
+<h3 id="7-2-the-three-features">7.2 The three features<a class="anchor" href="#7-2-the-three-features" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>What the reader does</th>
+<th>How it works</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Article actions</strong></td>
+<td>Taps Summarize, Translate (picks a language) or Explain on a story page</td>
+<td>Streams the answer into a panel labelled with the model. Cached per story, action and language. On summary-only stories, actions work on the summary and say so.</td>
+</tr>
+<tr>
+<td><strong>Filter rules</strong></td>
+<td>Writes rules like &quot;Hide event announcements&quot; and picks Hide, Highlight or Tag</td>
+<td>Each new story is checked once per rule version, in batches. Decision model: <strong>≥ 75%</strong> applies the action, <strong>40–75%</strong> goes to Maybe, <strong>&lt; 40%</strong> is ignored. General model: 85% and 30–85%. The reader&#39;s yes/no in Maybe is remembered. Hidden stories stay in Hidden; nothing is ever deleted.</td>
+</tr>
+<tr>
+<td><strong>Catch me up</strong></td>
+<td>Taps one button</td>
+<td>Takes unread stories since the last catch-up, up to 60; &quot;unread&quot; means not opened and not hidden. The general model groups them into stories, citing story IDs. The decision model, or the general model, ranks the groups by importance. Each group gets a short summary, and its links come from Feedolio&#39;s own story data, never from model text. &quot;Mark all caught up&quot; resets the window.</td>
+</tr>
+</tbody></table></div>
+<h3 id="7-3-which-model-does-what">7.3 Which model does what<a class="anchor" href="#7-3-which-model-does-what" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Kind</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Summarize, Translate, Explain</td>
+<td>Generate, streamed</td>
+<td>General model</td>
+</tr>
+<tr>
+<td>Match a story against rules</td>
+<td>Yes/no + confidence</td>
+<td>Decision model, else general</td>
+</tr>
+<tr>
+<td>Group the digest into stories</td>
+<td>Generate, JSON</td>
+<td>General model</td>
+</tr>
+<tr>
+<td>Rank digest stories</td>
+<td>Score</td>
+<td>Decision model, else general</td>
+</tr>
+<tr>
+<td>Summarise each digest story</td>
+<td>Generate</td>
+<td>General model</td>
+</tr>
+</tbody></table></div>
+<h3 id="7-4-keeping-keys-safe">7.4 Keeping keys safe<a class="anchor" href="#7-4-keeping-keys-safe" aria-label="Link to this section">#</a></h3>
+<aside class="callout callout-important"><p class="callout-title">Important</p><p>Keys sit in the same browser as untrusted feed content, so any injected script could steal them. Nothing from a feed or a model may ever run as code.</p>
+</aside>
+<ul>
+<li><strong>Feed content:</strong> all feed HTML goes through DOMPurify. Titles and excerpts are always plain text.</li>
+<li><strong>Model output:</strong> shown as text through a tiny paragraph-and-list formatter we own, never as HTML. Links in AI panels come only from Feedolio&#39;s story data.</li>
+<li><strong>Prompt injection:</strong> feed text is fenced and labelled as untrusted in every prompt. Models get no tools, so a hostile feed can at worst mislabel a story, and a mislabelled story lands in Maybe or Hidden, where the reader can still see it.</li>
+<li><strong>Content Security Policy:</strong> scripts only from Feedolio itself (no third-party scripts at all), with Trusted Types on. The small inline script that applies the theme before first paint is allowed by its hash. <code>connect-src</code> has to allow any https host and localhost, because readers choose their own endpoints. So the policy can&#39;t stop data leaving, and stopping script injection is the real defence.</li>
+<li><strong>Key storage:</strong><ul>
+<li>Keys are stored apart from other data, never logged or put in error messages, and never sent to <code>/api/feed</code>.</li>
+<li>With &quot;Remember on this device&quot; off, keys live only as long as the tab.</li>
+<li>One button removes them all.</li>
+<li>Signed-in readers get keys per account.</li>
+</ul>
+</li>
+<li><strong>Privacy:</strong> only the stories a reader acts on, or that rules check, go to their provider. Settings says so plainly and shows this session&#39;s usage.</li>
+</ul>
+<h3 id="7-5-cost-and-speed-the-reader-pays">7.5 Cost and speed (the reader pays)<a class="anchor" href="#7-5-cost-and-speed-the-reader-pays" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Check rules in batches of up to 25 stories, once per story and rule version, and never again on refresh.</li>
+<li>Cache AI results in IndexedDB.</li>
+<li>Cap the digest at 60 stories.</li>
+<li>Show a usage counter in Settings.</li>
+</ul>
+<h2 id="8-build-plan">8. Build plan<a class="anchor" href="#8-build-plan" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Milestone</th>
+<th>Stories</th>
+<th>Est.</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>M0</td>
+<td>Foundations</td>
+<td>—</td>
+<td>2 h</td>
+</tr>
+<tr>
+<td>M1</td>
+<td>Feed Worker, with feed discovery</td>
+<td>US-78, US-90, US-91</td>
+<td>8 h</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>App shell, headline list, Today and date headers</td>
+<td>US-01–05, US-10, US-16–20, US-66–68, US-82, US-83</td>
+<td>6.5 h</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Story page and reading settings</td>
+<td>US-21–35, US-89</td>
+<td>5.5 h</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Bookmarks</td>
+<td>US-36–48</td>
+<td>4 h</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Multiple feeds, Settings, add any link, divider</td>
+<td>US-06–09, US-11–15, US-55–65, US-84, US-92–94</td>
+<td>9 h</td>
+</tr>
+<tr>
+<td>M6</td>
+<td>Polish: dark mode, accessibility, shortcuts, layouts, sidebar</td>
+<td>US-69–72, US-85–88, US-115</td>
+<td>9 h</td>
+</tr>
+<tr>
+<td>M7</td>
+<td>Sharing</td>
+<td>US-49–54</td>
+<td>2 h</td>
+</tr>
+<tr>
+<td>M8</td>
+<td>Ship: README, deploy, final QA</td>
+<td>US-79–81</td>
+<td>3 h</td>
+</tr>
+<tr>
+<td>M9</td>
+<td>GitHub sign-in</td>
+<td>US-73–76</td>
+<td>3 h</td>
+</tr>
+<tr>
+<td>M10</td>
+<td>AI foundations: keys, providers, safety</td>
+<td>US-95–99, US-113, US-114</td>
+<td>6 h</td>
+</tr>
+<tr>
+<td>M11</td>
+<td>AI article actions</td>
+<td>US-100–103</td>
+<td>4 h</td>
+</tr>
+<tr>
+<td>M12</td>
+<td>AI filter rules, Maybe and Hidden</td>
+<td>US-104–108</td>
+<td>7 h</td>
+</tr>
+<tr>
+<td>M13</td>
+<td>AI Catch me up</td>
+<td>US-109–112</td>
+<td>6 h</td>
+</tr>
+</tbody></table></div>
+<aside class="callout callout-tip"><p class="callout-title">Tip</p><p><strong>Short on time?</strong> M0–M5 plus M8 (about 38 hours) deliver everything the brief requires. Then add M6, M7 and M9. The AI milestones come last, starting with M10.</p>
+</aside>
+<p><strong>Done means, for every milestone:</strong></p>
+<ul>
+<li>Tests pass in CI.</li>
+<li>No accessibility violations on the views it touched.</li>
+<li>Works at 390 px and 1280 px wide.</li>
+<li>Deployed to a preview URL.</li>
+<li>README updated if behaviour changed.</li>
+</ul>
+<h3 id="m0-foundations">M0 · Foundations<a class="anchor" href="#m0-foundations" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Vite + React (JavaScript) app, ESLint, Prettier</li>
+<li><input disabled="" type="checkbox"> Vitest, Testing Library, MSW; one example journey test</li>
+<li><input disabled="" type="checkbox"> Router with empty views; Redux store with empty slices</li>
+<li><input disabled="" type="checkbox"> <code>tokens.css</code> and <code>base.css</code> from the design canvas</li>
+<li><input disabled="" type="checkbox"> Wrangler config: static assets in single-page-app mode, Workers Caching on, Cloudflare Vite plugin</li>
+<li><input disabled="" type="checkbox"> CI on GitHub Actions; Workers Builds for preview URLs</li>
+</ul>
+<p><strong>Done when</strong> <code>npm run dev</code> serves the app shell and a placeholder <code>/api/feed</code>, and a preview URL is live.</p>
+<h3 id="m1-feed-worker">M1 · Feed Worker<a class="anchor" href="#m1-feed-worker" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> URL guard: scheme, port, <code>localhost</code>, literal private IPs; redirects re-checked</li>
+<li><input disabled="" type="checkbox"> Fetch with an 8 s timeout and 5 MB cap</li>
+<li><input disabled="" type="checkbox"> Parse with <code>fast-xml-parser</code>; normalise RSS and Atom into <code>Story</code></li>
+<li><input disabled="" type="checkbox"> Main-image rules and the <code>hasFullContent</code> flag</li>
+<li><input disabled="" type="checkbox"> Feed discovery from a web page: one feed, several (<code>choices</code>), or <code>NO_FEED_FOUND</code></li>
+<li><input disabled="" type="checkbox"> <code>postsPerWeek</code> from story dates</li>
+<li><input disabled="" type="checkbox"> Save the five feeds, two web pages and the edge cases as test fixtures</li>
+<li><input disabled="" type="checkbox"> Contract tests for every error code and the cache headers</li>
+</ul>
+<p><strong>Done when</strong> all five fixtures produce the expected stories and images, pasting <code>theverge.com</code> finds its Atom feed, and each error code has a passing test.</p>
+<h3 id="m2-app-shell-headline-list-today-and-date-headers">M2 · App shell, headline list, Today and date headers<a class="anchor" href="#m2-app-shell-headline-list-today-and-date-headers" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Responsive shell: sidebar, drawer, bottom tabs</li>
+<li><input disabled="" type="checkbox"> <code>getFeed</code> query; story rows with source, time, author and excerpt</li>
+<li><input disabled="" type="checkbox"> Main image with lazy loading, plus the monogram tile fallback</li>
+<li><input disabled="" type="checkbox"> Loading skeleton and per-feed error row with Retry</li>
+<li><input disabled="" type="checkbox"> Date headers: Today, Yesterday, Earlier this week, Older</li>
+<li><input disabled="" type="checkbox"> Today view (<code>/today</code>): the last 24 hours across enabled feeds</li>
+</ul>
+<p><strong>Done when</strong> one feed&#39;s headlines show correctly on phone and desktop, including the no-image case, and Today shows only the last 24 hours.</p>
+<h3 id="m3-story-page-and-reading-settings">M3 · Story page and reading settings<a class="anchor" href="#m3-story-page-and-reading-settings" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Route and the four-step story lookup</li>
+<li><input disabled="" type="checkbox"> Sanitised body: links open in a new tab; iframes become &quot;View on the original site&quot; links</li>
+<li><input disabled="" type="checkbox"> Summary-only layout with a &quot;Continue reading on {site}&quot; button</li>
+<li><input disabled="" type="checkbox"> Reading time, previous/next links, no duplicate hero image</li>
+<li><input disabled="" type="checkbox"> Reading settings (Aa): text size, serif or sans, line width; remembered</li>
+</ul>
+<p><strong>Done when</strong> a hostile test feed can&#39;t inject script, a reload keeps the story on screen, and reading settings survive a reload.</p>
+<h3 id="m4-bookmarks">M4 · Bookmarks<a class="anchor" href="#m4-bookmarks" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Bookmarks slice storing full story copies; toggle, remove, restore</li>
+<li><input disabled="" type="checkbox"> Versioned <code>localStorage</code> layer: validate on load, throttled saves, warning when full</li>
+<li><input disabled="" type="checkbox"> Cross-tab sync via the <code>storage</code> event</li>
+<li><input disabled="" type="checkbox"> Saved page, empty state and Undo toast</li>
+</ul>
+<p><strong>Done when</strong> a bookmark survives a reload, its story leaving the feed, and its feed being removed.</p>
+<h3 id="m5-multiple-feeds-settings-add-any-link-divider">M5 · Multiple feeds, Settings, add any link, divider<a class="anchor" href="#m5-multiple-feeds-settings-add-any-link-divider" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Subscriptions slice with the five starter feeds</li>
+<li><input disabled="" type="checkbox"> All stories: merge, remove duplicates, sort, with per-feed errors</li>
+<li><input disabled="" type="checkbox"> Add-a-feed dialog: paste any link, see the preview (latest headlines, posts a week), pick when there are several feeds</li>
+<li><input disabled="" type="checkbox"> Settings: hide, remove, restore starters, suggested feeds, duplicate check; theme switch</li>
+<li><input disabled="" type="checkbox"> &quot;New since your last visit&quot; divider, driven by <code>lastVisitAt</code></li>
+<li><input disabled="" type="checkbox"> First-visit welcome note</li>
+</ul>
+<p><strong>Done when</strong> a reader can paste a website link, add its feed, and see it in All stories, and on their next visit a divider marks what&#39;s new.</p>
+<h3 id="m6-polish-dark-mode-accessibility-shortcuts-layouts-sidebar">M6 · Polish: dark mode, accessibility, shortcuts, layouts, sidebar<a class="anchor" href="#m6-polish-dark-mode-accessibility-shortcuts-layouts-sidebar" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Dark theme tokens; theme applied before first paint</li>
+<li><input disabled="" type="checkbox"> Keyboard pass: visible focus, skip link, focus restored on Back</li>
+<li><input disabled="" type="checkbox"> Shortcuts with a <code>?</code> overlay: J/K, Enter or O, V, S, R, <code>[</code>, G then T/A/S, Esc. Shortcuts are off while typing.</li>
+<li><input disabled="" type="checkbox"> List or Cards layout; Comfortable or Compact density; remembered</li>
+<li><input disabled="" type="checkbox"> Collapsible sidebar: a 64 px icon rail with tooltips and count badges. The toggle reports <code>aria-expanded</code>, and every rail icon keeps an accessible name. Expanded by default from 1280 px; the reader&#39;s choice is remembered.</li>
+<li><input disabled="" type="checkbox"> Screen-reader pass: landmarks, one <code>h1</code> per view, <code>aria-pressed</code> on Save</li>
+<li><input disabled="" type="checkbox"> Reduced motion; automated audit (axe) on every view</li>
+</ul>
+<p><strong>Done when</strong> every view has no serious accessibility issues in both themes, and a reader can browse, open and save stories with the keyboard alone.</p>
+<h3 id="m7-sharing">M7 · Sharing<a class="anchor" href="#m7-sharing" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Share links for X, Facebook, LinkedIn and email</li>
+<li><input disabled="" type="checkbox"> Native share sheet on phones; Copy link with a &quot;Copied&quot; message</li>
+</ul>
+<p><strong>Done when</strong> each button opens the right share page for the story&#39;s original link.</p>
+<h3 id="m8-ship">M8 · Ship<a class="anchor" href="#m8-ship" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> README: setup, commands, decisions, trade-offs, what&#39;s next</li>
+<li><input disabled="" type="checkbox"> Security headers for the app&#39;s pages; Playwright smoke test on the preview</li>
+<li><input disabled="" type="checkbox"> Final check on a real phone; production deploy</li>
+</ul>
+<p><strong>Done when</strong> a reviewer can open the live URL and follow the README from a clean checkout.</p>
+<h3 id="m9-github-sign-in">M9 · GitHub sign-in<a class="anchor" href="#m9-github-sign-in" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Auth0 app with GitHub login; <code>.env.example</code></li>
+<li><input disabled="" type="checkbox"> Separate saved data per signed-in user; offer to import guest bookmarks</li>
+</ul>
+<p><strong>Done when</strong> two accounts on one browser see separate bookmarks, and signed-out use still works.</p>
+<h3 id="m10-ai-foundations-keys-providers-safety">M10 · AI foundations: keys, providers, safety<a class="anchor" href="#m10-ai-foundations-keys-providers-safety" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Settings › AI: provider, base URL, model list, key, &quot;Remember on this device&quot;, Test connection, Remove all keys</li>
+<li><input disabled="" type="checkbox"> Adapters: Anthropic SDK (browser mode); OpenAI-compatible <code>fetch</code> with streaming; decision model with a general-model fallback</li>
+<li><input disabled="" type="checkbox"> Task router (§7.3); key store kept apart from <code>feedolio:v1</code>; IndexedDB cache</li>
+<li><input disabled="" type="checkbox"> CSP with Trusted Types; output-as-text formatter; usage counter</li>
+</ul>
+<p><strong>Done when</strong> a reader can connect each provider type, see &quot;Connected&quot;, and remove every key, and no test can get a key sent anywhere except its provider.</p>
+<h3 id="m11-ai-article-actions">M11 · AI article actions<a class="anchor" href="#m11-ai-article-actions" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Summarize, Translate (language menu) and Explain on the story page</li>
+<li><input disabled="" type="checkbox"> Streaming panel with provenance, Copy, Regenerate and the &quot;AI can make mistakes&quot; note</li>
+<li><input disabled="" type="checkbox"> Cache per story, action and language; summary-only notice</li>
+</ul>
+<p><strong>Done when</strong> Summarize streams from a recorded provider response, and model output containing HTML shows as plain text.</p>
+<h3 id="m12-ai-filter-rules-maybe-and-hidden">M12 · AI filter rules, Maybe and Hidden<a class="anchor" href="#m12-ai-filter-rules-maybe-and-hidden" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Rules editor: plain-English text, Hide/Highlight/Tag, &quot;Test on recent stories&quot;</li>
+<li><input disabled="" type="checkbox"> Batched checks of new stories; thresholds; judgments saved per rule version</li>
+<li><input disabled="" type="checkbox"> Highlight and tag styling; Maybe view with Yes/No that&#39;s remembered; Hidden view with Unhide; tag pages</li>
+</ul>
+<p><strong>Done when</strong> a rule hides the Founder Summit fixture story, sends an uncertain story to Maybe, and nothing ever disappears from Hidden.</p>
+<h3 id="m13-ai-catch-me-up">M13 · AI Catch me up<a class="anchor" href="#m13-ai-catch-me-up" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Opened-story record and <code>lastCatchUpAt</code></li>
+<li><input disabled="" type="checkbox"> Grouping with story-ID citations; ranking; one summary per group</li>
+<li><input disabled="" type="checkbox"> Digest page with importance, summaries and source links; &quot;Mark all caught up&quot;</li>
+</ul>
+<p><strong>Done when</strong> the fixture stories group into ranked stories, every source link opens a real story in Feedolio, and &quot;Mark all caught up&quot; starts a new window.</p>
+<h2 id="9-testing">9. Testing<a class="anchor" href="#9-testing" aria-label="Link to this section">#</a></h2>
+<p><strong>Approach (settled):</strong> journey tests are the main tool. Unit tests cover only dense logic, and contract tests cover the Worker.</p>
+<p><strong>Principles:</strong></p>
+<ul>
+<li><strong>Test behaviour, not code.</strong> Assert on what a reader sees and does, or on what <code>/api/feed</code> returns. Never assert on Redux state or CSS classes, and don&#39;t use snapshot tests.</li>
+<li><strong>Fake only what we don&#39;t own.</strong> The network gets saved feed files and recorded AI responses, and the clock is frozen. Everything else runs for real.</li>
+<li><strong>Use real fixtures.</strong> Saved copies of the five feeds, plus edge cases: hostile HTML, missing dates, an empty feed, an HTML 404 page, and web pages with one, several or no feed links.</li>
+</ul>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What it covers</th>
+<th>Tools</th>
+<th>About</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Journey tests</strong> (main)</td>
+<td>The real app in a simulated browser. Calls to <code>/api/feed</code> run the real Worker code, publisher requests get fixture files, and AI providers get recorded responses.</td>
+<td>Vitest, Testing Library, MSW</td>
+<td>35</td>
+</tr>
+<tr>
+<td><strong>Endpoint contract</strong></td>
+<td>Error codes, cache headers, discovery and parsed output, run inside the Workers runtime</td>
+<td>Vitest + Cloudflare Vitest plugin</td>
+<td>18</td>
+</tr>
+<tr>
+<td><strong>Unit tests</strong> (only for dense logic)</td>
+<td>Normaliser, main-image rules, URL guard, storage migration, AI threshold logic</td>
+<td>Vitest</td>
+<td>35</td>
+</tr>
+<tr>
+<td><strong>Smoke</strong> (optional)</td>
+<td>Real browsers and real feeds against the preview URL</td>
+<td>Playwright</td>
+<td>3</td>
+</tr>
+</tbody></table></div>
+<p><strong>Must-pass scenarios:</strong></p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Expected</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>One feed fails while others load</td>
+<td>That feed shows Retry; the rest of All stories appears</td>
+</tr>
+<tr>
+<td>Open a TechCrunch story</td>
+<td>Summary plus a link to techcrunch.com</td>
+</tr>
+<tr>
+<td>Story from the hostile fixture</td>
+<td>No script, no event handlers, no <code>javascript:</code> links in the page</td>
+</tr>
+<tr>
+<td>Save, reload, then the story leaves the feed</td>
+<td>The story still opens from Saved</td>
+</tr>
+<tr>
+<td>Bookmark in one tab</td>
+<td>It appears in another open tab</td>
+</tr>
+<tr>
+<td>Paste <code>theverge.com</code>; paste a page with no feed</td>
+<td>Finds the Atom feed; a clear &quot;couldn&#39;t find a feed&quot; error</td>
+</tr>
+<tr>
+<td>Feed URL that resolves to <code>localhost</code> or a private IP</td>
+<td><code>BLOCKED_HOST</code></td>
+</tr>
+<tr>
+<td>Old TechCrunch URL (HTML 404)</td>
+<td><code>UPSTREAM_ERROR</code> with status 404</td>
+</tr>
+<tr>
+<td>Second visit after new stories arrive</td>
+<td>Divider between new and older stories; a first visit shows the welcome note instead</td>
+</tr>
+<tr>
+<td>Collapse the sidebar with <code>[</code>, then reload</td>
+<td>Still collapsed; every rail icon has an accessible name</td>
+</tr>
+<tr>
+<td>AI output containing <code>&lt;img onerror&gt;</code></td>
+<td>Shown as text; nothing runs</td>
+</tr>
+<tr>
+<td>Digest cites an unknown story ID</td>
+<td>Dropped; no model-made links appear</td>
+</tr>
+<tr>
+<td>Decision model set, then removed</td>
+<td>Judging goes to the decision model, then to the general model with the wider Maybe band</td>
+</tr>
+<tr>
+<td>Any request to <code>/api/feed</code></td>
+<td>Never carries an AI key</td>
+</tr>
+</tbody></table></div>
+<h2 id="10-risks">10. Risks<a class="anchor" href="#10-risks" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Plan</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A publisher moves its feed (TechCrunch already has)</td>
+<td>Tests use fixtures; the Worker follows redirects; readers can update feeds in Settings</td>
+</tr>
+<tr>
+<td>Medium feeds look stale (2018–2020)</td>
+<td>Two live starter feeds; dates shown honestly</td>
+</tr>
+<tr>
+<td>Worker misused as an open proxy</td>
+<td>URL and IP checks, size cap, caching; rate limiting later</td>
+</tr>
+<tr>
+<td>Workers free plan limits (10 ms CPU, 100k requests a day)</td>
+<td>Parsing takes about 1 ms and caching keeps calls rare. The $5/month plan lifts both.</td>
+</tr>
+<tr>
+<td>Browser storage fills up with story copies</td>
+<td>A warning toast; move to IndexedDB if it ever matters (about 300 long stories fit)</td>
+</tr>
+<tr>
+<td>Key theft through injected script</td>
+<td>Sanitising, text-only AI output, strict CSP with Trusted Types, no third-party scripts</td>
+</tr>
+<tr>
+<td>Prompt injection in feed text</td>
+<td>No tools, fenced input, limited actions; mislabelled stories stay visible in Maybe or Hidden</td>
+</tr>
+<tr>
+<td>A provider blocks browser requests</td>
+<td>Test connection explains it; OpenRouter is an alternative</td>
+</tr>
+<tr>
+<td>Jev&#39;s request format is unconfirmed</td>
+<td>General-model fallback; confirm before M12</td>
+</tr>
+<tr>
+<td>Readers surprised by AI costs</td>
+<td>AI off until set up; batching, caching and a usage counter</td>
+</tr>
+</tbody></table></div>
+<h2 id="11-settled-decisions">11. Settled decisions<a class="anchor" href="#11-settled-decisions" aria-label="Link to this section">#</a></h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Can the app use a small server-side Worker to fetch feeds?</td>
+<td><strong>Yes.</strong></td>
+</tr>
+<tr>
+<td>Which default feeds?</td>
+<td><strong>The brief&#39;s three</strong> (TechCrunch at its current address) <strong>plus BBC Technology and The Verge.</strong></td>
+</tr>
+<tr>
+<td>Does sign-in need to sync bookmarks across devices?</td>
+<td><strong>No.</strong> Sign-in only separates data per user on the device.</td>
+</tr>
+<tr>
+<td>How do we test?</td>
+<td><strong>Journey tests first</strong> (§9). Unit tests only for dense logic.</td>
+</tr>
+<tr>
+<td>Priorities</td>
+<td><strong>Adding your own feeds is a Must.</strong> Theme and GitHub sign-in are Should.</td>
+</tr>
+<tr>
+<td>What&#39;s new since last time?</td>
+<td><strong>A light &quot;New since your last visit&quot; divider</strong>, like Reeder. No unread counts.</td>
+</tr>
+<tr>
+<td>Ideas from other readers</td>
+<td><strong>All seven:</strong> shortcuts, add any link, date headers, Today, List or Cards, reading settings, welcome note.</td>
+</tr>
+<tr>
+<td>Sidebar</td>
+<td><strong>Collapsible on desktop</strong> to a slim icon rail; <code>[</code> toggles it; the choice is remembered.</td>
+</tr>
+<tr>
+<td>AI</td>
+<td><strong>Stretch:</strong> article actions, filter rules and Catch me up, on the reader&#39;s own keys, with an optional decision model.</td>
+</tr>
+</tbody></table></div>
+<p>Settled 2026-11-08 and 2026-11-09.</p>
+<p><strong>What happened to the TechCrunch feed:</strong> TechCrunch moved its section pages and feeds under <code>/category/</code>.</p>
+<ul>
+<li><strong>Until mid-2022:</strong> the brief&#39;s address (<code>techcrunch.com/startups/feed/</code>) served the feed.</li>
+<li><strong>From October 2022:</strong> it redirected to the new address.</li>
+<li><strong>By October 2026:</strong> the redirect was gone and it returns a &quot;Page not found&quot; page.</li>
+</ul>
+<p>The feed itself is alive at <code>techcrunch.com/category/startups/feed/</code>. Source: live checks and Wayback Machine snapshots.</p>
+<h2 id="12-not-in-this-version">12. Not in this version<a class="anchor" href="#12-not-in-this-version" aria-label="Link to this section">#</a></h2>
+<ul>
+<li>Syncing across devices (not required), or any database of our own</li>
+<li>Full read/unread tracking with counts (the divider covers &quot;what&#39;s new&quot;), search, folders, OPML import, notifications, offline mode</li>
+<li>Pulling full articles from publisher sites, or finding images for feeds that have none</li>
+<li>Facebook &quot;Like&quot; button or any social SDK</li>
+<li>Embedded videos and iframes; these link to the original instead</li>
+<li>AI that would need our own server: shared caching, scheduled or emailed digests</li>
+<li>TypeScript, server-side rendering, the interface in other languages</li>
+</ul>
+<h2 id="appendix-notes-for-implementers">Appendix: notes for implementers<a class="anchor" href="#appendix-notes-for-implementers" aria-label="Link to this section">#</a></h2>
+<p><strong>Ground rules:</strong></p>
+<ul>
+<li>JavaScript only, with JSDoc for shapes. No TypeScript.</li>
+<li>No CSS libraries. Use CSS Modules, and take values from <code>tokens.css</code> (copied from the design canvas).</li>
+<li>Domain words: <strong>Feed</strong>, <strong>Subscription</strong>, <strong>Story</strong>, <strong>Bookmark</strong>, <strong>Rule</strong>. The UI says &quot;Save&quot; and &quot;Saved&quot;.</li>
+<li>Never render model output as HTML, and never send a key anywhere except its provider.</li>
+<li>Each milestone is a separate pull request, with tests in the same pull request.</li>
+</ul>
+<p><strong>Commands:</strong></p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npm run dev</code></td>
+<td>App and Worker together (Cloudflare Vite plugin)</td>
+</tr>
+<tr>
+<td><code>npm test</code></td>
+<td>All Vitest suites</td>
+</tr>
+<tr>
+<td><code>npm run build</code></td>
+<td>Production build</td>
+</tr>
+<tr>
+<td><code>npx wrangler deploy</code></td>
+<td>Deploy to Cloudflare</td>
+</tr>
+</tbody></table></div>
+<p><strong>Project layout:</strong></p>
+<pre><code class="language-text">src/
+  app/          store, router, persistence, visits
+  features/     feeds · story · bookmarks · subscriptions · preferences · share · auth · shortcuts
+  features/ai/  providers (anthropic, openaiCompatible, decision) · router · keys · cache · actions · rules · digest
+  components/   AppShell, StoryRow, StoryCard, StoryImage, MonogramTile, DateHeader, Toast, Icon (*.module.css)
+  styles/       tokens.css, base.css
+worker/
+  index.js      routes /api/feed
+  lib/          handleFeedRequest, safeFetch, discoverFeed, normaliseFeed, pickMainImage
+public/_headers security headers for the app&#39;s pages
+test/           fixtures/feeds, fixtures/pages, fixtures/ai, msw handlers, journey tests
+wrangler.jsonc  static assets (single-page-app mode), Workers Caching on
+</code></pre>
+<p><strong>Further reading:</strong> the <a href="to-spec-plan.html">detailed spec</a> has every user story. The <a href="anthropic-engineering-plan.html">engineering design</a> has the decision records, data flows, error handling and full test list.</p>
+
+    </article>
+    <p class="footer">Generated from <code>feedolio-plan.md</code>, which has the same content.</p>
+  </main>
+</div>
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('.sidebar .toc a'));
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && byId[e.target.id]) {
+          links.forEach(function (a) { a.classList.remove('active'); });
+          byId[e.target.id].classList.add('active');
+        }
+      });
+    }, { rootMargin: '0px 0px -70% 0px' });
+    document.querySelectorAll('article h2[id], article h3[id]').forEach(function (h) { obs.observe(h); });
+  }
+  document.querySelectorAll('.toc-mobile .toc a').forEach(function (a) {
+    a.addEventListener('click', function () { a.closest('details').removeAttribute('open'); });
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+(function () {
+  var KEY = 'plan-doc-theme';
+  var root = document.documentElement;
+  var blocks = Array.prototype.slice.call(document.querySelectorAll('pre.mermaid'));
+  blocks.forEach(function (b) { b.setAttribute('data-src', b.textContent); });
+  function isDark() {
+    var t = root.getAttribute('data-theme');
+    if (t) return t === 'dark';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function renderDiagrams() {
+    if (!window.mermaid || !blocks.length) return;
+    blocks.forEach(function (b) { b.removeAttribute('data-processed'); b.textContent = b.getAttribute('data-src'); });
+    window.mermaid.initialize({ startOnLoad: false, theme: isDark() ? 'dark' : 'neutral', securityLevel: 'strict', fontFamily: 'Atkinson Hyperlegible, Segoe UI, sans-serif' });
+    window.mermaid.run({ nodes: blocks }).catch(function (e) { console.error(e); });
+  }
+  function apply(t) {
+    if (t === 'light' || t === 'dark') root.setAttribute('data-theme', t); else root.removeAttribute('data-theme');
+    document.querySelectorAll('[data-set-theme]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-set-theme') === (t || 'system'))); });
+    renderDiagrams();
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  apply(saved || 'system');
+  document.querySelectorAll('[data-set-theme]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.getAttribute('data-set-theme');
+      apply(t);
+      try { localStorage.setItem(KEY, t); } catch (e) {}
+    });
+  });
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', function () { if (!root.getAttribute('data-theme')) renderDiagrams(); });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Keep LF line endings everywhere, whatever core.autocrlf says.
+* text=auto eol=lf
+
+# Saved feeds and pages stay byte for byte as captured.
+test/fixtures/** -text
