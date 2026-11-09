@@ -15,11 +15,11 @@ import { STARTER_FEEDS, starterSubscriptions } from './defaults.js';
  * @property {string}  addedAt    ISO timestamp
  */
 
-/** Oldest first, so the sidebar keeps the order feeds were added in. */
-const subscriptionsAdapter = createEntityAdapter({
-  /** @type {(a: Subscription, b: Subscription) => number} */
-  sortComparer: (a, b) => a.addedAt.localeCompare(b.addedAt),
-});
+/**
+ * In the reader's order: new feeds go last, and feeds can be dragged or moved
+ * (feedMoved). The sidebar, the phone chips and Settings all follow it.
+ */
+const subscriptionsAdapter = createEntityAdapter();
 
 const STARTER_URLS = new Set(STARTER_FEEDS.map(({ url }) => normaliseFeedUrl(url)));
 
@@ -51,9 +51,21 @@ const subscriptionsSlice = createSlice({
     subscriptionRemoved(state, { payload }) {
       subscriptionsAdapter.removeOne(state, payload);
     },
-    /** Puts back a removed feed as it was (Undo). */
-    subscriptionRestored(state, /** @type {{ payload: Subscription }} */ { payload }) {
-      subscriptionsAdapter.upsertOne(state, payload);
+    /** Puts back a removed feed as it was, where it was (Undo). */
+    subscriptionRestored: {
+      reducer(
+        state,
+        /** @type {{ payload: { subscription: Subscription, index: number } }} */ { payload },
+      ) {
+        subscriptionsAdapter.upsertOne(state, payload.subscription);
+        moveId(state.ids, payload.subscription.id, payload.index);
+      },
+      /** @param {Subscription} subscription @param {number} index  Where it was */
+      prepare: (subscription, index) => ({ payload: { subscription, index } }),
+    },
+    /** Moves a feed to another place in the reader's order. */
+    feedMoved(state, /** @type {{ payload: { id: string, to: number } }} */ { payload }) {
+      moveId(state.ids, payload.id, payload.to);
     },
     /** Shows a feed in All stories and Today, or hides it from them. */
     subscriptionToggled(state, /** @type {{ payload: string }} */ { payload }) {
@@ -85,12 +97,27 @@ export const {
   subscriptionRestored,
   subscriptionToggled,
   defaultsRestored,
+  feedMoved,
 } = subscriptionsSlice.actions;
 export default subscriptionsSlice.reducer;
 
 /**
- * The subscriptions slice from saved data. Starts with the starter feeds when
- * nothing was saved yet.
+ * Moves an id to a new index (clamped to the list), in place.
+ *
+ * @param {string[]} ids
+ * @param {string} id
+ * @param {number} to
+ */
+function moveId(ids, id, to) {
+  const from = ids.indexOf(id);
+  if (from === -1) return;
+  ids.splice(from, 1);
+  ids.splice(Math.max(0, Math.min(Math.trunc(to) || 0, ids.length)), 0, id);
+}
+
+/**
+ * The subscriptions slice from saved data, in the order it was saved. Starts
+ * with the starter feeds when nothing was saved yet.
  *
  * @param {Subscription[]|undefined} saved
  */

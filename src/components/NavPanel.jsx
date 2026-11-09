@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Link, NavLink } from 'react-router';
 import { tagPath } from '../features/ai/rules/useRules.js';
+import { pressFeed, stepFeed } from '../features/subscriptions/reorderTrigger.js';
 import Icon from './Icon.jsx';
 import { FeedDot } from './Monogram.jsx';
 import styles from './NavPanel.module.css';
@@ -34,6 +35,7 @@ export function Wordmark({ onNavigate, className = '' }) {
  * @property {() => void} [onToggle]  Shows the collapse or expand button
  * @property {string} [className]
  * @property {AiNav} [ai]  Catch me up, Maybe, Hidden and tags, once the reader uses AI
+ * @property {(id: string, to: number) => void} [onMoveFeed]  Lets the reader reorder feeds: drag, or Alt+↑/↓
  */
 
 /** @typedef {ReturnType<typeof import('../features/ai/rules/useRules.js').useAiNav>} AiNav */
@@ -60,6 +62,7 @@ function Panel({
   onToggle,
   className = '',
   ai,
+  onMoveFeed,
 }) {
   return (
     <nav id={id} aria-label={label} className={`${styles.panel} ${className}`}>
@@ -159,10 +162,16 @@ function Panel({
 
       <div className={styles.feeds}>
         <h2 className={styles.heading}>Feeds</h2>
-        <ul className={styles.items}>
+        <ul className={`${styles.items} ${styles.feedList}`} {...reorderable(onMoveFeed)}>
           {feeds.map((feed) => (
-            <li key={feed.id}>
-              <NavLink to={`/feeds/${feed.id}`} className={styles.item} onClick={onNavigate}>
+            <li key={feed.id} data-reorder-id={feed.id} data-reorder-label={feed.title}>
+              <NavLink
+                to={`/feeds/${feed.id}`}
+                className={styles.item}
+                onClick={onNavigate}
+                draggable={false}
+                aria-keyshortcuts={onMoveFeed && MOVE_KEYS}
+              >
                 <FeedDot feed={feed} />
                 <span className={styles.label}>{feed.title}</span>
               </NavLink>
@@ -198,6 +207,7 @@ function Rail({
   onToggle,
   className = '',
   ai,
+  onMoveFeed,
 }) {
   return (
     <nav id={id} aria-label={label} className={`${styles.rail} ${className}`}>
@@ -310,14 +320,20 @@ function Rail({
 
       <div className={styles.railRule} aria-hidden="true" />
 
-      <ul className={styles.railItems} aria-label="Feeds">
+      <ul
+        className={`${styles.railItems} ${styles.feedList}`}
+        aria-label="Feeds"
+        {...reorderable(onMoveFeed)}
+      >
         {feeds.map((feed) => (
-          <li key={feed.id}>
+          <li key={feed.id} data-reorder-id={feed.id} data-reorder-label={feed.title}>
             <NavLink
               to={`/feeds/${feed.id}`}
               className={styles.railItem}
               aria-label={feed.title}
               title={feed.title}
+              draggable={false}
+              aria-keyshortcuts={onMoveFeed && MOVE_KEYS}
             >
               <FeedDot feed={feed} icon />
             </NavLink>
@@ -333,6 +349,28 @@ function Rail({
       </div>
     </nav>
   );
+}
+
+/** The keys that move a focused feed, as aria-keyshortcuts names them. */
+const MOVE_KEYS = 'Alt+ArrowUp Alt+ArrowDown';
+
+/**
+ * Handlers that let the reader reorder a feed list: drag with a mouse or pen,
+ * or Alt+↑/↓ on a focused feed. The work loads on first use.
+ *
+ * @param {NavPanelProps['onMoveFeed']} onMoveFeed
+ */
+function reorderable(onMoveFeed) {
+  if (!onMoveFeed) return {};
+  return {
+    /** @param {import('react').PointerEvent<HTMLUListElement>} event */
+    onPointerDown: (event) => pressFeed(event, onMoveFeed),
+    /** @param {import('react').KeyboardEvent<HTMLUListElement>} event */
+    onKeyDown: (event) => stepFeed(event, onMoveFeed),
+    // A link would otherwise start the browser's own drag of its address.
+    /** @param {import('react').DragEvent} event */
+    onDragStart: (event) => event.preventDefault(),
+  };
 }
 
 /**

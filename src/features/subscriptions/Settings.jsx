@@ -20,10 +20,12 @@ import {
   themeChanged,
 } from '../preferences/preferencesSlice.js';
 import AddFeedForm from './AddFeedForm.jsx';
+import { beginPointerDrag, moveByStep } from './feedReorder.js';
 import styles from './Settings.module.css';
 import SettingsTabs from './SettingsTabs.jsx';
 import {
   defaultsRestored,
+  feedMoved,
   selectAllSubscriptions,
   selectCanRestoreDefaults,
   selectSuggestedFeeds,
@@ -142,13 +144,55 @@ export default function Settings() {
   );
 }
 
-/** Every followed feed, with a switch to show it in All stories and Remove. */
+/**
+ * Every followed feed, in the reader's order, with a switch to show it in All
+ * stories and Remove. Feeds are reordered by dragging their grip (any pointer,
+ * touch included) or with Move up and Move down.
+ */
 function YourFeeds() {
   const dispatch = useDispatch();
   const subscriptions = useSelector(selectAllSubscriptions);
   const list = useRef(/** @type {HTMLUListElement|null} */ (null));
   const heading = useRef(/** @type {HTMLHeadingElement|null} */ (null));
   const removing = useFocusAfterRemoval(list, 'button[data-remove]', heading, subscriptions);
+  /** @type {import('./feedReorder.js').Move} */
+  const move = (id, to) => dispatch(feedMoved({ id, to }));
+
+  /**
+   * Move up or Move down: one place, keeping focus on the button pressed.
+   *
+   * @param {import('react').MouseEvent<HTMLButtonElement>} event
+   * @param {-1|1} by
+   */
+  const step = (event, by) => {
+    const item = /** @type {HTMLElement|null} */ (event.currentTarget.closest('[data-reorder-id]'));
+    if (!list.current || !item) return;
+    moveByStep({
+      list: list.current,
+      item,
+      by,
+      move,
+      label: item.dataset.reorderLabel ?? 'Feed',
+      focus: by < 0 ? '[data-move="up"]' : '[data-move="down"]',
+    });
+  };
+
+  /** @param {import('react').PointerEvent<HTMLUListElement>} event */
+  const pressGrip = (event) => {
+    const grip = /** @type {Element} */ (event.target).closest('[data-reorder-grip]');
+    const item = /** @type {HTMLElement|null|undefined} */ (grip?.closest('[data-reorder-id]'));
+    if (!item || !list.current || event.button !== 0) return;
+    event.preventDefault();
+    beginPointerDrag({
+      list: list.current,
+      item,
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      move,
+      now: true,
+    });
+  };
 
   return (
     <div className={styles.group}>
@@ -158,11 +202,15 @@ function YourFeeds() {
       {subscriptions.length === 0 ? (
         <p className={styles.help}>You don’t follow any feeds. Add one above.</p>
       ) : (
-        <ul ref={list} className={styles.rows} aria-label="Your feeds">
+        <ul ref={list} className={styles.rows} aria-label="Your feeds" onPointerDown={pressGrip}>
           {subscriptions.map((subscription, index) => (
             <FeedRow
               key={subscription.id}
               subscription={subscription}
+              first={index === 0}
+              last={index === subscriptions.length - 1}
+              onMoveUp={(event) => step(event, -1)}
+              onMoveDown={(event) => step(event, 1)}
               onToggle={() => dispatch(subscriptionToggled(subscription.id))}
               onRemove={() => {
                 removing(index);
@@ -170,7 +218,8 @@ function YourFeeds() {
                 dispatch(
                   toastShown({
                     message: `Removed ${subscription.title}`,
-                    undo: subscriptionRestored(subscription),
+                    // Undo puts it back where it was.
+                    undo: subscriptionRestored(subscription, index),
                   }),
                 );
               }}
@@ -188,14 +237,23 @@ function YourFeeds() {
 /**
  * @param {{
  *   subscription: import('./subscriptionsSlice.js').Subscription,
+ *   first: boolean,
+ *   last: boolean,
+ *   onMoveUp: (event: import('react').MouseEvent<HTMLButtonElement>) => void,
+ *   onMoveDown: (event: import('react').MouseEvent<HTMLButtonElement>) => void,
  *   onToggle: () => void,
  *   onRemove: () => void,
  * }} props
  */
-function FeedRow({ subscription, onToggle, onRemove }) {
+function FeedRow({ subscription, first, last, onMoveUp, onMoveDown, onToggle, onRemove }) {
   const id = useId();
+  const { title } = subscription;
   return (
-    <li className={styles.row}>
+    <li className={styles.row} data-reorder-id={subscription.id} data-reorder-label={title}>
+      {/* Pointer only: keyboard and screen reader users have Move up and Move down. */}
+      <span className={styles.grip} data-reorder-grip="" aria-hidden="true" title="Drag to reorder">
+        <GripIcon />
+      </span>
       <MonogramTile feed={lookOf(subscription)} className={styles.tile} />
       <div className={styles.rowText}>
         <span className={styles.rowTitle}>
@@ -215,17 +273,51 @@ function FeedRow({ subscription, onToggle, onRemove }) {
         />
         <span id={`${id}-show`}>Show in All stories</span>
       </label>
-      <button
-        type="button"
-        className={styles.quiet}
-        aria-label={`Remove ${subscription.title}`}
-        data-remove=""
-        onClick={onRemove}
-      >
-        <Icon name="close" size={18} />
-        Remove
-      </button>
+      <div className={styles.rowActions}>
+        {/* aria-disabled, not disabled, so focus stays when a feed reaches an end. */}
+        <button
+          type="button"
+          className={styles.iconButton}
+          aria-label={`Move ${title} up`}
+          aria-disabled={first || undefined}
+          data-move="up"
+          onClick={onMoveUp}
+        >
+          <Icon name="chevronDown" size={18} className={styles.up} />
+        </button>
+        <button
+          type="button"
+          className={styles.iconButton}
+          aria-label={`Move ${title} down`}
+          aria-disabled={last || undefined}
+          data-move="down"
+          onClick={onMoveDown}
+        >
+          <Icon name="chevronDown" size={18} />
+        </button>
+        <button
+          type="button"
+          className={styles.quiet}
+          aria-label={`Remove ${title}`}
+          data-remove=""
+          onClick={onRemove}
+        >
+          <Icon name="close" size={18} />
+          Remove
+        </button>
+      </div>
     </li>
+  );
+}
+
+/** Six dots: the handle that drags a feed. Drawn here, as only Settings uses it. */
+function GripIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" focusable="false">
+      {[6, 12, 18].flatMap((cy) =>
+        [9, 15].map((cx) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="1.6" />),
+      )}
+    </svg>
   );
 }
 

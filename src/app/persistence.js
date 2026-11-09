@@ -125,7 +125,8 @@ export function loadSaved(key = STORAGE_KEY) {
 export function save(state, key = STORAGE_KEY) {
   const data = {
     version: VERSION,
-    subscriptions: Object.values(state.subscriptions.entities),
+    // In the reader's order.
+    subscriptions: state.subscriptions.ids.map((id) => state.subscriptions.entities[id]),
     bookmarks: Object.values(state.bookmarks.entities),
     preferences: state.preferences,
     visits: {

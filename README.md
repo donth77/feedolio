@@ -81,7 +81,12 @@ Feeds the reader already follows are caught before and after the lookup. Address
 In **Settings**:
 
 - A switch hides a feed from All stories and Today; it stays in the sidebar.
-- **Remove** offers Undo, and keeps stories saved from the feed.
+- **Reordering:** feeds keep the reader's order, saved per account. The sidebar, the collapsed rail, the phone chips and Settings all follow it.
+  - **Drag** a feed in the sidebar or the rail with a mouse or pen. A plain click still opens it, and Esc mid-drag puts it back.
+  - **Grip:** in Settings, drag a feed by its grip with any pointer, touch included.
+  - **Without dragging:** **Move up** and **Move down** in Settings, or Alt+↑ / Alt+↓ on a feed in the sidebar. Focus stays on the control, and screen readers hear the new position.
+  - The drag code loads the first time a feed is pressed, so it adds nothing to the first page.
+- **Remove** offers Undo, which puts the feed back where it was, and keeps stories saved from the feed.
 - **Suggested feeds** lists starter feeds the reader removed.
 - **Restore starter feeds** brings them all back.
 - **Theme** switches between System, Light and Dark.
@@ -110,6 +115,7 @@ Everything works with the keyboard. A skip link leads past the navigation, and c
 | S                | Save or unsave                                           |
 | R                | Refresh feeds                                            |
 | `[`              | Collapse or expand the sidebar                           |
+| Alt+↑ / Alt+↓    | Move the focused feed in the sidebar up or down          |
 | G then T, A or S | Go to Today, All stories or Saved                        |
 | ?                | Show every shortcut                                      |
 | Esc              | Close a dialog or menu                                   |

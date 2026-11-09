@@ -258,3 +258,19 @@
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-line);
 }
+
+/* Reordering feeds (feedReorder.js): no text selection while a feed is
+   dragged, and the dragged feed lifted above the others. */
+.feedList[data-reordering],
+.feedList[data-reordering] a {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.feedList > [data-dragging] {
+  position: relative;
+  z-index: 2;
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-menu);
+}

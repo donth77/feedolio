@@ -202,6 +202,20 @@ describe('save', () => {
     });
   });
 
+  it('saves feeds in the reader’s order', () => {
+    const second = { ...SUBSCRIPTION, id: 'f_2', url: 'https://more.test/feed', title: 'More' };
+    const state = appState();
+    // Moved above the first feed: the order lives in ids, not in entities.
+    state.subscriptions = { ids: ['f_2', 'f_1'], entities: { f_1: SUBSCRIPTION, f_2: second } };
+
+    expect(save(/** @type {any} */ (state))).toBe('saved');
+    const saved = JSON.parse(/** @type {string} */ (localStorage.getItem(STORAGE_KEY)));
+    expect(saved.subscriptions.map((/** @type {{ id: string }} */ { id }) => id)).toEqual([
+      'f_2',
+      'f_1',
+    ]);
+  });
+
   it('reports when storage is full', () => {
     vi.stubGlobal('localStorage', fakeStorage({ full: true }));
     expect(save(/** @type {any} */ (appState()))).toBe('full');

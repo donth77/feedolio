@@ -15,6 +15,7 @@ import { selectSidebar, sidebarChanged } from '../features/preferences/preferenc
 import AddFeedDialog from '../features/subscriptions/AddFeedDialog.jsx';
 import { AddFeedContext } from '../features/subscriptions/addFeedContext.js';
 import {
+  feedMoved,
   selectAllSubscriptions,
   selectEnabledSubscriptions,
 } from '../features/subscriptions/subscriptionsSlice.js';
@@ -84,6 +85,11 @@ export default function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   // From the drawer, the dialog replaces it rather than stacking on top.
+  // Drag a feed, or Alt+↑/↓, in the sidebar and the drawer.
+  const moveFeed = useCallback(
+    (/** @type {string} */ id, /** @type {number} */ to) => dispatch(feedMoved({ id, to })),
+    [dispatch],
+  );
   const openAddFeed = useCallback(() => {
     setDrawerOpen(false);
     setAddOpen(true);
@@ -109,6 +115,7 @@ export default function AppShell() {
             onToggle={toggleSidebar}
             className={styles.sidebarPanel}
             ai={aiNav}
+            onMoveFeed={moveFeed}
           />
         </div>
 
@@ -222,6 +229,7 @@ export default function AppShell() {
             onAddFeed={openAddFeed}
             onNavigate={() => setDrawerOpen(false)}
             ai={aiNav}
+            onMoveFeed={moveFeed}
           />
         </Drawer>
 

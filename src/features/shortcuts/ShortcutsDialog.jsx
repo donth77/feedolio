@@ -10,13 +10,14 @@ const SHORTCUTS = [
   { label: 'Save or unsave', keys: ['S'] },
   { label: 'Refresh feeds', keys: ['R'] },
   { label: 'Collapse or expand the sidebar', keys: ['['] },
+  { label: 'Move the focused feed up or down', keys: ['Alt', '+', '↑', 'or', '↓'] },
   { label: 'Go to Today', keys: ['G', 'then', 'T'] },
   { label: 'Go to All stories', keys: ['G', 'then', 'A'] },
   { label: 'Go to Saved', keys: ['G', 'then', 'S'] },
   { label: 'Show shortcuts', keys: ['?'] },
   { label: 'Close a dialog or menu', keys: ['Esc'] },
 ];
-const WORDS = new Set(['or', 'then']);
+const WORDS = new Set(['or', 'then', '+']);
 
 /**
  * Every keyboard shortcut, as a modal dialog. Opens with `?`.
