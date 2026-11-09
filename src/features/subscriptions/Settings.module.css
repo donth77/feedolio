@@ -100,7 +100,7 @@
 
 .rowText {
   display: flex;
-  flex: 1 1 240px;
+  flex: 1 1 180px;
   flex-direction: column;
   gap: var(--space-1);
   min-width: 0;
@@ -218,6 +218,72 @@
 .quiet:hover {
   background: var(--color-hover);
   color: var(--color-ink);
+}
+
+/* Reordering feeds (feedReorder.js). The grip drags with any pointer; on
+   touch it doesn't scroll the page. */
+.grip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: var(--tap-target);
+  margin-left: calc(-1 * var(--space-2));
+  color: var(--color-ink-muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.rows[data-reordering] {
+  overflow: visible;
+  cursor: grabbing;
+  user-select: none;
+}
+
+.rows[data-reordering] .grip {
+  cursor: grabbing;
+}
+
+.row[data-dragging] {
+  position: relative;
+  z-index: 2;
+  box-shadow: var(--shadow-menu);
+}
+
+/* Move up, Move down and Remove: together, wrapping as one. */
+.rowActions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-ink-muted);
+}
+
+.iconButton:hover:not([aria-disabled='true']) {
+  background: var(--color-hover);
+  color: var(--color-ink);
+}
+
+.iconButton[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.up {
+  transform: rotate(180deg);
 }
 
 @media (max-width: 639px) {

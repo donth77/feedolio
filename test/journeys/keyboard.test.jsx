@@ -121,7 +121,8 @@ describe('Keyboard shortcuts', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Keyboard shortcuts' });
     expect(within(dialog).getByText('Next or previous story')).toBeVisible();
     expect(within(dialog).getByText('Collapse or expand the sidebar')).toBeVisible();
-    expect(within(dialog).getAllByRole('term')).toHaveLength(11);
+    expect(within(dialog).getByText('Move the focused feed up or down')).toBeVisible();
+    expect(within(dialog).getAllByRole('term')).toHaveLength(12);
     await expectNoAxeViolations(dialog);
 
     // Keys don't act on the page behind it.
