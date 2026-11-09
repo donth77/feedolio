@@ -205,7 +205,7 @@ function Rail({ id, label, feeds, todayCount, savedCount, onAddFeed, onToggle, c
               aria-label={feed.title}
               title={feed.title}
             >
-              <FeedDot feed={feed} />
+              <FeedDot feed={feed} icon />
             </NavLink>
           </li>
         ))}
