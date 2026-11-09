@@ -423,6 +423,12 @@ describe('other requests', () => {
     expect((await response.json()).error.code).toBe('METHOD_NOT_ALLOWED');
   });
 
+  it('answers other requests that reach the Worker with a plain 404', async () => {
+    const response = await exports.default.fetch('https://feedolio.test/missing.js');
+    expect(response.status).toBe(404);
+    expect(await response.text()).toBe('Not found');
+  });
+
   it('answers unknown API addresses with a JSON 404', async () => {
     const response = await exports.default.fetch('https://feedolio.test/api/nope');
     expect(response.status).toBe(404);

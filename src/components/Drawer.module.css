@@ -1,0 +1,56 @@
+.drawer {
+  width: min(320px, 86vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-dialog);
+}
+
+.drawer[open] {
+  animation: slide-in 160ms ease-out;
+}
+
+.drawer::backdrop {
+  background: var(--color-scrim);
+}
+
+.inner {
+  position: relative;
+  min-height: 100%;
+}
+
+.inner > nav {
+  min-height: 100dvh;
+}
+
+.close {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-3);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-ink);
+}
+
+.close:hover {
+  background: var(--color-hover);
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+}

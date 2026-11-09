@@ -1,0 +1,134 @@
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Date headers: a strong rule under the day, its dates and story count beside it. */
+.dateHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  padding: 30px 0 10px;
+  border-bottom: 2px solid var(--color-ink);
+}
+
+section:first-of-type > .dateHeader {
+  padding-top: var(--space-2);
+}
+
+.dateTitle {
+  font: 600 22px/1.2 var(--font-read);
+}
+
+.dateSub {
+  font: var(--type-meta);
+  font-weight: 400;
+  color: var(--color-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border-radius: 10px;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.errorIcon {
+  flex: none;
+}
+
+.errorText {
+  flex: 1 1 220px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.retry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font: var(--type-control);
+}
+
+.retry:hover:not(:disabled) {
+  border-color: var(--color-line-hover);
+}
+
+.retry:disabled {
+  cursor: progress;
+  color: var(--color-ink-muted);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 56px var(--space-5);
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+
+.emptyTitle {
+  font: 600 21px/1.25 var(--font-read);
+}
+
+.emptyText {
+  max-width: 420px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-surface);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.noteIcon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--color-ink-muted);
+}
+
+@media (max-width: 639px) {
+  .dateHeader {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    justify-content: space-between;
+    padding: var(--space-4) 0 var(--space-2);
+    background: var(--color-bg);
+  }
+
+  .dateTitle {
+    font-size: 19px;
+  }
+
+  .dateSub {
+    font-size: 12px;
+  }
+}

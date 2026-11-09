@@ -1,0 +1,114 @@
+/* List rows: thumbnail on the left from 640 px, on the right on phones. */
+.row {
+  display: grid;
+  grid-template-columns: minmax(72px, 128px) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.thumb {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  background: var(--color-placeholder);
+  font-size: 34px;
+}
+
+/* Shared by the image and the monogram tile, so it leaves `display` alone. */
+.fill {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.meta {
+  font: var(--type-meta);
+  color: var(--color-ink-muted);
+}
+
+.source {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.headline {
+  font: var(--type-headline);
+  letter-spacing: -0.005em;
+  text-wrap: pretty;
+}
+
+.link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: var(--color-ink-muted);
+}
+
+.skeleton {
+  display: block;
+  border-radius: var(--radius-dot);
+  background: var(--color-skeleton);
+}
+
+@media (max-width: 639px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) 72px;
+    gap: 14px;
+    padding: 14px 0;
+  }
+
+  .thumb {
+    grid-column: 2;
+    grid-row: 1;
+    width: 72px;
+    height: 72px;
+    aspect-ratio: auto;
+    font-size: 26px;
+  }
+
+  .text {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .meta {
+    font-size: 12px;
+  }
+
+  .author,
+  .excerpt {
+    display: none;
+  }
+
+  .headline {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+}

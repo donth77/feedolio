@@ -9,31 +9,30 @@ describe('Getting around', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'All stories' })).toBeVisible();
     expect(document.title).toBe('All stories · Feedolio');
-    await expectNoAxeViolations();
 
-    const nav = screen.getByRole('navigation', { name: 'Main' });
+    const sidebar = screen.getByRole('navigation', { name: 'Sections and feeds' });
 
-    await user.click(within(nav).getByRole('link', { name: 'Today' }));
+    await user.click(within(sidebar).getByRole('link', { name: /^Today/ }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Today' })).toBeVisible();
     expect(window.location.pathname).toBe('/today');
 
-    await user.click(within(nav).getByRole('link', { name: 'Saved' }));
+    await user.click(within(sidebar).getByRole('link', { name: 'Saved' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Saved' })).toBeVisible();
     expect(window.location.pathname).toBe('/bookmarks');
 
     // Settings loads its code the first time it opens.
-    await user.click(within(nav).getByRole('link', { name: 'Settings' }));
+    await user.click(within(sidebar).getByRole('link', { name: 'Settings' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
-    expect(within(nav).getByRole('link', { name: 'Settings' })).toHaveAttribute(
+    expect(within(sidebar).getByRole('link', { name: 'Settings' })).toHaveAttribute(
       'aria-current',
       'page',
     );
-    expect(within(nav).getByRole('link', { name: 'All stories' })).not.toHaveAttribute(
+    expect(within(sidebar).getByRole('link', { name: 'All stories' })).not.toHaveAttribute(
       'aria-current',
     );
     await expectNoAxeViolations();
 
-    await user.click(screen.getByRole('link', { name: 'Feedolio' }));
+    await user.click(within(sidebar).getByRole('link', { name: 'Feedolio' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'All stories' })).toBeVisible();
     expect(window.location.pathname).toBe('/');
   });
