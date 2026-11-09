@@ -6,7 +6,8 @@
  *
  * Stored shape (version 1):
  *   { version: 1, subscriptions: Subscription[], bookmarks: Bookmark[],
- *     preferences: Preferences, visits: Visits, aiSettings: AiSettings }
+ *     preferences: Preferences, visits: Visits, aiSettings: AiSettings,
+ *     rules: { list: Rule[], judged: boolean } }
  *
  * AI keys are never part of it: they live apart, in features/ai/keys.js.
  *
@@ -34,6 +35,7 @@ export const SAVE_INTERVAL_MS = 500;
  * @property {Partial<Preferences>} [preferences]
  * @property {Record<string, unknown>} [visits]
  * @property {Record<string, unknown>} [aiSettings]
+ * @property {Record<string, unknown>} [rules]
  */
 
 /** @returns {Storage|null} */
@@ -100,6 +102,7 @@ export function loadSaved(key = STORAGE_KEY) {
   if (isObject(parsed.preferences)) saved.preferences = parsed.preferences;
   if (isObject(parsed.visits)) saved.visits = parsed.visits;
   if (isObject(parsed.aiSettings)) saved.aiSettings = parsed.aiSettings;
+  if (isObject(parsed.rules)) saved.rules = parsed.rules;
   return saved;
 }
 
@@ -131,6 +134,10 @@ export function save(state, key = STORAGE_KEY) {
       openedIds: state.visits.openedIds,
     },
     aiSettings: state.aiSettings,
+    rules: {
+      list: state.rules.ids.map((id) => state.rules.entities[id]),
+      judged: state.rules.judged,
+    },
   };
   const target = storage();
   if (!target) return 'unavailable';
@@ -160,6 +167,7 @@ const SAVED_SLICES = /** @type {const} */ ([
   'preferences',
   'visits',
   'aiSettings',
+  'rules',
 ]);
 
 /**

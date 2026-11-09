@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigationType } from 'react-router';
 import { feedErrorMessage } from '../features/feeds/feedApi.js';
+import { selectStoryEffects } from '../features/ai/rules/ruleEffects.js';
 import { DIVIDER_ID, dividerPlace } from '../features/feeds/useFeeds.js';
 import { selectDensity, selectLayout } from '../features/preferences/preferencesSlice.js';
 import { takeOpenedStory } from '../lib/returnFocus.js';
@@ -47,13 +48,26 @@ export default function StoryList({
   const { firstOldId } = dividerPlace(stories, cutoff);
   const layout = useSelector(selectLayout);
   const density = useSelector(selectDensity);
+  const effects = useSelector(selectStoryEffects);
   const cards = layout === 'cards';
   const listClass = cards ? cardStyles.grid : styles.list;
   const row = (/** @type {ListedStory} */ item) =>
     cards ? (
-      <StoryCard key={item.story.id} item={item} now={now} from={from} />
+      <StoryCard
+        key={item.story.id}
+        item={item}
+        now={now}
+        from={from}
+        effects={effects.get(item.story.id)}
+      />
     ) : (
-      <StoryRow key={item.story.id} item={item} now={now} from={from} />
+      <StoryRow
+        key={item.story.id}
+        item={item}
+        now={now}
+        from={from}
+        effects={effects.get(item.story.id)}
+      />
     );
 
   const container = useRef(/** @type {HTMLDivElement|null} */ (null));

@@ -7,7 +7,7 @@ import { closeCache } from '../../src/features/ai/cache.js';
 import { removeAllKeys } from '../../src/features/ai/keys.js';
 import { resetUsage } from '../../src/features/ai/usage.js';
 import { takeOpenedStory } from '../../src/lib/returnFocus.js';
-import { KEY_HOSTS } from '../fixtures/ai.js';
+import { clearJudgeOverrides, KEY_HOSTS } from '../fixtures/ai.js';
 import { server } from '../msw/server.js';
 
 // Views that load their code on first use (the story page, Settings) can take
@@ -100,6 +100,7 @@ afterEach(() => {
   sessionStorage.clear();
   removeAllKeys();
   resetUsage();
+  clearJudgeOverrides();
   window.history.replaceState(null, '', '/');
 });
 

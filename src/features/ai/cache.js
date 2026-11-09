@@ -6,8 +6,10 @@
  *   account, story, action, language and model.
  * - judgments: rule checks, keyed by account, story, rule and rule version.
  *
- * Entries older than 30 days are trimmed when the database opens. Where
- * IndexedDB is missing or blocked, results are kept in memory for the page.
+ * Entries older than 30 days are trimmed when the database opens, except
+ * those marked to keep (a rule's effects and the reader's answers: Hidden must
+ * never lose a story). Where IndexedDB is missing or blocked, results are kept
+ * in memory for the page.
  */
 
 const DB_NAME = 'feedolio-ai';
@@ -15,7 +17,7 @@ const DB_VERSION = 1;
 export const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 /** @typedef {'answers'|'judgments'} CacheStore */
-/** @typedef {{ key: string, value: unknown, savedAt: number }} CacheRecord */
+/** @typedef {{ key: string, value: unknown, savedAt: number, keep?: boolean }} CacheRecord */
 
 const STORES = /** @type {CacheStore[]} */ (['answers', 'judgments']);
 
@@ -85,7 +87,7 @@ function trim(db) {
       request.onsuccess = () => {
         const cursor = request.result;
         if (!cursor) return;
-        cursor.delete();
+        if (!cursor.value.keep) cursor.delete();
         cursor.continue();
       };
     }
@@ -121,10 +123,11 @@ export async function readCached(store, key) {
  * @param {CacheStore} store
  * @param {string} key
  * @param {unknown} value
+ * @param {{ keep?: boolean }} [options]  keep: never trim it
  */
-export async function writeCached(store, key, value) {
+export async function writeCached(store, key, value, { keep = false } = {}) {
   /** @type {CacheRecord} */
-  const record = { key, value, savedAt: Date.now() };
+  const record = { key, value, savedAt: Date.now(), ...(keep && { keep }) };
   const db = await open();
   if (!db) {
     memory.set(`${store}\n${key}`, record);
@@ -137,9 +140,39 @@ export async function writeCached(store, key, value) {
   }
 }
 
+/**
+ * Every saved result whose key starts with `prefix`, e.g. one account's
+ * judgments.
+ *
+ * @param {CacheStore} store
+ * @param {string} prefix
+ * @returns {Promise<unknown[]>}
+ */
+export async function readAllCached(store, prefix) {
+  const db = await open();
+  if (!db) {
+    return [...memory]
+      .filter(
+        ([key, record]) =>
+          key.startsWith(`${store}
+${prefix}`) && fresh(record),
+      )
+      .map(([, record]) => record.value);
+  }
+  try {
+    const range = IDBKeyRange.bound(prefix, `${prefix}￿`);
+    const records = /** @type {CacheRecord[]} */ (
+      await settled(db.transaction(store).objectStore(store).getAll(range))
+    );
+    return records.filter((record) => fresh(record)).map((record) => record.value);
+  } catch {
+    return [];
+  }
+}
+
 /** @param {CacheRecord|undefined} record */
 function fresh(record) {
-  return record && record.savedAt > Date.now() - MAX_AGE_MS ? record : undefined;
+  return record && (record.keep || record.savedAt > Date.now() - MAX_AGE_MS) ? record : undefined;
 }
 
 /**

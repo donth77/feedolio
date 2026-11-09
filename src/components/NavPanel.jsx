@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Link, NavLink } from 'react-router';
+import { tagPath } from '../features/ai/rules/useRules.js';
 import { authConfig } from '../features/auth/authConfig.js';
 import Icon from './Icon.jsx';
 import { FeedDot } from './Monogram.jsx';
@@ -33,7 +34,10 @@ export function Wordmark({ onNavigate, className = '' }) {
  * @property {boolean} [collapsed]  Show the slim icon rail instead
  * @property {() => void} [onToggle]  Shows the collapse or expand button
  * @property {string} [className]
+ * @property {RulesNav} [rules]  Maybe, Hidden and tags, once the reader has rules
  */
+
+/** @typedef {ReturnType<typeof import('../features/ai/rules/useRules.js').useRulesNav>} RulesNav */
 
 /**
  * Sections and feeds: the desktop sidebar (which can collapse to a 64 px icon
@@ -56,6 +60,7 @@ function Panel({
   onNavigate,
   onToggle,
   className = '',
+  rules,
 }) {
   return (
     <nav id={id} aria-label={label} className={`${styles.panel} ${className}`}>
@@ -102,6 +107,45 @@ function Panel({
         </li>
       </ul>
 
+      {rules?.show && (
+        <div className={styles.group}>
+          <h2 className={styles.heading}>AI</h2>
+          <ul className={styles.items}>
+            <li>
+              <NavLink to="/maybe" className={styles.item} onClick={onNavigate}>
+                <Icon name="maybe" />
+                <span className={styles.label}>Maybe</span>
+                <Count value={rules.maybe} spoken="to review" />
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/hidden" className={styles.item} onClick={onNavigate}>
+                <Icon name="hidden" />
+                <span className={styles.label}>Hidden</span>
+                <Count value={rules.hidden} spoken="hidden" />
+              </NavLink>
+            </li>
+          </ul>
+        </div>
+      )}
+
+      {rules && rules.tags.length > 0 && (
+        <div className={styles.group}>
+          <h2 className={styles.heading}>Tags</h2>
+          <ul className={styles.items}>
+            {rules.tags.map(({ tag, count }) => (
+              <li key={tag}>
+                <NavLink to={tagPath(tag)} className={styles.item} onClick={onNavigate}>
+                  <Icon name="tag" />
+                  <span className={styles.label}>{tag}</span>
+                  <Count value={count} spoken={count === 1 ? 'story' : 'stories'} />
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className={styles.feeds}>
         <h2 className={styles.heading}>Feeds</h2>
         <ul className={styles.items}>
@@ -133,7 +177,17 @@ function Panel({
  *
  * @param {NavPanelProps} props
  */
-function Rail({ id, label, feeds, todayCount, savedCount, onAddFeed, onToggle, className = '' }) {
+function Rail({
+  id,
+  label,
+  feeds,
+  todayCount,
+  savedCount,
+  onAddFeed,
+  onToggle,
+  className = '',
+  rules,
+}) {
   return (
     <nav id={id} aria-label={label} className={`${styles.rail} ${className}`}>
       <div className={styles.railTop}>
@@ -195,6 +249,40 @@ function Rail({ id, label, feeds, todayCount, savedCount, onAddFeed, onToggle, c
             </span>
           </NavLink>
         </li>
+        {rules?.show && (
+          <>
+            <li>
+              <NavLink
+                to="/maybe"
+                className={styles.railItem}
+                aria-label={`Maybe, ${rules.maybe} to review`}
+                title="Maybe"
+              >
+                <Icon name="maybe" />
+                {rules.maybe > 0 && (
+                  <span className={styles.badge} aria-hidden="true">
+                    {rules.maybe}
+                  </span>
+                )}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/hidden"
+                className={styles.railItem}
+                aria-label={`Hidden, ${rules.hidden} hidden`}
+                title="Hidden"
+              >
+                <Icon name="hidden" />
+                {rules.hidden > 0 && (
+                  <span className={styles.badge} aria-hidden="true">
+                    {rules.hidden}
+                  </span>
+                )}
+              </NavLink>
+            </li>
+          </>
+        )}
       </ul>
 
       <div className={styles.railRule} aria-hidden="true" />
@@ -262,6 +350,24 @@ function Account({ variant }) {
     <Suspense fallback={null}>
       <AccountPanel variant={variant} />
     </Suspense>
+  );
+}
+
+/**
+ * A count beside a sidebar item, read out with its meaning.
+ *
+ * @param {{ value: number, spoken: string }} props
+ */
+function Count({ value, spoken }) {
+  return (
+    <>
+      <span className={styles.count} aria-hidden="true">
+        {value}
+      </span>
+      <span className="visually-hidden">
+        , {value} {spoken}
+      </span>
+    </>
   );
 }
 

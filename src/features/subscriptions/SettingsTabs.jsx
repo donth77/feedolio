@@ -11,7 +11,7 @@ const SECTIONS = [
 
 /**
  * Links between the parts of Settings: sections of the main page, and the
- * AI page. On the main page the links jump to a section and move focus to its
+ * AI and Rules pages. On the main page the links jump to a section and move focus to its
  * heading.
  */
 export default function SettingsTabs() {
@@ -44,6 +44,14 @@ export default function SettingsTabs() {
       >
         <Icon name="sparkle" size={16} />
         AI
+      </Link>
+      <Link
+        to="/settings/rules"
+        className={styles.tab}
+        aria-current={pathname === '/settings/rules' ? 'page' : undefined}
+      >
+        <Icon name="sparkle" size={16} />
+        Rules
       </Link>
     </nav>
   );

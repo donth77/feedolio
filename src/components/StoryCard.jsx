@@ -3,6 +3,7 @@ import BookmarkButton from '../features/bookmarks/BookmarkButton.jsx';
 import { sizedImageUrl } from '../lib/images.js';
 import { rememberOpenedStory } from '../lib/returnFocus.js';
 import { fullTime, storyTime } from '../lib/time.js';
+import RuleBadges from './RuleBadges.jsx';
 import styles from './StoryCard.module.css';
 import StoryImage from './StoryImage.jsx';
 
@@ -17,9 +18,10 @@ const CARD_IMAGE_WIDTH = 800;
  *   item: import('../features/feeds/useFeeds.js').ListedStory,
  *   now: number,
  *   from?: { pathname: string, label: string },
+ *   effects?: import('../features/ai/rules/ruleEffects.js').StoryEffects,
  * }} props
  */
-export default function StoryCard({ item, now, from }) {
+export default function StoryCard({ item, now, from, effects }) {
   const { story, feed } = item;
   return (
     <li
@@ -27,6 +29,7 @@ export default function StoryCard({ item, now, from }) {
       data-story-row=""
       data-story-id={story.id}
       data-original={story.link}
+      data-highlight={effects?.highlight ? '' : undefined}
     >
       <div className={styles.media}>
         <StoryImage
@@ -59,6 +62,7 @@ export default function StoryCard({ item, now, from }) {
           </Link>
         </h3>
         {story.excerpt && <p className={styles.excerpt}>{story.excerpt}</p>}
+        <RuleBadges effects={effects} />
       </div>
       <div className={styles.foot}>
         <BookmarkButton story={story} feedTitle={feed.title} variant="card" />

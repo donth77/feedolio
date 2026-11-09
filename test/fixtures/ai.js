@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw';
+import anthropicJudgmentsEvents from './ai/anthropic-judgments-events.json';
 import anthropicJudgments from './ai/anthropic-judgments.json';
 import anthropicModels from './ai/anthropic-models.json';
 import anthropicExplainStocks from './ai/anthropic-explain-stocks.sse?raw';
@@ -6,6 +7,8 @@ import anthropicSummarizePandemic from './ai/anthropic-summarize-pandemic.sse?ra
 import anthropicSummary from './ai/anthropic-summary.sse?raw';
 import anthropicTranslateStocksEs from './ai/anthropic-translate-stocks-es.sse?raw';
 import customModels from './ai/custom-models.json';
+import jevJudgmentsEvents from './ai/jev-judgments-events.json';
+import jevJudgmentsFunding from './ai/jev-judgments-funding.json';
 import jevModels from './ai/jev-models.json';
 import jevSystemOne from './ai/jev-systemone.json';
 import ollamaModels from './ai/ollama-models.json';
@@ -116,9 +119,78 @@ export const eventStream = (stream) =>
  */
 function anthropicAnswer(body) {
   const system = String(body?.system ?? '');
+  if (system.startsWith('You check news stories')) return anthropicJudgment(body);
   if (system.startsWith('You translate')) return eventStream('anthropic-translate-stocks-es.sse');
   if (system.startsWith('You explain')) return eventStream('anthropic-explain-stocks.sse');
   return eventStream('anthropic-summarize-pandemic.sse');
+}
+
+/**
+ * Rules judged against every fixture story, recorded 2026-11-09: Jev's
+ * probability of a match, and the general model's { match, confidence }.
+ */
+export const RULE_RECORDINGS = {
+  events: 'Hide event announcements and conference promotions',
+  funding: 'Tag startup funding and valuation news as Funding',
+};
+const JEV_JUDGMENTS = [jevJudgmentsEvents, jevJudgmentsFunding];
+
+/** Changes to the recordings, for one test: story id → confidence. */
+const overrides = new Map();
+
+/**
+ * Makes the fake models answer `confidence` for a story, whatever the
+ * recording says (a 58% judgment, say). Cleared after each test.
+ *
+ * @param {string} storyId
+ * @param {number} confidence  Probability of a match
+ */
+export function judgeAs(storyId, confidence) {
+  overrides.set(storyId, confidence);
+}
+export const clearJudgeOverrides = () => overrides.clear();
+
+/**
+ * Jev's answer, from the recording for the rule asked about. Stories nobody
+ * recorded get a clear "no".
+ *
+ * @param {any} body
+ */
+function jevAnswer(body) {
+  const recording = JEV_JUDGMENTS.find((judged) => judged.rule === body?.state?.rule);
+  const ids = Object.keys(body?.questions ?? {});
+  return HttpResponse.json({
+    model: recording?.model ?? 'jev-1.14.0',
+    answers: Object.fromEntries(
+      ids.map((id) => [
+        id,
+        { type: 'noul', noul: overrides.get(id) ?? recording?.answers[id] ?? 0.02 },
+      ]),
+    ),
+    usage: { input_tokens: 40 * ids.length, output_tokens: 18 * ids.length },
+  });
+}
+
+/**
+ * The general model's structured answer, from the recording for the rule in
+ * the prompt, in the shape of a recorded Anthropic message.
+ *
+ * @param {any} body
+ */
+function anthropicJudgment(body) {
+  const prompt = String(body?.messages?.[0]?.content ?? '');
+  const rule = /^Rule: (".*")$/m.exec(prompt)?.[1];
+  const recording =
+    rule && JSON.parse(rule) === anthropicJudgmentsEvents.rule ? anthropicJudgmentsEvents : null;
+  const ids = [...prompt.matchAll(/<untrusted_story id="([^"]+)"/g)].map((match) => match[1]);
+  const judgments = ids.map((id) => {
+    const override = overrides.get(id);
+    if (override !== undefined) return { id, match: override >= 0.5, confidence: Math.max(override, 1 - override) };
+    return { id, ...(recording?.answers[id] ?? { match: false, confidence: 0.95 }) };
+  });
+  const message = recorded('anthropic-judgments.json');
+  message.content = [{ type: 'text', text: JSON.stringify({ judgments }) }];
+  return HttpResponse.json(message);
 }
 
 /** Answers like the real providers, as recorded or as their docs show. */
@@ -165,6 +237,12 @@ export const aiHandlers = [
   http.get('https://openrouter.ai/api/v1/models', () =>
     HttpResponse.json(recorded('openrouter-models.json')),
   ),
+  // Jev through OpenRouter: TypeSafe's System One API, recorded answers
+  http.post('https://openrouter.ai/api/v1/systemone', async ({ request }) =>
+    hasBearer(request, TEST_KEYS.openrouter)
+      ? jevAnswer(await request.json())
+      : HttpResponse.json({ error: { message: 'User not found.', code: 401 } }, { status: 401 }),
+  ),
 
   // Ollama on this computer, with OLLAMA_ORIGINS set
   http.get('http://localhost:11434/v1/models', () =>
@@ -185,7 +263,34 @@ export const aiHandlers = [
       ? HttpResponse.json(recorded('jev-models.json'))
       : HttpResponse.json({ detail: 'Invalid API key' }, { status: 401 }),
   ),
+  http.post('https://api.typesafe.ai/v1/systemone', async ({ request }) =>
+    hasBearer(request, TEST_KEYS.typesafe)
+      ? jevAnswer(await request.json())
+      : HttpResponse.json({ detail: 'Invalid API key' }, { status: 401 }),
+  ),
 ];
+
+/**
+ * Saves filter rules the way the app would.
+ *
+ * @param {{ text: string, action: 'hide'|'highlight'|'tag', tag?: string, enabled?: boolean }[]} rules
+ */
+export function seedRules(rules) {
+  const saved = JSON.parse(localStorage.getItem('feedolio:v1') ?? '{"version":1}');
+  saved.rules = {
+    list: rules.map((rule, index) => ({
+      id: `rule${index + 1}`,
+      text: rule.text,
+      action: rule.action,
+      tag: rule.tag ?? null,
+      enabled: rule.enabled ?? true,
+      version: 1,
+      createdAt: `2026-11-0${index + 1}T00:00:00.000Z`,
+    })),
+    judged: false,
+  };
+  localStorage.setItem('feedolio:v1', JSON.stringify(saved));
+}
 
 /**
  * Saves an AI setup the way the app would, so a test can start with AI on.

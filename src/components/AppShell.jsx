@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
+import { tagPath, useRulesNav, useWithoutHidden } from '../features/ai/rules/useRules.js';
 import { selectAuth } from '../features/auth/authSlice.js';
 import { selectBookmarkCount } from '../features/bookmarks/bookmarksSlice.js';
 import {
@@ -52,7 +53,9 @@ export default function AppShell() {
   // Hidden feeds stay in the sidebar and chips, so they can still be opened.
   const feeds = useSelector(selectAllSubscriptions).map(lookOf);
   const allLoaded = states.every((state) => state.status !== 'loading');
-  const todayCount = allLoaded ? inLastDay(mergeStories(states), now).length : null;
+  const { stories: visible } = useWithoutHidden(mergeStories(states));
+  const todayCount = allLoaded ? inLastDay(visible, now).length : null;
+  const rulesNav = useRulesNav();
   const savedCount = useSelector(selectBookmarkCount);
   const offeringGuestImport = useSelector(selectAuth).guestBookmarks > 0;
 
@@ -89,6 +92,7 @@ export default function AppShell() {
             collapsed={railed}
             onToggle={toggleSidebar}
             className={styles.sidebarPanel}
+            rules={rulesNav}
           />
         </div>
 
@@ -127,6 +131,28 @@ export default function AppShell() {
                   All
                 </NavLink>
               </li>
+              {rulesNav.show && (
+                <>
+                  <li>
+                    <NavLink to="/maybe" className={styles.chip}>
+                      Maybe {rulesNav.maybe > 0 && rulesNav.maybe}
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/hidden" className={styles.chip}>
+                      Hidden {rulesNav.hidden > 0 && rulesNav.hidden}
+                    </NavLink>
+                  </li>
+                </>
+              )}
+              {rulesNav.tags.map(({ tag }) => (
+                <li key={tag}>
+                  <NavLink to={tagPath(tag)} className={styles.chip}>
+                    <Icon name="tag" size={14} />
+                    {tag}
+                  </NavLink>
+                </li>
+              ))}
               {feeds.map((feed) => (
                 <li key={feed.id}>
                   <NavLink to={`/feeds/${feed.id}`} className={styles.chip}>
@@ -171,6 +197,7 @@ export default function AppShell() {
             savedCount={savedCount}
             onAddFeed={openAddFeed}
             onNavigate={() => setDrawerOpen(false)}
+            rules={rulesNav}
           />
         </Drawer>
 

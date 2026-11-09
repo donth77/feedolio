@@ -104,3 +104,9 @@
 [data-density='compact'] .excerpt {
   display: none;
 }
+
+/* Highlighted by a rule. */
+.card[data-highlight] {
+  border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-line));
+  background: color-mix(in srgb, var(--color-accent) 6%, var(--color-raised));
+}

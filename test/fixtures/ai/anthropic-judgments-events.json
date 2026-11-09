@@ -1,0 +1,290 @@
+{
+  "rule": "Hide event announcements and conference promotions",
+  "model": "claude-opus-5-5",
+  "answers": {
+    "s_1rrk8t90i0q": {
+      "match": false,
+      "confidence": 0.85
+    },
+    "s_2ag9eoux1wo": {
+      "match": false,
+      "confidence": 0.85
+    },
+    "s_acd0thltms": {
+      "match": false,
+      "confidence": 0.8
+    },
+    "s_210l5dscjbm": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1vpueyceyr9": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_gqnwsz888b": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1hyhbqxvaa": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_k8m6dfb7um": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_2d41nigryky": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1ycoi6vtgzj": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_28qfi3oo2p0": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1by81ltncq7": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_111d3o96a09": {
+      "match": false,
+      "confidence": 0.9
+    },
+    "s_181hop818oy": {
+      "match": false,
+      "confidence": 0.7
+    },
+    "s_27eihpe52ef": {
+      "match": false,
+      "confidence": 0.85
+    },
+    "s_1pewgjayin7": {
+      "match": false,
+      "confidence": 0.9
+    },
+    "s_own59cjecr": {
+      "match": false,
+      "confidence": 0.9
+    },
+    "s_1a368ujv0do": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_19cto57pcbs": {
+      "match": false,
+      "confidence": 0.8
+    },
+    "s_lwvmkk1u87": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_sdpt5yhz0e": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1zzfqgv5zuo": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_ar5p2qpept": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_jmjapwczek": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1uo9colru55": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_mxdf1ozvuz": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_2amf9qwav9s": {
+      "match": false,
+      "confidence": 0.85
+    },
+    "s_mogwldyvjc": {
+      "match": false,
+      "confidence": 0.8
+    },
+    "s_2g5a13bnc2q": {
+      "match": false,
+      "confidence": 0.7
+    },
+    "s_o00r1eodbn": {
+      "match": false,
+      "confidence": 0.7
+    },
+    "s_4kmxkblhvi": {
+      "match": true,
+      "confidence": 0.98
+    },
+    "s_1biudunk3y4": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_eqyrvpfqiv": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1umgbekybod": {
+      "match": true,
+      "confidence": 0.98
+    },
+    "s_2e40vwzhrnf": {
+      "match": true,
+      "confidence": 0.98
+    },
+    "s_frt6rx55xo": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_25wlpiqsy0s": {
+      "match": false,
+      "confidence": 0.9
+    },
+    "s_gbxbj7uh3r": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1ifpllqvb7w": {
+      "match": false,
+      "confidence": 0.9
+    },
+    "s_1lr3ez6gidy": {
+      "match": false,
+      "confidence": 0.9
+    },
+    "s_qw5ccoa901": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_45gwygbwsy": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1vyq88jf5zo": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_19ry8ut0w2x": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_10sb44wq2y6": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1gbs2hc4ivg": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_lf8rmc3r3s": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_282q734bhqn": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_2fd74ez31d8": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_1od9nnvitj1": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_14rhbvz4eal": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_2co7t4f47yg": {
+      "match": false,
+      "confidence": 0.97
+    },
+    "s_muzriwoi2s": {
+      "match": false,
+      "confidence": 0.97
+    },
+    "s_18krd9d4fe3": {
+      "match": false,
+      "confidence": 0.8
+    },
+    "s_16b5dlklilq": {
+      "match": false,
+      "confidence": 0.9
+    },
+    "s_15tvek1quk2": {
+      "match": false,
+      "confidence": 0.92
+    },
+    "s_yhe11fdfvs": {
+      "match": false,
+      "confidence": 0.92
+    },
+    "s_1ycbmjeqmue": {
+      "match": false,
+      "confidence": 0.92
+    },
+    "s_2drf99dk8bn": {
+      "match": false,
+      "confidence": 0.7
+    },
+    "s_1ucc88jwvw4": {
+      "match": false,
+      "confidence": 0.92
+    },
+    "s_j9w8xto5mj": {
+      "match": false,
+      "confidence": 0.88
+    },
+    "s_1qzxau7a6he": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_n9053e5ros": {
+      "match": false,
+      "confidence": 0.85
+    },
+    "s_2d6ffjc1jlt": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_28h076ayunl": {
+      "match": false,
+      "confidence": 0.9
+    },
+    "s_10dpq4903u": {
+      "match": false,
+      "confidence": 0.85
+    },
+    "s_1uk7h9ca5ja": {
+      "match": false,
+      "confidence": 0.97
+    },
+    "s_2b4hr49jv83": {
+      "match": false,
+      "confidence": 0.85
+    },
+    "s_211su950t6t": {
+      "match": false,
+      "confidence": 0.9
+    },
+    "s_l77ebdt0va": {
+      "match": false,
+      "confidence": 0.95
+    },
+    "s_hehy77bqhe": {
+      "match": false,
+      "confidence": 0.85
+    }
+  }
+}

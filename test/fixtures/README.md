@@ -47,6 +47,9 @@ Served by `ai.js`, which also holds the fake test keys. Each provider accepts on
 | `anthropic-translate-stocks-es.sse` | Recorded 2026-11-09: Translate into Spanish on the BBC "AI stocks climb…" summary | Summary-only story |
 | `anthropic-explain-stocks.sse` | Recorded 2026-11-09: Explain on the same BBC summary | Four bullet points |
 | `anthropic-judgments.json`  | Recorded 2026-11-09: structured output judging two stories against a rule           | `{ judgments: [{ id, match, confidence }] }`                                |
+| `jev-judgments-events.json` | Recorded 2026-11-09: Jev on all 71 fixture stories, rule "Hide event announcements and conference promotions" | Founder Summit stories 0.92–0.95; a podcast launch 0.50 (Maybe) |
+| `jev-judgments-funding.json` | Recorded 2026-11-09: Jev on all 71 fixture stories, rule "Tag startup funding and valuation news as Funding" | Five raises 0.97–0.99; Wonder's IPO filing 0.70 (Maybe) |
+| `anthropic-judgments-events.json` | Recorded 2026-11-09: Claude Opus 5.5 on the same stories and events rule, structured output | Only the three Founder Summit stories match |
 | `jev-models.json`           | Recorded 2026-11-09: `GET https://api.typesafe.ai/v1/models`                        |                                                                             |
 | `jev-systemone.json`        | Recorded 2026-11-09: `POST https://api.typesafe.ai/v1/systemone`, three yes/no questions | The conference story came back at 0.53: a "Maybe"                     |
 | `openrouter-models.json`    | Recorded 2026-11-09: `GET https://openrouter.ai/api/v1/models` (public)            | Five of the 461 models, keeping only the fields Feedolio reads              |

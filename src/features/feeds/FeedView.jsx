@@ -7,6 +7,8 @@ import StoryList, { EmptyState, FeedErrors, ListNote } from '../../components/St
 import { displayUrl } from '../../lib/feeds.js';
 import { shortDate } from '../../lib/time.js';
 import { useNow } from '../../lib/useNow.js';
+import { HiddenNote } from '../ai/rules/RuleNotes.jsx';
+import { useWithoutHidden } from '../ai/rules/useRules.js';
 import { selectSubscriptionById } from '../subscriptions/subscriptionsSlice.js';
 import { useGetFeedQuery } from './feedApi.js';
 import ListHeader from './ListHeader.jsx';
@@ -44,7 +46,7 @@ function FeedStories({ subscription }) {
   const retry = useRetryFeed();
   const now = useNow();
   const cutoff = useSelector(selectCutoff);
-  const stories = mergeStories([state]);
+  const { stories, hidden } = useWithoutHidden(mergeStories([state]));
   const loading = state.status === 'loading';
   const { newCount, firstOldId } = dividerPlace(stories, cutoff);
   const newest = stories[0]?.story.publishedAt;
@@ -63,6 +65,7 @@ function FeedStories({ subscription }) {
         <ListNote>No new stories since {shortDate(newest)}. Older stories stay readable.</ListNote>
       )}
       <FeedErrors failed={state.status === 'error' ? [state] : []} onRetry={retry} />
+      <HiddenNote hidden={hidden} />
       {state.status === 'ready' && stories.length === 0 ? (
         <EmptyState title="No stories yet">This feed hasn’t published anything.</EmptyState>
       ) : (

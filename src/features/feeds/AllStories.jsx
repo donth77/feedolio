@@ -2,6 +2,8 @@ import { useSelector } from 'react-redux';
 import { selectCutoff, selectShowWelcome } from '../../app/visitsSlice.js';
 import StoryList, { EmptyState, FeedErrors } from '../../components/StoryList.jsx';
 import { useNow } from '../../lib/useNow.js';
+import { HiddenNote, RulesStatus } from '../ai/rules/RuleNotes.jsx';
+import { useWithoutHidden } from '../ai/rules/useRules.js';
 import { selectEnabledSubscriptions } from '../subscriptions/subscriptionsSlice.js';
 import ListHeader from './ListHeader.jsx';
 import { dividerPlace, mergeStories, useFeedStates, useRetryFeed } from './useFeeds.js';
@@ -18,7 +20,7 @@ export default function AllStories() {
   const now = useNow();
   const cutoff = useSelector(selectCutoff);
   const showWelcome = useSelector(selectShowWelcome);
-  const stories = mergeStories(states);
+  const { stories, hidden } = useWithoutHidden(mergeStories(states));
   const loading = states.some((state) => state.status === 'loading');
   const failed = states.filter((state) => state.status === 'error');
   const { newCount, firstOldId } = dividerPlace(stories, cutoff);
@@ -39,6 +41,7 @@ export default function AllStories() {
       />
       {showWelcome && <WelcomeNote />}
       <FeedErrors failed={failed} onRetry={retry} />
+      <HiddenNote hidden={hidden} />
       {subscriptions.length === 0 ? (
         <EmptyState title="No feeds to show" action={{ to: '/settings', label: 'Open Settings' }}>
           Every feed is hidden from All stories, or you don’t follow any yet.
@@ -55,6 +58,7 @@ export default function AllStories() {
           showCounts
         />
       )}
+      {!loading && <RulesStatus now={now} />}
     </>
   );
 }

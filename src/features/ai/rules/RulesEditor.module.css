@@ -1,0 +1,374 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 780px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title {
+  font: 600 26px/1.2 var(--font-read);
+}
+
+.title:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.card {
+  composes: card from '../AiSettings.module.css';
+}
+
+.cardTitle {
+  composes: cardTitle from '../AiSettings.module.css';
+}
+
+.help {
+  composes: help from '../AiSettings.module.css';
+}
+
+.small {
+  composes: small from '../AiSettings.module.css';
+}
+
+.checkedBy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font: 600 13px/1 var(--font-ui);
+}
+
+.notice {
+  composes: note from '../AiSettings.module.css';
+}
+
+/* Rules */
+
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rule {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 18px 20px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-raised);
+}
+
+.ruleTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.ruleText {
+  font: 500 17px/1.4 var(--font-read);
+  overflow-wrap: anywhere;
+}
+
+.switchLabel {
+  composes: switchLabel from '../AiSettings.module.css';
+}
+
+.switch {
+  composes: switch from '../AiSettings.module.css';
+}
+
+.ruleMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.actionChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font: 600 12px/1 var(--font-ui);
+}
+
+.actionChip[data-action='highlight'],
+.actionChip[data-action='tag'] {
+  border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.statLink {
+  font: 600 13px/1.4 var(--font-ui);
+}
+
+.ruleButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.secondary {
+  composes: secondary from '../AiSettings.module.css';
+}
+
+.quiet {
+  composes: quiet from '../AiSettings.module.css';
+}
+
+.primary {
+  composes: button from '../AiSettings.module.css';
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.primary:hover {
+  background: var(--color-accent-hover);
+}
+
+/* The form */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.field {
+  composes: field from '../AiSettings.module.css';
+}
+
+.label {
+  composes: label from '../AiSettings.module.css';
+}
+
+.textarea {
+  width: 100%;
+  min-height: 88px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font: 400 16px/1.5 var(--font-ui);
+  resize: vertical;
+}
+
+.textarea::placeholder {
+  color: var(--color-ink-muted);
+}
+
+.textarea[aria-invalid='true'] {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px var(--color-danger-soft);
+}
+
+.input {
+  composes: input from '../AiSettings.module.css';
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: var(--space-4);
+}
+
+.selectWrap {
+  composes: selectWrap from '../AiSettings.module.css';
+}
+
+.select {
+  composes: select from '../AiSettings.module.css';
+}
+
+.caret {
+  composes: caret from '../AiSettings.module.css';
+}
+
+.problem {
+  color: var(--color-danger);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+.formButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.alert {
+  composes: alert from '../AiSettings.module.css';
+}
+
+/* Test results */
+
+.testResults {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.testHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.testTitle {
+  font: 600 14px/1.3 var(--font-ui);
+}
+
+.results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.result:last-child {
+  border-bottom: 0;
+}
+
+.resultText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.resultTitle {
+  font: 600 14px/1.35 var(--font-ui);
+}
+
+.verdict {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font: 600 12px/1.2 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.verdict[data-verdict='match'] {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.verdict[data-verdict='maybe'] {
+  background: var(--color-maybe-bg);
+  color: var(--color-maybe-ink);
+}
+
+/* How matching works */
+
+.details {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-raised);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 18px;
+  font: 600 15px/1.3 var(--font-ui);
+  cursor: pointer;
+}
+
+.detailsBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 18px 18px;
+}
+
+.scale {
+  display: flex;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.scaleNo {
+  background: var(--color-line);
+}
+
+.scaleMaybe {
+  background: var(--color-maybe-ink);
+}
+
+.scaleMatch {
+  background: var(--color-success);
+}
+
+.bands {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 639px) {
+  .rule {
+    padding: var(--space-4);
+  }
+
+  .result {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

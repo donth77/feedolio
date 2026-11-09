@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { Link } from 'react-router';
 import { toastShown } from '../../app/toastSlice.js';
 import Icon from '../../components/Icon.jsx';
 import PageHeader from '../../components/PageHeader.jsx';
@@ -810,6 +811,12 @@ function Features() {
               </span>
               <span id={`${id}-${feature.name}-help`} className={styles.small}>
                 {feature.help}
+                {feature.name === 'rules' && (
+                  <>
+                    {' '}
+                    <Link to="/settings/rules">Edit them under Rules</Link>.
+                  </>
+                )}
               </span>
             </div>
             <label className={styles.switchLabel}>
