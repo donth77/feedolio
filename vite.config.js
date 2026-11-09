@@ -6,4 +6,11 @@ import { defineConfig } from 'vite';
 // local runtime during `pnpm dev`, and builds the app and Worker together.
 export default defineConfig({
   plugins: [react(), cloudflare()],
+  server: {
+    watch: {
+      // Generated output. Watching it made every coverage run reload the page
+      // hundreds of times.
+      ignored: ['**/coverage/**', '**/dist/**', '**/test-results/**', '**/playwright-report/**'],
+    },
+  },
 });

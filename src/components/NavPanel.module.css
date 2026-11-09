@@ -17,6 +17,33 @@
   text-decoration: none;
 }
 
+/* Wordmark and the collapse button, side by side. */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+
+.toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-ink-muted);
+}
+
+.toggle:hover {
+  background: var(--color-hover);
+  color: var(--color-ink);
+}
+
 .panelWordmark {
   padding: var(--space-1) 10px;
 }
@@ -126,6 +153,102 @@
 }
 
 .footer {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-line);
+}
+
+/* The collapsed sidebar: a 64 px column of 44 px icons. */
+.rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 100%;
+  padding: var(--space-5) 0 28px;
+  background: var(--color-surface);
+}
+
+.railTop,
+.railItems {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.railItem {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border-radius: var(--radius-control);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.railItem:hover {
+  background: var(--color-hover);
+}
+
+.railItem[aria-current='page'] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.railAdd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-control);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.railAdd:hover {
+  border-color: var(--color-accent-hover);
+  background: var(--color-accent-hover);
+}
+
+.badge {
+  position: absolute;
+  top: 2px;
+  right: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 var(--space-1);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  color: var(--color-ink-muted);
+  font: 600 10px/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.railRule {
+  width: 28px;
+  height: 1px;
+  background: var(--color-line);
+}
+
+.railFooter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--tap-target);
   margin-top: auto;
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-line);

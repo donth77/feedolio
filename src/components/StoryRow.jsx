@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import BookmarkButton from '../features/bookmarks/BookmarkButton.jsx';
 import { sizedImageUrl } from '../lib/images.js';
+import { rememberOpenedStory } from '../lib/returnFocus.js';
 import { fullTime, savedWhen, storyTime } from '../lib/time.js';
 import StoryImage from './StoryImage.jsx';
 import styles from './StoryRow.module.css';
@@ -44,7 +45,12 @@ export default function StoryRow({ item, now, from, headingLevel = 3, savedAt, a
   const Headline = headingLevel === 2 ? 'h2' : 'h3';
 
   return (
-    <li className={styles.row}>
+    <li
+      className={styles.row}
+      data-story-row=""
+      data-story-id={story.id}
+      data-original={story.link}
+    >
       <div className={styles.thumb}>
         <StoryImage
           src={story.imageUrl && sizedImageUrl(story.imageUrl, THUMB_WIDTH)}
@@ -84,16 +90,33 @@ export default function StoryRow({ item, now, from, headingLevel = 3, savedAt, a
             className={styles.link}
             to={`/feeds/${story.feedId}/stories/${story.id}`}
             state={from && { from }}
+            data-story-link=""
+            onClick={() => rememberOpenedStory(story.id)}
           >
             {story.title}
           </Link>
         </Headline>
         {story.excerpt && <p className={styles.excerpt}>{story.excerpt}</p>}
+        <KeyHint />
       </div>
       <div className={styles.action}>
         {action ?? <BookmarkButton story={story} feedTitle={feed.title} />}
       </div>
     </li>
+  );
+}
+
+/**
+ * What the keys do, under the story selected with the keyboard. Screen reader
+ * users get the full list from the ? overlay instead.
+ */
+export function KeyHint() {
+  return (
+    <p className={styles.hint} aria-hidden="true">
+      <kbd className={styles.kbd}>Enter</kbd> open <kbd className={styles.kbd}>V</kbd> original{' '}
+      <kbd className={styles.kbd}>S</kbd> save <kbd className={styles.kbd}>J</kbd>
+      <kbd className={styles.kbd}>K</kbd> move
+    </p>
   );
 }
 

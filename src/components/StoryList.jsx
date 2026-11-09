@@ -1,11 +1,16 @@
-import { useId, useMemo } from 'react';
-import { Link, useLocation } from 'react-router';
+import { useEffect, useId, useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { Link, useLocation, useNavigationType } from 'react-router';
 import { feedErrorMessage } from '../features/feeds/feedApi.js';
+import { DIVIDER_ID, dividerPlace } from '../features/feeds/useFeeds.js';
+import { selectDensity, selectLayout } from '../features/preferences/preferencesSlice.js';
+import { takeOpenedStory } from '../lib/returnFocus.js';
 import { fullTime, GROUP_LABELS, groupByDate, groupDates, visitLabel } from '../lib/time.js';
 import Icon from './Icon.jsx';
+import StoryCard from './StoryCard.jsx';
+import cardStyles from './StoryCard.module.css';
 import styles from './StoryList.module.css';
 import StoryRow, { SkeletonRow } from './StoryRow.jsx';
-import { DIVIDER_ID, dividerPlace } from '../features/feeds/useFeeds.js';
 
 /** @typedef {import('../features/feeds/useFeeds.js').ListedStory} ListedStory */
 /** @typedef {import('../features/feeds/useFeeds.js').FeedState} FeedState */
@@ -13,7 +18,9 @@ import { DIVIDER_ID, dividerPlace } from '../features/feeds/useFeeds.js';
 /**
  * Stories under date headers (Today, Yesterday, Earlier this week, Older),
  * with a grey placeholder while nothing has loaded yet, and a "New since
- * your last visit" divider when the reader has been here before.
+ * your last visit" divider when the reader has been here before. Shown as
+ * rows or cards, comfortable or compact, as the reader prefers. Coming back
+ * from a story puts focus on it again.
  *
  * @param {{
  *   stories: ListedStory[],
@@ -38,9 +45,31 @@ export default function StoryList({
   const { pathname } = useLocation();
   const from = useMemo(() => ({ pathname, label }), [pathname, label]);
   const { firstOldId } = dividerPlace(stories, cutoff);
-  const row = (/** @type {ListedStory} */ item) => (
-    <StoryRow key={item.story.id} item={item} now={now} from={from} />
-  );
+  const layout = useSelector(selectLayout);
+  const density = useSelector(selectDensity);
+  const cards = layout === 'cards';
+  const listClass = cards ? cardStyles.grid : styles.list;
+  const row = (/** @type {ListedStory} */ item) =>
+    cards ? (
+      <StoryCard key={item.story.id} item={item} now={now} from={from} />
+    ) : (
+      <StoryRow key={item.story.id} item={item} now={now} from={from} />
+    );
+
+  const container = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const navigation = useNavigationType();
+  useEffect(() => {
+    if (stories.length === 0) return;
+    const storyId = takeOpenedStory();
+    // Only coming back (the back link or Back) returns focus; opening a list afresh starts at the top.
+    if (navigation !== 'POP') return;
+    if (!storyId || !/^s_[0-9a-z]+$/.test(storyId)) return;
+    const link = container.current?.querySelector(
+      `[data-story-id="${storyId}"] a[data-story-link]`,
+    );
+    // The scroll position is restored separately, so focus mustn't scroll.
+    if (link instanceof HTMLElement) link.focus({ preventScroll: true });
+  }, [stories, navigation]);
 
   if (stories.length === 0 && loading) {
     return (
@@ -53,7 +82,7 @@ export default function StoryList({
   }
 
   return (
-    <div aria-busy={loading}>
+    <div ref={container} aria-busy={loading} data-density={density}>
       {groupByDate(stories, now).map(({ group, items }) => {
         const headingId = `${idPrefix}-${group}`;
         const count = `${items.length} ${items.length === 1 ? 'story' : 'stories'}`;
@@ -70,12 +99,12 @@ export default function StoryList({
               </span>
             </div>
             {split === -1 ? (
-              <ul className={styles.list}>{items.map(row)}</ul>
+              <ul className={listClass}>{items.map(row)}</ul>
             ) : (
               <>
-                {split > 0 && <ul className={styles.list}>{items.slice(0, split).map(row)}</ul>}
+                {split > 0 && <ul className={listClass}>{items.slice(0, split).map(row)}</ul>}
                 <NewSinceDivider cutoff={/** @type {string} */ (cutoff)} now={now} />
-                <ul className={styles.list}>{items.slice(split).map(row)}</ul>
+                <ul className={listClass}>{items.slice(split).map(row)}</ul>
               </>
             )}
           </section>

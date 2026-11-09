@@ -80,6 +80,23 @@ const preferencesSlice = createSlice({
     themeChanged(state, { payload }) {
       state.theme = restorePreferences({ theme: payload }).theme;
     },
+    /** @param {{ payload: Preferences['layout'] }} action */
+    layoutChanged(state, { payload }) {
+      state.layout = restorePreferences({ layout: payload }).layout;
+    },
+    /** @param {{ payload: Preferences['density'] }} action */
+    densityChanged(state, { payload }) {
+      state.density = restorePreferences({ density: payload }).density;
+    },
+    /**
+     * The reader collapsed or expanded the sidebar. From then on their choice
+     * wins over the automatic one.
+     *
+     * @param {{ payload: Preferences['sidebar'] }} action
+     */
+    sidebarChanged(state, { payload }) {
+      state.sidebar = restorePreferences({ sidebar: payload }).sidebar;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(persistedStateHydrated, (_state, { payload }) =>
@@ -88,7 +105,8 @@ const preferencesSlice = createSlice({
   },
 });
 
-export const { readingChanged, themeChanged } = preferencesSlice.actions;
+export const { readingChanged, themeChanged, layoutChanged, densityChanged, sidebarChanged } =
+  preferencesSlice.actions;
 export default preferencesSlice.reducer;
 
 /** @param {{ preferences: Preferences }} state */
@@ -96,3 +114,12 @@ export const selectReading = (state) => state.preferences.reading;
 
 /** @param {{ preferences: Preferences }} state */
 export const selectTheme = (state) => state.preferences.theme;
+
+/** @param {{ preferences: Preferences }} state */
+export const selectLayout = (state) => state.preferences.layout;
+
+/** @param {{ preferences: Preferences }} state */
+export const selectDensity = (state) => state.preferences.density;
+
+/** @param {{ preferences: Preferences }} state */
+export const selectSidebar = (state) => state.preferences.sidebar;

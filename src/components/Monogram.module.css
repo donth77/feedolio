@@ -24,6 +24,10 @@
   letter-spacing: -0.02em;
 }
 
+.drawn::before {
+  content: attr(data-initials);
+}
+
 .bc {
   background: var(--tint-bc-bg);
   color: var(--tint-bc-ink);

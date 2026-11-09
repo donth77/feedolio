@@ -136,7 +136,10 @@ describe('Main images', () => {
     const row = rowOf('All the latest updates on AI data centers');
     fireEvent.error(/** @type {HTMLImageElement} */ (row.querySelector('img')));
     expect(row.querySelector('img')).toBeNull();
-    expect(within(row).getByText('V')).toBeVisible();
+    // The tile is the row's first element: the image's place.
+    const tile = /** @type {HTMLElement} */ (row.firstElementChild?.firstElementChild);
+    expect(tile).toHaveTextContent(/^V$/);
+    expect(tile).toHaveAttribute('aria-hidden', 'true');
   });
 });
 

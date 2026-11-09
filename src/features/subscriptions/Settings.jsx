@@ -9,7 +9,11 @@ import { displayUrl, monogramFor, tintFor } from '../../lib/feeds.js';
 import { useFocusAfterRemoval } from '../../lib/useFocusAfterRemoval.js';
 import { lookOf } from '../feeds/useFeeds.js';
 import {
+  densityChanged,
+  layoutChanged,
   readingChanged,
+  selectDensity,
+  selectLayout,
   selectReading,
   selectTheme,
   themeChanged,
@@ -32,6 +36,14 @@ const THEMES = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
 ];
+const LAYOUTS = [
+  { value: 'list', label: 'List' },
+  { value: 'cards', label: 'Cards' },
+];
+const DENSITIES = [
+  { value: 'comfortable', label: 'Comfortable' },
+  { value: 'compact', label: 'Compact' },
+];
 const SIZES = [
   { value: 's', label: 'Small' },
   { value: 'm', label: 'Medium' },
@@ -47,6 +59,8 @@ const FONTS = [
 export default function Settings() {
   const dispatch = useDispatch();
   const theme = useSelector(selectTheme);
+  const layout = useSelector(selectLayout);
+  const density = useSelector(selectDensity);
   const reading = useSelector(selectReading);
 
   return (
@@ -78,7 +92,8 @@ export default function Settings() {
               Appearance
             </h2>
             <p className={styles.help}>
-              Text size and font apply to the story page, where the Aa button changes them too.
+              Layout and density apply to story lists. Text size and font apply to the story page,
+              where the Aa button changes them too.
             </p>
           </div>
           <Segmented
@@ -86,6 +101,18 @@ export default function Settings() {
             options={THEMES}
             value={theme}
             onChange={(value) => dispatch(themeChanged(value))}
+          />
+          <Segmented
+            legend="Story list layout"
+            options={LAYOUTS}
+            value={layout}
+            onChange={(value) => dispatch(layoutChanged(value))}
+          />
+          <Segmented
+            legend="Density"
+            options={DENSITIES}
+            value={density}
+            onChange={(value) => dispatch(densityChanged(value))}
           />
           <Segmented
             legend="Story text size"
