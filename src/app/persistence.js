@@ -156,6 +156,11 @@ export function createSaver(getState, onFailure = () => {}) {
     flush() {
       if (timer) flush();
     },
+    /** Drops a pending save without writing it, when this store is going away. */
+    cancel() {
+      if (timer) clearTimeout(timer);
+      timer = null;
+    },
     /**
      * The state now matches storage (it was just loaded from it), so there's
      * nothing to save. Writing it back would only echo it to other tabs.

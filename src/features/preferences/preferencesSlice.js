@@ -76,6 +76,10 @@ const preferencesSlice = createSlice({
     readingChanged(state, { payload }) {
       state.reading = restorePreferences({ reading: { ...state.reading, ...payload } }).reading;
     },
+    /** @param {{ payload: Preferences['theme'] }} action */
+    themeChanged(state, { payload }) {
+      state.theme = restorePreferences({ theme: payload }).theme;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(persistedStateHydrated, (_state, { payload }) =>
@@ -84,8 +88,11 @@ const preferencesSlice = createSlice({
   },
 });
 
-export const { readingChanged } = preferencesSlice.actions;
+export const { readingChanged, themeChanged } = preferencesSlice.actions;
 export default preferencesSlice.reducer;
 
 /** @param {{ preferences: Preferences }} state */
 export const selectReading = (state) => state.preferences.reading;
+
+/** @param {{ preferences: Preferences }} state */
+export const selectTheme = (state) => state.preferences.theme;

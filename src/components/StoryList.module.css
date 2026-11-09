@@ -29,6 +29,24 @@ section:first-of-type > .dateHeader {
   font-variant-numeric: tabular-nums;
 }
 
+/* "New since your last visit": an accent label, then a rule to the edge. */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0;
+  color: var(--color-accent);
+  font: 600 13px/1.2 var(--font-ui);
+}
+
+.divider::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-accent);
+}
+
 .error {
   display: flex;
   flex-wrap: wrap;
@@ -152,6 +170,13 @@ section:first-of-type > .dateHeader {
   }
 
   .dateSub {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 639px) {
+  .divider {
+    padding: var(--space-3) 0;
     font-size: 12px;
   }
 }

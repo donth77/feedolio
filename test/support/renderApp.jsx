@@ -23,7 +23,11 @@ export function renderApp(url = '/') {
 function mount() {
   const store = makeStore();
   const router = createAppRouter();
-  onTestFinished(() => router.dispose());
+  // A save still waiting when the test ends must not land in the next test.
+  onTestFinished(() => {
+    store.stopSaving();
+    router.dispose();
+  });
   const user = userEvent.setup();
   const view = render(<App store={store} router={router} />);
 
@@ -38,6 +42,7 @@ function mount() {
     reload() {
       window.dispatchEvent(new Event('pagehide'));
       view.unmount();
+      store.stopSaving();
       router.dispose();
       return mount();
     },

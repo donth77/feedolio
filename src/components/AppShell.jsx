@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { selectBookmarkCount } from '../features/bookmarks/bookmarksSlice.js';
@@ -9,7 +9,12 @@ import {
   useFeedStates,
   useLoadFeeds,
 } from '../features/feeds/useFeeds.js';
-import { selectEnabledSubscriptions } from '../features/subscriptions/subscriptionsSlice.js';
+import AddFeedDialog from '../features/subscriptions/AddFeedDialog.jsx';
+import { AddFeedContext } from '../features/subscriptions/addFeedContext.js';
+import {
+  selectAllSubscriptions,
+  selectEnabledSubscriptions,
+} from '../features/subscriptions/subscriptionsSlice.js';
 import { useNow } from '../lib/useNow.js';
 import styles from './AppShell.module.css';
 import Drawer from './Drawer.jsx';
@@ -32,95 +37,116 @@ export default function AppShell() {
   useLoadFeeds(subscriptions);
   const states = useFeedStates(subscriptions);
   const now = useNow();
-  const feeds = subscriptions.map(lookOf);
+  // Hidden feeds stay in the sidebar and chips, so they can still be opened.
+  const feeds = useSelector(selectAllSubscriptions).map(lookOf);
   const allLoaded = states.every((state) => state.status !== 'loading');
   const todayCount = allLoaded ? inLastDay(mergeStories(states), now).length : null;
   const savedCount = useSelector(selectBookmarkCount);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  // From the drawer, the dialog replaces it rather than stacking on top.
+  const openAddFeed = useCallback(() => {
+    setDrawerOpen(false);
+    setAddOpen(true);
+  }, []);
   const { pathname } = useLocation();
   const isStories = pathname === '/' || pathname === '/today' || pathname.startsWith('/feeds/');
 
   return (
-    <div className={styles.shell}>
-      <div className={styles.sidebar}>
-        <NavPanel
-          id="sidebar"
-          label="Sections and feeds"
-          feeds={feeds}
-          todayCount={todayCount}
-          savedCount={savedCount}
-          className={styles.sidebarPanel}
-        />
-      </div>
+    <AddFeedContext.Provider value={openAddFeed}>
+      <div className={styles.shell}>
+        <div className={styles.sidebar}>
+          <NavPanel
+            id="sidebar"
+            label="Sections and feeds"
+            feeds={feeds}
+            todayCount={todayCount}
+            savedCount={savedCount}
+            onAddFeed={openAddFeed}
+            className={styles.sidebarPanel}
+          />
+        </div>
 
-      <div className={styles.column}>
-        <header className={styles.topBar}>
-          <button
-            type="button"
-            className={styles.menuButton}
-            aria-label="Open menu"
-            aria-haspopup="dialog"
-            aria-expanded={drawerOpen}
-            onClick={() => setDrawerOpen(true)}
-          >
-            <Icon name="menu" size={22} />
-          </button>
-          <Wordmark />
-        </header>
+        <div className={styles.column}>
+          <header className={styles.topBar}>
+            <button
+              type="button"
+              className={styles.menuButton}
+              aria-label="Open menu"
+              aria-haspopup="dialog"
+              aria-expanded={drawerOpen}
+              onClick={() => setDrawerOpen(true)}
+            >
+              <Icon name="menu" size={22} />
+            </button>
+            <Wordmark />
+            <button
+              type="button"
+              className={styles.addButton}
+              aria-label="Add feed"
+              onClick={openAddFeed}
+            >
+              <Icon name="add" size={22} />
+            </button>
+          </header>
 
-        <nav className={styles.chips} aria-label="Stories to show">
-          <ul className={styles.chipList}>
-            <li>
-              <NavLink to="/today" className={styles.chip}>
-                Today
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/" end className={styles.chip}>
-                All
-              </NavLink>
-            </li>
-            {feeds.map((feed) => (
-              <li key={feed.id}>
-                <NavLink to={`/feeds/${feed.id}`} className={styles.chip}>
-                  <FeedDot feed={feed} className={styles.chipDot} />
-                  {feed.title}
+          <nav className={styles.chips} aria-label="Stories to show">
+            <ul className={styles.chipList}>
+              <li>
+                <NavLink to="/today" className={styles.chip}>
+                  Today
                 </NavLink>
               </li>
-            ))}
-          </ul>
-        </nav>
+              <li>
+                <NavLink to="/" end className={styles.chip}>
+                  All
+                </NavLink>
+              </li>
+              {feeds.map((feed) => (
+                <li key={feed.id}>
+                  <NavLink to={`/feeds/${feed.id}`} className={styles.chip}>
+                    <FeedDot feed={feed} className={styles.chipDot} />
+                    {feed.title}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-        <main id="main" className={styles.main}>
-          <Outlet />
-        </main>
+          <main id="main" className={styles.main}>
+            <Outlet />
+          </main>
 
-        <nav className={styles.tabs} aria-label="Main">
-          <Link to="/" className={styles.tab} aria-current={isStories ? 'page' : undefined}>
-            <Icon name="stories" size={22} />
-            Stories
-          </Link>
-          <NavLink to="/bookmarks" className={styles.tab}>
-            <Icon name="saved" size={22} />
-            Saved
-          </NavLink>
-          <NavLink to="/settings" className={styles.tab}>
-            <Icon name="settings" size={22} />
-            Settings
-          </NavLink>
-        </nav>
+          <nav className={styles.tabs} aria-label="Main">
+            <Link to="/" className={styles.tab} aria-current={isStories ? 'page' : undefined}>
+              <Icon name="stories" size={22} />
+              Stories
+            </Link>
+            <NavLink to="/bookmarks" className={styles.tab}>
+              <Icon name="saved" size={22} />
+              Saved
+            </NavLink>
+            <NavLink to="/settings" className={styles.tab}>
+              <Icon name="settings" size={22} />
+              Settings
+            </NavLink>
+          </nav>
+        </div>
+
+        <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} label="Menu">
+          <NavPanel
+            label="Sections and feeds"
+            feeds={feeds}
+            todayCount={todayCount}
+            savedCount={savedCount}
+            onAddFeed={openAddFeed}
+            onNavigate={() => setDrawerOpen(false)}
+          />
+        </Drawer>
+
+        <AddFeedDialog open={addOpen} onClose={() => setAddOpen(false)} />
       </div>
-
-      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} label="Menu">
-        <NavPanel
-          label="Sections and feeds"
-          feeds={feeds}
-          todayCount={todayCount}
-          savedCount={savedCount}
-          onNavigate={() => setDrawerOpen(false)}
-        />
-      </Drawer>
-    </div>
+    </AddFeedContext.Provider>
   );
 }

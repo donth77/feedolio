@@ -1,31 +1,46 @@
 import { useId, useMemo } from 'react';
 import { Link, useLocation } from 'react-router';
 import { feedErrorMessage } from '../features/feeds/feedApi.js';
-import { GROUP_LABELS, groupByDate, groupDates } from '../lib/time.js';
+import { fullTime, GROUP_LABELS, groupByDate, groupDates, visitLabel } from '../lib/time.js';
 import Icon from './Icon.jsx';
 import styles from './StoryList.module.css';
 import StoryRow, { SkeletonRow } from './StoryRow.jsx';
+import { DIVIDER_ID, dividerPlace } from '../features/feeds/useFeeds.js';
 
 /** @typedef {import('../features/feeds/useFeeds.js').ListedStory} ListedStory */
 /** @typedef {import('../features/feeds/useFeeds.js').FeedState} FeedState */
 
 /**
  * Stories under date headers (Today, Yesterday, Earlier this week, Older),
- * with a grey placeholder while nothing has loaded yet.
+ * with a grey placeholder while nothing has loaded yet, and a "New since
+ * your last visit" divider when the reader has been here before.
  *
  * @param {{
  *   stories: ListedStory[],
  *   now: number,
  *   loading: boolean,
  *   label: string,
+ *   cutoff?: string|null,
  *   showCounts?: boolean,
  * }} props
  *   label: the list's name, for the story page's back link ("All stories")
+ *   cutoff: when the reader's last visit ended
  */
-export default function StoryList({ stories, now, loading, label, showCounts = false }) {
+export default function StoryList({
+  stories,
+  now,
+  loading,
+  label,
+  cutoff = null,
+  showCounts = false,
+}) {
   const idPrefix = useId();
   const { pathname } = useLocation();
   const from = useMemo(() => ({ pathname, label }), [pathname, label]);
+  const { firstOldId } = dividerPlace(stories, cutoff);
+  const row = (/** @type {ListedStory} */ item) => (
+    <StoryRow key={item.story.id} item={item} now={now} from={from} />
+  );
 
   if (stories.length === 0 && loading) {
     return (
@@ -42,6 +57,7 @@ export default function StoryList({ stories, now, loading, label, showCounts = f
       {groupByDate(stories, now).map(({ group, items }) => {
         const headingId = `${idPrefix}-${group}`;
         const count = `${items.length} ${items.length === 1 ? 'story' : 'stories'}`;
+        const split = items.findIndex((item) => item.story.id === firstOldId);
         return (
           <section key={group} aria-labelledby={headingId}>
             <div className={styles.dateHeader}>
@@ -53,14 +69,37 @@ export default function StoryList({ stories, now, loading, label, showCounts = f
                 {showCounts && ` · ${count}`}
               </span>
             </div>
-            <ul className={styles.list}>
-              {items.map((item) => (
-                <StoryRow key={item.story.id} item={item} now={now} from={from} />
-              ))}
-            </ul>
+            {split === -1 ? (
+              <ul className={styles.list}>{items.map(row)}</ul>
+            ) : (
+              <>
+                {split > 0 && <ul className={styles.list}>{items.slice(0, split).map(row)}</ul>}
+                <NewSinceDivider cutoff={/** @type {string} */ (cutoff)} now={now} />
+                <ul className={styles.list}>{items.slice(split).map(row)}</ul>
+              </>
+            )}
           </section>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * The line between stories published since the reader's last visit and the
+ * ones before it.
+ *
+ * @param {{ cutoff: string, now: number }} props
+ */
+function NewSinceDivider({ cutoff, now }) {
+  return (
+    <div
+      id={DIVIDER_ID}
+      className={styles.divider}
+      role="separator"
+      aria-label={`New since your last visit, ${fullTime(cutoff)}. Newer stories are above.`}
+    >
+      New since your last visit · {visitLabel(cutoff, now)}
     </div>
   );
 }

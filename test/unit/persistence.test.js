@@ -203,6 +203,18 @@ describe('createSaver', () => {
     expect(onFailure).toHaveBeenCalledWith('full');
   });
 
+  it('drops a pending save when the store is going away', () => {
+    vi.useFakeTimers();
+    let state = appState();
+    const saver = createSaver(() => /** @type {any} */ (state));
+
+    state = { ...state, preferences: { theme: 'light' } };
+    saver.changed();
+    saver.cancel();
+    vi.runAllTimers();
+    expect(localStorage.setItem).not.toHaveBeenCalled();
+  });
+
   it('doesn’t write back data that was just loaded from another tab', () => {
     vi.useFakeTimers();
     let state = appState();
