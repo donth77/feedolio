@@ -7,7 +7,7 @@ import { createSlice } from '@reduxjs/toolkit';
  * @typedef {import('./session.js').AccountUser} AccountUser
  *
  * @typedef {Object} AuthState
- * @property {'signedOut'|'signingIn'|'signedIn'} status
+ * @property {'signedOut'|'signedIn'} status
  * @property {AccountUser|null} user
  * @property {number} guestBookmarks  Saved-while-signed-out stories offered to a new account; 0 when none
  */
@@ -24,12 +24,6 @@ const authSlice = createSlice({
   name: 'auth',
   initialState: authStateFor(null),
   reducers: {
-    signInStarted(state) {
-      state.status = 'signingIn';
-    },
-    signInStopped(state) {
-      state.status = state.user ? 'signedIn' : 'signedOut';
-    },
     /** @param {{ payload: AccountUser }} action */
     signedIn: (_state, { payload }) => authStateFor(payload),
     signedOut: () => authStateFor(null),
@@ -43,14 +37,7 @@ const authSlice = createSlice({
   },
 });
 
-export const {
-  signInStarted,
-  signInStopped,
-  signedIn,
-  signedOut,
-  guestImportOffered,
-  guestImportClosed,
-} = authSlice.actions;
+export const { signedIn, signedOut, guestImportOffered, guestImportClosed } = authSlice.actions;
 export default authSlice.reducer;
 
 /** @param {{ auth: AuthState }} state */

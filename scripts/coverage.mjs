@@ -41,6 +41,7 @@ const UNIT_FILES = [
 
 const WORKER_FILES = [
   'worker/index.js',
+  'worker/lib/auth.js',
   'worker/lib/errors.js',
   'worker/lib/handleFeedRequest.js',
   'worker/lib/responses.js',

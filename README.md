@@ -6,7 +6,7 @@ Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worke
 
 > **Status:** milestones M0 to M13 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser. They can also connect their own AI provider to summarize, translate or explain any story, to hide, highlight or tag stories with plain-English rules, and to get a "Catch me up" digest of what they missed.
 >
-> **Live:** set this line after the first production deploy (see [Deploying](#deploying)).
+> **Live:** [feedolio.tdonohue.workers.dev](https://feedolio.tdonohue.workers.dev)
 
 ## Requirements
 
@@ -138,20 +138,25 @@ The Saved page lists bookmarks most recently saved first, and the sidebar shows 
 
 ## Signing in
 
-Sign-in is optional, and Feedolio works fully without it. Signing in with GitHub (through Auth0) keeps each reader's feeds and saved stories apart on a shared browser. Nothing syncs between devices.
+Sign-in is optional, and Feedolio works fully without it. Signing in with GitHub keeps each reader's feeds and saved stories apart on a shared browser. Nothing syncs between devices.
 
 - **Separate data:** each account's data is saved under its own key, `feedolio:v1:<user id>`. Signed-out reading uses `feedolio:v1`, and signing out keeps an account's data for next time.
 - **Guest stories:** on an account's first sign-in in a browser, Feedolio offers to bring over the stories saved there while signed out.
-- **What's stored:** `feedolio:session` holds only who is signed in (id, name, picture), never a token. Auth0's tokens stay in memory, and Feedolio calls no API with them.
-- **Code loading:** the Auth0 SDK (about 62 KB) loads only to sign in or out. Readers who never sign in never download it.
+- **How it works:** a GitHub OAuth app's web flow, run by the Worker (`/api/auth/*`), because GitHub's token exchange needs the app's client secret and doesn't accept requests from browsers.
+  - **Off to GitHub:** "Sign in with GitHub" goes to `/api/auth/login`, which sends the reader to GitHub with a random state, PKCE (S256), no scope (public profile only) and GitHub's account picker, so on a shared browser the next reader isn't signed in as the last one.
+  - **Back:** `/api/auth/callback` checks the state against a short-lived `HttpOnly` cookie, swaps the code for a token, reads the public profile, then **revokes the token**. Feedolio keeps no GitHub token anywhere.
+  - **Handoff:** the profile reaches the app in a signed, two-minute, `HttpOnly` cookie that the app collects once (`POST /api/auth/session`).
+  - **Sign out:** happens in the browser; there's no server session to end.
+- **What's stored:** `feedolio:session` holds only who is signed in (id, name, picture), never a token.
 
 To turn it on:
 
-1. In Auth0, create a **Single Page Application** and enable the **GitHub** social connection for it.
-2. Add `http://localhost:5173` and each deployed address (including `workers.dev` and preview URLs) to its Allowed Callback URLs, Allowed Logout URLs and Allowed Web Origins.
-3. Set `VITE_AUTH0_DOMAIN` and `VITE_AUTH0_CLIENT_ID` (see `.env.example`): in `.env` for local development, and as build variables in Workers Builds. Both are public values.
+1. Register an OAuth app at [github.com/settings/applications/new](https://github.com/settings/applications/new). Homepage: the site's address. Callback: the address plus `/api/auth/callback` (for example `https://feedolio.tdonohue.workers.dev/api/auth/callback`). GitHub matches the callback exactly, so a second app (callback `http://localhost:5173/api/auth/callback`) is needed for local development.
+2. Put the app's client ID in `wrangler.jsonc` under `vars` as `GITHUB_CLIENT_ID` (it's public).
+3. Store the client secret in Cloudflare: `pnpm exec wrangler secret put GITHUB_CLIENT_SECRET`, then paste it when asked. It also signs the handoff cookie (through HKDF), so there's one secret to keep.
+4. For local development, put the local app's `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` in `.env` (see `.env.example`). The Cloudflare Vite plugin gives them to the Worker; they never reach the browser.
 
-Without them, sign-in is hidden. If you use an Auth0 custom domain, add it to `connect-src` in `public/_headers`.
+Without both settings, sign-in is hidden. Preview URLs have their own addresses, so sign-in there needs an app registered for them.
 
 ## AI, with your own key
 
@@ -217,6 +222,7 @@ Readers write rules in plain English in **Settings › Rules** (`/settings/rules
 
 - **Feed content is untrusted.** Story HTML is cleaned by DOMPurify plus Feedolio's own rules when it's shown (see [Reading a story](#reading-a-story)). Titles and excerpts are always text.
 - **The feed endpoint is not an open proxy.** It only fetches http(s) on standard ports and refuses local, private and reserved addresses on every redirect, with time and size limits.
+- **Sign-in keeps no token.** The Worker revokes GitHub’s token as soon as it has read the public profile. Its cookies are `__Host-`, `HttpOnly`, `Secure` and short-lived; a random state and PKCE stop anyone else finishing a reader’s sign-in; and it only ever returns readers to a path in the app. Sign-in responses are never cached.
 - **Headers:** `public/_headers` gives every page a strict Content Security Policy:
   - Scripts come only from Feedolio's own files, plus the inline theme script by its hash. A unit test checks the hash still matches `index.html`.
   - No inline styles, plug-ins, frames, or `<base>`; fonts are self-hosted.
@@ -256,12 +262,13 @@ They need a browser: run `pnpm exec playwright install chromium` once, or set `P
 | Redux Toolkit with RTK Query                             | Feed data gets caching, retries and loading states without hand-written code; reader data stays in plain slices      | More moving parts than React state alone                                                                       |
 | JavaScript with JSDoc, CSS Modules and design tokens     | As the brief asks: no TypeScript, no CSS libraries                                                                   | Types are documented, not compiled                                                                             |
 | A "new since your last visit" divider, not unread counts | Shows where the reader left off without tracking every story                                                         | Doesn't remember individual stories read                                                                       |
+| GitHub sign-in finished by the Worker                    | GitHub's token exchange needs a secret and doesn't accept browser requests; no third-party sign-in service           | One secret to keep; GitHub matches callbacks exactly, so each address needs its OAuth app                      |
 | AI runs in the browser on the reader's own keys          | No AI backend and no AI cost to us; any provider, including local models                                             | Providers must allow browser requests; keys share the page with feed content, so injection defences are strict |
 | The digest cites story ids; Feedolio makes the links     | Feed text can try to steer a model, so nothing a model writes becomes a link                                         | A source the model names wrongly is dropped rather than guessed                                                |
 
 ## What's next
 
-- **Launch:** the first production deploy and GitHub sign-in setup (see [Deploying](#deploying) and [Signing in](#signing-in)).
+- **Launch:** automatic deploys through Workers Builds (see [Deploying](#deploying)).
 - **Later:** sync across devices, search, OPML import, offline reading, and rate limiting on the feed endpoint.
 
 ## The feed endpoint
@@ -291,7 +298,7 @@ Errors look like `{ "error": { "code": "NO_FEED_FOUND", "message": "…" } }`.
 src/
   app/          store, router, saved data (persistence.js), visits, route-level states
   features/     feeds · story · bookmarks · subscriptions · preferences · share ·
-                shortcuts · auth (GitHub sign-in through Auth0) ·
+                shortcuts · auth (GitHub sign-in, finished by the Worker) ·
                 ai (Settings › AI, provider adapters, task router, key store, cache,
                 story actions, filter rules, Catch me up)
   components/   AppShell, NavPanel, Drawer, StoryList, StoryRow, StoryCard, StoryImage,
@@ -302,7 +309,7 @@ src/
 worker/
   index.js      routes /api/*
   lib/          handleFeedRequest, safeFetch, urlGuard, parser, normaliseFeed,
-                pickMainImage, discoverFeed, text
+                pickMainImage, discoverFeed, text, auth (GitHub sign-in)
 test/           journeys/, unit/, worker/, fixtures/, msw/, support/, setup/
 e2e/            Playwright smoke tests against a deployed copy
 public/_headers security headers for the app's pages
@@ -319,4 +326,4 @@ Deploys use Cloudflare Workers Builds, connected to the GitHub repository:
    - non-production branch command: `pnpm exec wrangler versions upload`, which gives each branch a preview URL.
 3. Run the smoke tests against the preview or live address (see [Testing](#testing)).
 
-No secrets are needed. GitHub sign-in needs the two public Auth0 values above as build variables. CI (`.github/workflows/ci.yml`) runs lint, the format check, tests with coverage and the build on every push.
+GitHub sign-in needs one secret, `GITHUB_CLIENT_SECRET`, stored with Wrangler (see [Signing in](#signing-in)); nothing else is secret. CI (`.github/workflows/ci.yml`) runs lint, the format check, tests with coverage and the build on every push.

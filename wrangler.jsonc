@@ -18,6 +18,9 @@
   "cache": { "enabled": true },
   // Workers Logs
   "observability": { "enabled": true },
+  // GitHub sign-in: the OAuth app's client ID, which is public. Its secret,
+  // GITHUB_CLIENT_SECRET, is stored with `wrangler secret put` (see README).
+  "vars": { "GITHUB_CLIENT_ID": "Ov23liFlv1dFFddx2c5g" },
   // A workers.dev address, plus preview URLs for Workers Builds branches.
   "workers_dev": true,
   "preview_urls": true,

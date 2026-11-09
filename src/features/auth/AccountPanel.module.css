@@ -38,6 +38,7 @@
   background: var(--color-raised);
   color: var(--color-ink);
   font: var(--type-control);
+  text-decoration: none;
 }
 
 .button:hover:not(:disabled) {

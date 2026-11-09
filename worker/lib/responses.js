@@ -2,7 +2,7 @@
  * Headers on every JSON response from the Worker. Static pages get their
  * security headers from public/_headers; Worker responses set their own.
  */
-const JSON_HEADERS = {
+export const JSON_HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
   'X-Content-Type-Options': 'nosniff',
 };

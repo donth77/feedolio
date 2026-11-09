@@ -9,7 +9,7 @@
 export const SESSION_KEY = 'feedolio:session';
 
 /** @param {unknown} value @returns {value is AccountUser} */
-function isUser(value) {
+export function isAccountUser(value) {
   const user = /** @type {Record<string, unknown>} */ (value);
   return (
     typeof user === 'object' &&
@@ -25,7 +25,7 @@ function isUser(value) {
 export function readSession() {
   try {
     const value = JSON.parse(globalThis.localStorage?.getItem(SESSION_KEY) ?? 'null');
-    return isUser(value) ? value : null;
+    return isAccountUser(value) ? value : null;
   } catch {
     return null;
   }
