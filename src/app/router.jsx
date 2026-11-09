@@ -1,6 +1,5 @@
 import { createBrowserRouter } from 'react-router';
 import AppShell from '../components/AppShell.jsx';
-import SavedView from '../features/bookmarks/SavedView.jsx';
 import AllStories from '../features/feeds/AllStories.jsx';
 import FeedView from '../features/feeds/FeedView.jsx';
 import TodayView from '../features/feeds/TodayView.jsx';
@@ -41,7 +40,10 @@ export const routes = [
               { index: true, Component: AllStories },
               { path: 'today', Component: TodayView },
               { path: 'feeds/:feedId', Component: FeedView },
-              { path: 'bookmarks', Component: SavedView },
+              {
+                path: 'bookmarks',
+                lazy: lazyView(() => import('../features/bookmarks/SavedView.jsx')),
+              },
               {
                 path: 'settings',
                 lazy: lazyView(() => import('../features/subscriptions/Settings.jsx')),

@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createSaver,
+  hasSaved,
   loadSaved,
   SAVE_INTERVAL_MS,
   save,
   STORAGE_KEY,
+  storageKeyFor,
 } from '../../src/app/persistence.js';
 
 /**
@@ -105,6 +107,44 @@ describe('loadSaved', () => {
       },
     });
     expect(loadSaved()).toEqual({});
+  });
+});
+
+describe('accounts', () => {
+  it('keeps each signed-in account’s data under its own key', () => {
+    expect(storageKeyFor(null)).toBe(STORAGE_KEY);
+    expect(storageKeyFor('github|101')).toBe(`${STORAGE_KEY}:github|101`);
+
+    expect(save(/** @type {any} */ (appState()), storageKeyFor('github|101'))).toBe('saved');
+    expect(hasSaved(storageKeyFor('github|101'))).toBe(true);
+    expect(hasSaved(STORAGE_KEY)).toBe(false);
+    expect(loadSaved(storageKeyFor('github|101')).bookmarks).toEqual([BOOKMARK]);
+    expect(loadSaved()).toEqual({});
+  });
+
+  it('treats storage it can’t read as empty', () => {
+    vi.stubGlobal('localStorage', {
+      getItem() {
+        throw new DOMException('Access denied', 'SecurityError');
+      },
+    });
+    expect(hasSaved(STORAGE_KEY)).toBe(false);
+  });
+
+  it('saves to the key the state belongs to', () => {
+    vi.useFakeTimers();
+    let state = appState();
+    const saver = createSaver(
+      () => /** @type {any} */ (state),
+      () => {},
+      () => storageKeyFor('github|202'),
+    );
+
+    state = { ...state, preferences: { theme: 'dark' } };
+    saver.changed();
+    vi.runAllTimers();
+    expect(hasSaved(storageKeyFor('github|202'))).toBe(true);
+    expect(hasSaved(STORAGE_KEY)).toBe(false);
   });
 });
 

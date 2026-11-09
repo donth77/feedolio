@@ -117,7 +117,8 @@ describe('Keyboard shortcuts', () => {
     await storiesLoaded();
 
     await user.keyboard('?');
-    const dialog = screen.getByRole('dialog', { name: 'Keyboard shortcuts' });
+    // The overlay's code loads the first time it opens.
+    const dialog = await screen.findByRole('dialog', { name: 'Keyboard shortcuts' });
     expect(within(dialog).getByText('Next or previous story')).toBeVisible();
     expect(within(dialog).getByText('Collapse or expand the sidebar')).toBeVisible();
     expect(within(dialog).getAllByRole('term')).toHaveLength(11);
@@ -132,7 +133,7 @@ describe('Keyboard shortcuts', () => {
 
     // The header button opens it too.
     await user.click(screen.getByRole('button', { name: 'Shortcuts' }));
-    expect(screen.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible();
+    expect(await screen.findByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible();
   });
 
   it('stays out of the way while the reader types in a field', async () => {

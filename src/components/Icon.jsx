@@ -55,6 +55,20 @@ const PATHS = {
       <path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" />
     </>
   ),
+  signIn: (
+    <>
+      <path d="M10 17l5-5-5-5" />
+      <path d="M15 12H3" />
+      <path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5" />
+    </>
+  ),
+  signOut: (
+    <>
+      <path d="M14 17l5-5-5-5" />
+      <path d="M19 12H8" />
+      <path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h5" />
+    </>
+  ),
   search: (
     <>
       <circle cx="11" cy="11" r="6" />

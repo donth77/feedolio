@@ -4,7 +4,7 @@ A fast, responsive reader for RSS and Atom feeds, with bookmarks that persist.
 
 Feedolio is a React app (JavaScript, no CSS libraries) plus one Cloudflare Worker. The Worker fetches feeds on the app's behalf, because publishers block direct browser requests, and turns the XML into clean JSON.
 
-> **Status:** milestones M0 to M8 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. GitHub sign-in (M9) and the optional AI features (M10 to M13) come next.
+> **Status:** milestones M0 to M9 are built. Readers start with five feeds and can add any website or feed by pasting its link. Stories open on their own pages, cleaned of anything that could run code. Saved stories stay readable after they leave their feed. Lists come as rows or cards, the sidebar collapses to an icon rail, everything works from the keyboard, and stories can be shared without trackers. Readers can sign in with GitHub to keep their data apart on a shared browser. The optional AI features (M10 to M13) come next.
 >
 > **Live:** set this line after the first production deploy (see [Deploying](#deploying)).
 
@@ -136,6 +136,23 @@ A bookmark keeps a full copy of the story. Feeds keep only their latest stories,
 
 The Saved page lists bookmarks most recently saved first, and the sidebar shows how many there are. A long-form story copy is about 15 KB, so roughly 300 fit in the browser's usual 5 MB.
 
+## Signing in
+
+Sign-in is optional, and Feedolio works fully without it. Signing in with GitHub (through Auth0) keeps each reader's feeds and saved stories apart on a shared browser. Nothing syncs between devices.
+
+- **Separate data:** each account's data is saved under its own key, `feedolio:v1:<user id>`. Signed-out reading uses `feedolio:v1`, and signing out keeps an account's data for next time.
+- **Guest stories:** on an account's first sign-in in a browser, Feedolio offers to bring over the stories saved there while signed out.
+- **What's stored:** `feedolio:session` holds only who is signed in (id, name, picture), never a token. Auth0's tokens stay in memory, and Feedolio calls no API with them.
+- **Code loading:** the Auth0 SDK (about 62 KB) loads only to sign in or out. Readers who never sign in never download it.
+
+To turn it on:
+
+1. In Auth0, create a **Single Page Application** and enable the **GitHub** social connection for it.
+2. Add `http://localhost:5173` and each deployed address (including `workers.dev` and preview URLs) to its Allowed Callback URLs, Allowed Logout URLs and Allowed Web Origins.
+3. Set `VITE_AUTH0_DOMAIN` and `VITE_AUTH0_CLIENT_ID` (see `.env.example`): in `.env` for local development, and as build variables in Workers Builds. Both are public values.
+
+Without them, sign-in is hidden. If you use an Auth0 custom domain, add it to `connect-src` in `public/_headers`.
+
 ## Security
 
 - **Feed content is untrusted.** Story HTML is cleaned by DOMPurify plus Feedolio's own rules when it's shown (see [Reading a story](#reading-a-story)). Titles and excerpts are always text.
@@ -180,7 +197,6 @@ They need a browser: run `pnpm exec playwright install chromium` once, or set `P
 
 ## What's next
 
-- **GitHub sign-in (M9):** keeps each reader's data separate on a shared browser.
 - **AI features (M10 to M13), optional:** summaries and translation, plain-English filter rules, and a "Catch me up" digest, on the reader's own keys.
 - **Later:** sync across devices, search, OPML import, offline reading, and rate limiting on the feed endpoint.
 
@@ -211,7 +227,7 @@ Errors look like `{ "error": { "code": "NO_FEED_FOUND", "message": "…" } }`.
 src/
   app/          store, router, saved data (persistence.js), visits, route-level states
   features/     feeds · story · bookmarks · subscriptions · preferences · share ·
-                shortcuts · auth
+                shortcuts · auth (GitHub sign-in through Auth0)
   components/   AppShell, NavPanel, Drawer, StoryList, StoryRow, StoryCard, StoryImage,
                 Monogram, Toast, Segmented, Icon
   lib/          dates, images, feed tiles; shared with the Worker: JSDoc types, ids,
@@ -237,4 +253,4 @@ Deploys use Cloudflare Workers Builds, connected to the GitHub repository:
    - non-production branch command: `pnpm exec wrangler versions upload`, which gives each branch a preview URL.
 3. Run the smoke tests against the preview or live address (see [Testing](#testing)).
 
-No secrets are needed for M0 to M8. CI (`.github/workflows/ci.yml`) runs lint, the format check, tests with coverage and the build on every push.
+No secrets are needed. GitHub sign-in needs the two public Auth0 values above as build variables. CI (`.github/workflows/ci.yml`) runs lint, the format check, tests with coverage and the build on every push.

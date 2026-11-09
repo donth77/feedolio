@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { RouterProvider } from 'react-router';
-import { STORAGE_KEY } from './persistence.js';
+import { SESSION_KEY } from '../features/auth/session.js';
 import { visitEnded } from './visitsSlice.js';
 
 /**
@@ -29,7 +29,8 @@ export default function App({ store, router }) {
     };
     // Fired only in the other tabs of this site when one of them saves.
     const takeOtherTabsChanges = (/** @type {StorageEvent} */ event) => {
-      if (event.key === STORAGE_KEY || event.key === null) store.reloadSaved();
+      if (event.key === SESSION_KEY || event.key === null) store.followOtherTabs();
+      if (event.key === store.storageKey() || event.key === null) store.reloadSaved();
     };
     window.addEventListener('pagehide', flush);
     document.addEventListener('visibilitychange', flushWhenHidden);

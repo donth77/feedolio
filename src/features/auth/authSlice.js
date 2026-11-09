@@ -1,24 +1,57 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 /**
- * Optional GitHub sign-in (M9). Signing in only keeps each reader's data
- * apart on this device; nothing syncs.
+ * Optional GitHub sign-in. Signing in only keeps each reader's data apart on
+ * this device; nothing syncs.
+ *
+ * @typedef {import('./session.js').AccountUser} AccountUser
  *
  * @typedef {Object} AuthState
  * @property {'signedOut'|'signingIn'|'signedIn'} status
- * @property {{ id: string, name: string, avatarUrl: string|null }|null} user
+ * @property {AccountUser|null} user
+ * @property {number} guestBookmarks  Saved-while-signed-out stories offered to a new account; 0 when none
  */
 
-/** @type {AuthState} */
-const initialState = {
-  status: 'signedOut',
-  user: null,
-};
+/**
+ * @param {AccountUser|null} user
+ * @returns {AuthState}
+ */
+export function authStateFor(user) {
+  return { status: user ? 'signedIn' : 'signedOut', user, guestBookmarks: 0 };
+}
 
 const authSlice = createSlice({
   name: 'auth',
-  initialState,
-  reducers: {},
+  initialState: authStateFor(null),
+  reducers: {
+    signInStarted(state) {
+      state.status = 'signingIn';
+    },
+    signInStopped(state) {
+      state.status = state.user ? 'signedIn' : 'signedOut';
+    },
+    /** @param {{ payload: AccountUser }} action */
+    signedIn: (_state, { payload }) => authStateFor(payload),
+    signedOut: () => authStateFor(null),
+    /** @param {{ payload: number }} action  How many guest bookmarks to offer */
+    guestImportOffered(state, { payload }) {
+      state.guestBookmarks = payload;
+    },
+    guestImportClosed(state) {
+      state.guestBookmarks = 0;
+    },
+  },
 });
 
+export const {
+  signInStarted,
+  signInStopped,
+  signedIn,
+  signedOut,
+  guestImportOffered,
+  guestImportClosed,
+} = authSlice.actions;
 export default authSlice.reducer;
+
+/** @param {{ auth: AuthState }} state */
+export const selectAuth = (state) => state.auth;

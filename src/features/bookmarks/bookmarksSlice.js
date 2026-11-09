@@ -51,6 +51,10 @@ const bookmarksSlice = createSlice({
     bookmarkRestored(state, /** @type {{ payload: Bookmark }} */ { payload }) {
       bookmarksAdapter.upsertOne(state, payload);
     },
+    /** Brings in bookmarks saved elsewhere (as a guest), keeping any already here. */
+    bookmarksImported(state, /** @type {{ payload: Bookmark[] }} */ { payload }) {
+      bookmarksAdapter.addMany(state, payload);
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(persistedStateHydrated, (_state, { payload }) =>
@@ -59,7 +63,8 @@ const bookmarksSlice = createSlice({
   },
 });
 
-export const { bookmarkToggled, bookmarkRemoved, bookmarkRestored } = bookmarksSlice.actions;
+export const { bookmarkToggled, bookmarkRemoved, bookmarkRestored, bookmarksImported } =
+  bookmarksSlice.actions;
 export default bookmarksSlice.reducer;
 
 /**

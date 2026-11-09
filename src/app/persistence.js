@@ -1,7 +1,8 @@
 /**
  * Saves the reader's own data in localStorage under one versioned key, and
  * loads it back at start-up. Feed data is never stored: it comes fresh from
- * the Worker.
+ * the Worker. Each signed-in account has its own key (feedolio:v1:<user id>);
+ * signed-out reading uses feedolio:v1.
  *
  * Stored shape (version 1):
  *   { version: 1, subscriptions: Subscription[], bookmarks: Bookmark[],
@@ -11,6 +12,7 @@
  * that can't be used (private browsing, blocked cookies) never breaks the app.
  */
 
+/** Where a guest's data is saved. */
 export const STORAGE_KEY = 'feedolio:v1';
 const VERSION = 1;
 /** Saves happen at most this often. */
@@ -41,14 +43,38 @@ function storage() {
 }
 
 /**
+ * Where an account's data is saved: the guest key, or the guest key plus the
+ * user's id.
+ *
+ * @param {string|null|undefined} userId
+ */
+export function storageKeyFor(userId) {
+  return userId ? `${STORAGE_KEY}:${userId}` : STORAGE_KEY;
+}
+
+/**
+ * Whether anything was ever saved under this key.
+ *
+ * @param {string} key
+ */
+export function hasSaved(key) {
+  try {
+    return storage()?.getItem(key) != null;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Reads and checks the saved data. Each part is kept only if it looks right.
  *
+ * @param {string} [key]
  * @returns {SavedData}
  */
-export function loadSaved() {
+export function loadSaved(key = STORAGE_KEY) {
   let raw;
   try {
-    raw = storage()?.getItem(STORAGE_KEY);
+    raw = storage()?.getItem(key);
   } catch {
     return {};
   }
@@ -86,9 +112,10 @@ export function loadSaved() {
  * Writes the reader's data.
  *
  * @param {RootState} state
+ * @param {string} [key]
  * @returns {SaveResult}
  */
-export function save(state) {
+export function save(state, key = STORAGE_KEY) {
   const data = {
     version: VERSION,
     subscriptions: Object.values(state.subscriptions.entities),
@@ -103,7 +130,7 @@ export function save(state) {
   const target = storage();
   if (!target) return 'unavailable';
   try {
-    target.setItem(STORAGE_KEY, JSON.stringify(data));
+    target.setItem(key, JSON.stringify(data));
     return 'saved';
   } catch (error) {
     return isQuotaError(error) ? 'full' : 'unavailable';
@@ -130,8 +157,9 @@ const SAVED_SLICES = /** @type {const} */ (['subscriptions', 'bookmarks', 'prefe
  *
  * @param {() => RootState} getState
  * @param {(result: Exclude<SaveResult, 'saved'>) => void} [onFailure]  Told when a save fails
+ * @param {(state: RootState) => string} [keyOf]  Where this state is saved
  */
-export function createSaver(getState, onFailure = () => {}) {
+export function createSaver(getState, onFailure = () => {}, keyOf = () => STORAGE_KEY) {
   /** @type {ReturnType<typeof setTimeout>|null} */
   let timer = null;
   let last = pick(getState());
@@ -141,7 +169,7 @@ export function createSaver(getState, onFailure = () => {}) {
     timer = null;
     const state = getState();
     last = pick(state);
-    const result = save(state);
+    const result = save(state, keyOf(state));
     if (result !== 'saved') onFailure(result);
   };
 

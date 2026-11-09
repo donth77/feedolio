@@ -1,3 +1,5 @@
 allowBuilds:
   esbuild: true
   workerd: true
+  # Its install script only prints a thank-you message.
+  browser-tabs-lock: false

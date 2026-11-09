@@ -14,8 +14,11 @@
     <title>Feedolio</title>
     <script>
       // Applies a chosen Light or Dark theme before the first paint, so the page never flashes.
+      // A signed-in reader's preferences are saved under their own key.
       try {
-        var theme = JSON.parse(localStorage.getItem('feedolio:v1')).preferences.theme;
+        var user = JSON.parse(localStorage.getItem('feedolio:session'));
+        var key = user && user.id ? 'feedolio:v1:' + user.id : 'feedolio:v1';
+        var theme = JSON.parse(localStorage.getItem(key)).preferences.theme;
         if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
       } catch (error) {}
     </script>
