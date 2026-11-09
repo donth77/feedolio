@@ -1,0 +1,588 @@
+/* The story page: its own top bar and one reading column, without the sidebar. */
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-bg);
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) clamp(16px, 4vw, 40px);
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-bg);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: var(--tap-target);
+  margin-left: -10px;
+  padding: 0 10px;
+  border-radius: var(--radius-control);
+  color: var(--color-ink);
+  font: 500 14px/1.2 var(--font-ui);
+  text-decoration: none;
+}
+
+.back:hover {
+  background: var(--color-hover);
+}
+
+.back svg {
+  flex: none;
+}
+
+.backLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.main {
+  flex: 1 0 auto;
+  padding: var(--space-12) var(--space-5) 96px;
+}
+
+/*
+ * The reading column. Reading settings set its width and the body's size and
+ * font through these variables.
+ */
+.article {
+  --read-size: 20px;
+  --read-font: var(--font-read);
+  --read-leading: 1.65;
+
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.article[data-width='wide'] {
+  max-width: 780px;
+}
+
+.article[data-size='s'] {
+  --read-size: 18px;
+}
+
+.article[data-size='l'] {
+  --read-size: 22px;
+}
+
+.article[data-size='xl'] {
+  --read-size: 24px;
+}
+
+.article[data-font='sans'] {
+  --read-font: var(--font-ui);
+  --read-leading: 1.6;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sourceLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.source {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  color: var(--color-ink);
+  font: 600 14px/1.2 var(--font-ui);
+  text-decoration: none;
+}
+
+a.source:hover {
+  text-decoration: underline;
+}
+
+.dot {
+  color: var(--color-ink-muted);
+}
+
+.topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.topic {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  font: 500 12px/1 var(--font-ui);
+  color: var(--color-ink-muted);
+}
+
+.title {
+  font: var(--type-story-title);
+  font-size: clamp(32px, 4.2vw, 46px);
+  letter-spacing: var(--tracking-title);
+  text-wrap: balance;
+}
+
+/* Focus moves here when the story changes; no ring unless it came from the keyboard. */
+.title:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.byline {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+  word-spacing: 0.08em;
+}
+
+.author {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.hero {
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--color-placeholder);
+}
+
+.heroImage {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+/* The story's own HTML, already cleaned. */
+.body {
+  font-family: var(--read-font);
+  font-size: var(--read-size);
+  line-height: var(--read-leading);
+  color: var(--color-ink);
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+/* Blocks sit 22 px apart; headings, figures, quotes and embeds get more room. */
+.body > * {
+  margin-block: 0;
+}
+
+.body > * + * {
+  margin-top: 22px;
+}
+
+.body > * + :is(h2, h3, h4, h5, h6) {
+  margin-top: 1.4em;
+}
+
+.body > * + :is(figure, blockquote, [data-embed]),
+.body > :is(figure, blockquote, [data-embed]) + * {
+  margin-top: 30px;
+}
+
+.body h2,
+.body h3,
+.body h4,
+.body h5,
+.body h6 {
+  font-family: var(--font-read);
+  font-weight: 600;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.body h2 {
+  font-size: 1.35em;
+}
+
+.body h3 {
+  font-size: 1.2em;
+}
+
+.body h4,
+.body h5,
+.body h6 {
+  font-size: 1.05em;
+}
+
+.body a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+.body a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.body img {
+  margin: 0 auto;
+  border-radius: 10px;
+}
+
+.body figure {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.body figcaption {
+  font: 400 14px/1.45 var(--font-ui);
+  color: var(--color-ink-muted);
+}
+
+.body blockquote {
+  position: relative;
+  padding-left: 28px;
+  font-style: italic;
+  font-size: 1.15em;
+  line-height: 1.45;
+  color: var(--color-ink-muted);
+}
+
+.body blockquote::before {
+  content: '\201C';
+  content: '\201C' / '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  font: 400 56px/0.9 var(--font-read);
+  font-style: normal;
+  color: var(--color-accent);
+}
+
+.body ul,
+.body ol {
+  padding-left: 1.4em;
+}
+
+.body li + li {
+  margin-top: 0.4em;
+}
+
+.body pre {
+  overflow-x: auto;
+  padding: var(--space-4);
+  border-radius: 10px;
+  background: var(--color-surface);
+  font: 14px/1.5 var(--font-code);
+}
+
+.body code {
+  font-family: var(--font-code);
+  font-size: 0.85em;
+}
+
+.body pre code {
+  font-size: inherit;
+}
+
+.body table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font: 400 15px/1.45 var(--font-ui);
+}
+
+.body th,
+.body td {
+  padding: 6px 10px;
+  border: 1px solid var(--color-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.body hr {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+}
+
+/* Embedded media, replaced by a link to the original. */
+.body [data-embed] {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: var(--space-4) 18px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  text-decoration: none;
+}
+
+.body a[data-embed]:hover {
+  border-color: var(--color-line-hover);
+}
+
+.body [data-embed] svg {
+  flex: none;
+  color: var(--color-ink-muted);
+}
+
+.body [data-embed] > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.body [data-embed] strong {
+  font: 600 14px/1.3 var(--font-ui);
+}
+
+.body [data-embed] strong + span {
+  font: 400 13px/1.4 var(--font-ui);
+  color: var(--color-ink-muted);
+}
+
+.end {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-top: 28px;
+  border-top: 1px solid var(--color-line);
+}
+
+.summaryEnd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.primary {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-control);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font: var(--type-control);
+  text-decoration: none;
+}
+
+.primary:hover {
+  border-color: var(--color-accent-hover);
+  background: var(--color-accent-hover);
+  color: var(--color-accent-ink);
+}
+
+.primary svg {
+  flex: none;
+}
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 14px var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.noteIcon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--color-ink-muted);
+}
+
+.noteText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-ink-muted);
+}
+
+.noteTitle {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.pager {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+}
+
+.pagerLink {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: var(--tap-target);
+  padding: 18px var(--space-5);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.pagerLink:hover {
+  border-color: var(--color-line-hover);
+}
+
+.older {
+  text-align: right;
+}
+
+.pagerLabel {
+  font: 400 13px/1.3 var(--font-ui);
+  color: var(--color-ink-muted);
+}
+
+.pagerTitle {
+  font: 600 19px/1.3 var(--font-read);
+  text-wrap: pretty;
+}
+
+.skeleton {
+  display: block;
+  border-radius: 6px;
+  background: var(--color-skeleton);
+}
+
+/* Loading failed, or the story is gone. */
+.state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.stateTitle {
+  font: var(--type-page-title);
+  letter-spacing: var(--tracking-title);
+}
+
+.stateText {
+  max-width: 60ch;
+  color: var(--color-ink-muted);
+}
+
+.stateActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font: var(--type-control);
+  text-decoration: none;
+}
+
+.secondary:hover {
+  border-color: var(--color-line-hover);
+  color: var(--color-ink);
+}
+
+@media (max-width: 639px) {
+  .main {
+    padding: var(--space-6) var(--space-5) var(--space-12);
+  }
+
+  .article {
+    --read-size: 18px;
+
+    gap: var(--space-5);
+  }
+
+  .article[data-size='s'] {
+    --read-size: 16px;
+  }
+
+  .article[data-size='l'] {
+    --read-size: 20px;
+  }
+
+  .article[data-size='xl'] {
+    --read-size: 22px;
+  }
+
+  /* As in the phone design: source, title, byline, then the topics. */
+  .sourceLine {
+    display: contents;
+  }
+
+  .source {
+    align-self: flex-start;
+  }
+
+  .dot {
+    display: none;
+  }
+
+  .topics {
+    order: 1;
+  }
+
+  .title {
+    font-size: 31px;
+    line-height: 1.15;
+  }
+
+  .byline {
+    font-size: 14px;
+  }
+
+  .stateTitle {
+    font-size: 30px;
+  }
+
+  .primary {
+    align-self: stretch;
+  }
+}

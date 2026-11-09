@@ -128,6 +128,21 @@ export function storyTime(publishedAt, now) {
     : monthDayYear.format(time);
 }
 
+/**
+ * When a story was published, for its own page: "Today, 8:02 pm",
+ * "Yesterday, 5:52 pm", or the date, "Feb 28, 2020".
+ *
+ * @param {string} publishedAt
+ * @param {number} now
+ */
+export function storyDate(publishedAt, now) {
+  const time = Date.parse(publishedAt);
+  const group = dateGroupOf(publishedAt, now);
+  if (group === 'today') return `Today, ${lowerMeridiem(clock.format(time))}`;
+  if (group === 'yesterday') return `Yesterday, ${lowerMeridiem(clock.format(time))}`;
+  return monthDayYear.format(time);
+}
+
 /** The exact time, for tooltips: "Friday, November 6, 2026 at 8:02 PM". @param {string} publishedAt */
 export function fullTime(publishedAt) {
   return fullDate.format(Date.parse(publishedAt));

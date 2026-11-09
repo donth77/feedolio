@@ -25,3 +25,18 @@ const bookmarksSlice = createSlice({
 });
 
 export default bookmarksSlice.reducer;
+
+/**
+ * The bookmarks slice from saved data.
+ *
+ * @param {Bookmark[]|undefined} saved
+ */
+export function restoreBookmarks(saved) {
+  return bookmarksAdapter.setAll(bookmarksAdapter.getInitialState(), saved ?? []);
+}
+
+/** @typedef {{ bookmarks: ReturnType<typeof bookmarksSlice.reducer> }} WithBookmarks */
+
+export const { selectById: selectBookmarkById } = bookmarksAdapter.getSelectors(
+  (/** @type {WithBookmarks} */ state) => state.bookmarks,
+);

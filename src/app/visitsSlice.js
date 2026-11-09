@@ -26,3 +26,24 @@ const visitsSlice = createSlice({
 });
 
 export default visitsSlice.reducer;
+
+/**
+ * The visit record from saved data. This session's cut-off starts as the last
+ * visit before it.
+ *
+ * @param {Record<string, unknown>} [saved]
+ * @returns {Visits}
+ */
+export function restoreVisits(saved = {}) {
+  const isoOrNull = (/** @type {unknown} */ value) =>
+    typeof value === 'string' && Number.isFinite(Date.parse(value)) ? value : null;
+  const lastVisitAt = isoOrNull(saved.lastVisitAt);
+  return {
+    lastVisitAt,
+    lastCatchUpAt: isoOrNull(saved.lastCatchUpAt),
+    openedIds: Array.isArray(saved.openedIds)
+      ? saved.openedIds.filter((id) => typeof id === 'string').slice(-2000)
+      : [],
+    cutoff: lastVisitAt,
+  };
+}

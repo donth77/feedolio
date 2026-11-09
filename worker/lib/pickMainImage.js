@@ -1,3 +1,4 @@
+import { isTrackingPixel, pixels } from '../../src/lib/beacons.js';
 import { parseAttributes, safeHttpUrl } from './text.js';
 
 /**
@@ -88,13 +89,6 @@ const IMG_TAG = /<img\b((?:[^>"']|"[^"]*"|'[^']*')*)>/gi;
 const FIGURE = /<figure\b[^>]*>([\s\S]*?)<\/figure\s*>/gi;
 
 /**
- * Known trackers and the usual names for pixel and spacer images. Matches
- * whole path segments, so "google-pixel-9.jpg" is still a picture.
- */
-const BEACON =
-  /\/_\/stat\b|(?:^|[./])(?:doubleclick|feedburner|scorecardresearch|quantserve|google-analytics)\.|\/\/(?:pixel|stats|beacon|track)[.-]|\/(?:pixel|beacon|spacer|blank|1x1|tracker|tracking)(?:\.[a-z]+)?(?:[/?#]|$)/i;
-
-/**
  * @param {string} html
  * @param {string} baseUrl
  */
@@ -125,8 +119,6 @@ function firstUsableImage(html, baseUrl) {
  */
 function usableImageUrl(attributes, baseUrl) {
   const width = pixels(attributes.width);
-  const height = pixels(attributes.height);
-  if ((width !== null && width <= 2) || (height !== null && height <= 2)) return null;
   if (width !== null && width < 120) return null;
 
   const lazy = attributes['data-src'] ?? attributes['data-lazy-src'];
@@ -135,17 +127,7 @@ function usableImageUrl(attributes, baseUrl) {
     (source) => source && !source.trim().toLowerCase().startsWith('data:'),
   );
   const url = safeHttpUrl(sources[0], baseUrl);
-  return url && !BEACON.test(url) ? url : null;
-}
-
-/**
- * A size attribute in pixels, or null when it is missing or not a plain number
- * (e.g. "100%").
- *
- * @param {string|undefined} value
- */
-function pixels(value) {
-  return value && /^\s*\d+(?:px)?\s*$/i.test(value) ? Number.parseInt(value, 10) : null;
+  return url && !isTrackingPixel(url, attributes) ? url : null;
 }
 
 /** @param {unknown} value */

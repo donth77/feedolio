@@ -22,11 +22,16 @@ function shortAuthors(author) {
 
 /**
  * One headline in a list: image or monogram tile, source, time, author,
- * headline and excerpt. The headline links to the story page.
+ * headline and excerpt. The headline links to the story page, telling it
+ * which list to go back to.
  *
- * @param {{ item: import('../features/feeds/useFeeds.js').ListedStory, now: number }} props
+ * @param {{
+ *   item: import('../features/feeds/useFeeds.js').ListedStory,
+ *   now: number,
+ *   from?: { pathname: string, label: string },
+ * }} props
  */
-export default function StoryRow({ item, now }) {
+export default function StoryRow({ item, now, from }) {
   const { story, feed } = item;
   const author = shortAuthors(story.author);
 
@@ -58,7 +63,11 @@ export default function StoryRow({ item, now }) {
           )}
         </p>
         <h3 className={styles.headline}>
-          <Link className={styles.link} to={`/feeds/${story.feedId}/stories/${story.id}`}>
+          <Link
+            className={styles.link}
+            to={`/feeds/${story.feedId}/stories/${story.id}`}
+            state={from && { from }}
+          >
             {story.title}
           </Link>
         </h3>

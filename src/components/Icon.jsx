@@ -45,6 +45,14 @@ const PATHS = {
       <path d="M12 11v5M12 8h.01" />
     </>
   ),
+  back: <path d="M15 18l-6-6 6-6" />,
+  external: (
+    <>
+      <path d="M14 4h6v6" />
+      <path d="M20 4l-9 9" />
+      <path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+    </>
+  ),
 };
 
 /**

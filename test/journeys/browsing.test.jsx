@@ -88,7 +88,12 @@ describe('All stories', () => {
     await user.click(
       screen.getByRole('link', { name: 'All the latest updates on AI data centers' }),
     );
-    expect(await screen.findByRole('heading', { level: 1, name: 'Story' })).toBeVisible();
+    expect(
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'All the latest updates on AI data centers',
+      }),
+    ).toBeVisible();
     expect(window.location.pathname).toMatch(new RegExp(`^${VERGE}/stories/s_[0-9a-z]+$`));
   });
 });

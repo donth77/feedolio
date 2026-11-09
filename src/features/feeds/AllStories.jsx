@@ -29,7 +29,7 @@ export default function AllStories() {
       {!loading && stories.length === 0 && failed.length === 0 ? (
         <EmptyState title="No stories yet">Your feeds haven’t published anything.</EmptyState>
       ) : (
-        <StoryList stories={stories} now={now} loading={loading} showCounts />
+        <StoryList stories={stories} now={now} loading={loading} label="All stories" showCounts />
       )}
     </>
   );

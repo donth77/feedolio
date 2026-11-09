@@ -31,6 +31,19 @@ const subscriptionsSlice = createSlice({
 
 export default subscriptionsSlice.reducer;
 
+/**
+ * The subscriptions slice from saved data. Starts with the starter feeds when
+ * nothing was saved yet.
+ *
+ * @param {Subscription[]|undefined} saved
+ */
+export function restoreSubscriptions(saved) {
+  return subscriptionsAdapter.setAll(
+    subscriptionsAdapter.getInitialState(),
+    saved ?? starterSubscriptions(),
+  );
+}
+
 /** @typedef {{ subscriptions: ReturnType<typeof subscriptionsSlice.reducer> }} WithSubscriptions */
 
 export const { selectAll: selectAllSubscriptions, selectById: selectSubscriptionById } =

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router';
+import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import {
   inLastDay,
   lookOf,
@@ -117,8 +117,6 @@ export default function AppShell() {
           onNavigate={() => setDrawerOpen(false)}
         />
       </Drawer>
-
-      <ScrollRestoration />
     </div>
   );
 }

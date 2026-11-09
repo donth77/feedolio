@@ -28,7 +28,7 @@ export default function TodayView() {
           New stories from your feeds will show up here.
         </EmptyState>
       ) : (
-        <StoryList stories={stories} now={now} loading={loading} showCounts />
+        <StoryList stories={stories} now={now} loading={loading} label="Today" showCounts />
       )}
     </>
   );
