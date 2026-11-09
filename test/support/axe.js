@@ -1,3 +1,4 @@
+import { waitFor } from '@testing-library/react';
 import axe from 'axe-core';
 import { expect } from 'vitest';
 
@@ -10,6 +11,9 @@ import { expect } from 'vitest';
  * @param {Document|Element} [context]
  */
 export async function expectNoAxeViolations(context = document) {
+  // Views name the browser tab in an effect, which can land just after the
+  // content a test waited for.
+  if (context === document) await waitFor(() => expect(document.title).not.toBe(''));
   const results = await axe.run(context, {
     rules: { 'color-contrast': { enabled: false } },
   });
