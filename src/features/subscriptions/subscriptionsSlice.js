@@ -1,4 +1,5 @@
 import { createEntityAdapter, createSelector, createSlice } from '@reduxjs/toolkit';
+import { persistedStateHydrated } from '../../app/actions.js';
 import { starterSubscriptions } from './defaults.js';
 
 /**
@@ -27,6 +28,11 @@ const subscriptionsSlice = createSlice({
     starterSubscriptions(),
   ),
   reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(persistedStateHydrated, (_state, { payload }) =>
+      restoreSubscriptions(payload.subscriptions),
+    );
+  },
 });
 
 export default subscriptionsSlice.reducer;
@@ -46,10 +52,13 @@ export function restoreSubscriptions(saved) {
 
 /** @typedef {{ subscriptions: ReturnType<typeof subscriptionsSlice.reducer> }} WithSubscriptions */
 
-export const { selectAll: selectAllSubscriptions, selectById: selectSubscriptionById } =
-  subscriptionsAdapter.getSelectors(
-    (/** @type {WithSubscriptions} */ state) => state.subscriptions,
-  );
+export const {
+  selectAll: selectAllSubscriptions,
+  selectById: selectSubscriptionById,
+  selectEntities: selectSubscriptionEntities,
+} = subscriptionsAdapter.getSelectors(
+  (/** @type {WithSubscriptions} */ state) => state.subscriptions,
+);
 
 /** Feeds shown in All stories and Today. */
 export const selectEnabledSubscriptions = createSelector(

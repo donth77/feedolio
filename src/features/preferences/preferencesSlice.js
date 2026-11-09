@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { persistedStateHydrated } from '../../app/actions.js';
 
 /**
  * How the reader likes Feedolio to look. Remembered on this device.
@@ -75,6 +76,11 @@ const preferencesSlice = createSlice({
     readingChanged(state, { payload }) {
       state.reading = restorePreferences({ reading: { ...state.reading, ...payload } }).reading;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(persistedStateHydrated, (_state, { payload }) =>
+      restorePreferences(payload.preferences),
+    );
   },
 });
 

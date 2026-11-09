@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
+import { selectBookmarkCount } from '../features/bookmarks/bookmarksSlice.js';
 import {
   inLastDay,
   lookOf,
@@ -34,6 +35,7 @@ export default function AppShell() {
   const feeds = subscriptions.map(lookOf);
   const allLoaded = states.every((state) => state.status !== 'loading');
   const todayCount = allLoaded ? inLastDay(mergeStories(states), now).length : null;
+  const savedCount = useSelector(selectBookmarkCount);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { pathname } = useLocation();
@@ -47,6 +49,7 @@ export default function AppShell() {
           label="Sections and feeds"
           feeds={feeds}
           todayCount={todayCount}
+          savedCount={savedCount}
           className={styles.sidebarPanel}
         />
       </div>
@@ -114,6 +117,7 @@ export default function AppShell() {
           label="Sections and feeds"
           feeds={feeds}
           todayCount={todayCount}
+          savedCount={savedCount}
           onNavigate={() => setDrawerOpen(false)}
         />
       </Drawer>

@@ -3,11 +3,11 @@ import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import Icon from '../../components/Icon.jsx';
 import { FeedDot } from '../../components/Monogram.jsx';
-import { TINTS, monogramFor, tintFor } from '../../lib/feeds.js';
-import { hash53 } from '../../lib/hash.js';
+import { monogramFor, tintFor, tintForId } from '../../lib/feeds.js';
 import { sizedImageUrl } from '../../lib/images.js';
 import { fullTime, storyDate } from '../../lib/time.js';
 import { useNow } from '../../lib/useNow.js';
+import BookmarkButton from '../bookmarks/BookmarkButton.jsx';
 import { feedErrorMessage } from '../feeds/feedApi.js';
 import { selectReading } from '../preferences/preferencesSlice.js';
 import { cleanStoryHtml, wordCount } from './cleanStoryHtml.js';
@@ -66,6 +66,7 @@ export default function StoryPage() {
         {story && (
           <div className={styles.actions}>
             <ReadingSettings />
+            <BookmarkButton story={story} feedTitle={lookup.feedTitle ?? ''} variant="page" />
           </div>
         )}
       </header>
@@ -133,9 +134,7 @@ function Article({ story, lookup, feedId, back }) {
   const topics = uniqueTopics(story.categories);
   const feedMark = {
     monogram: monogramFor(feedTitle),
-    tint: lookup.subscription
-      ? tintFor(lookup.subscription.url)
-      : TINTS[hash53(story.feedId) % TINTS.length],
+    tint: lookup.subscription ? tintFor(lookup.subscription.url) : tintForId(story.feedId),
   };
 
   // Moving to the next or previous story puts focus on its title, as a new page would.

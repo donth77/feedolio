@@ -1,0 +1,76 @@
+/* Centred above the bottom edge; above the tab bar on phones. */
+.region {
+  position: fixed;
+  right: 0;
+  bottom: 28px;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--space-4);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 560px;
+  padding: 6px 6px 6px var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--color-ink);
+  color: var(--color-bg);
+  font: 500 14px/1.3 var(--font-ui);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  pointer-events: auto;
+}
+
+.icon {
+  flex: none;
+}
+
+.message {
+  padding: var(--space-2) 6px var(--space-2) 0;
+}
+
+.action,
+.dismiss {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-target);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-bg);
+}
+
+.action {
+  padding: 0 14px;
+  font: 700 14px/1 var(--font-ui);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dismiss {
+  width: var(--tap-target);
+  opacity: 0.8;
+}
+
+.action:hover,
+.dismiss:hover {
+  background: rgba(127, 127, 127, 0.24);
+  opacity: 1;
+}
+
+/* The accent ring would be hard to see on the ink background. */
+.toast :focus-visible {
+  outline-color: var(--color-bg);
+}
+
+@media (max-width: 639px) {
+  .region {
+    bottom: 84px;
+  }
+}

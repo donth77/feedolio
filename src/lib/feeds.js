@@ -28,6 +28,17 @@ export function tintFor(url) {
 }
 
 /**
+ * A tint for a feed known only by its id, such as a saved story's feed that
+ * the reader has since removed.
+ *
+ * @param {string} feedId
+ * @returns {Tint}
+ */
+export function tintForId(feedId) {
+  return TINTS[hash53(feedId) % TINTS.length];
+}
+
+/**
  * Initials for a feed's tile: the first letters of its first two words,
  * skipping a leading "The". "TechCrunch Startups" → "TS", "The Verge" → "V".
  *

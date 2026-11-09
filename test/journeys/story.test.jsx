@@ -408,7 +408,7 @@ describe('Stories that can’t be shown', () => {
     // It can be brief, so only its appearance is checked.
     await screen.findByText('Loading story…');
     await storyShown(PANDEMIC);
-    await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
+    await waitFor(() => expect(screen.queryByText('Loading story…')).toBeNull());
   });
 });
 
